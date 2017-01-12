@@ -19,6 +19,11 @@ export default class Trustocracy extends Component {
         <Text style={styles.welcome}>
           Welcome to Trustocracy!
         </Text>
+        <View style={{flex: 1, flexDirection: 'row'}}>
+          <View style={{width: 50, height: 50, backgroundColor: 'powderblue'}} />
+          <View style={{width: 50, height: 50, backgroundColor: 'skyblue'}} />
+          <View style={{width: 50, height: 50, backgroundColor: 'steelblue'}} />
+        </View>
         <Text style={styles.instructions}>
           To get started, edit index.android.js
         </Text>
