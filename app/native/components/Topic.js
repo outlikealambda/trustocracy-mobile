@@ -12,6 +12,25 @@ import {
 // import Svg, { Circle, Rect, Text as SvgText } from 'react-native-svg';
 
 export class Topic extends Component {
+  constructor (props) {
+    super(props);
+    fetch('http://192.168.1.108:3714/api/secure/delegate/lookup?email=megesdal@gmail.com')
+      .then(response => {
+        console.log(response.status);
+        /*try {
+          return response.json();
+        } catch (error) {
+          console.error(error);
+        }*/
+      })
+      /*.then(responseJson => {
+        console.log(responseJson);
+      })*/
+      .catch(error => {
+        console.error(error);
+      });
+  }
+
   render () {
     return (
       <View style={styles.container}>
@@ -102,21 +121,23 @@ export class Topic extends Component {
             </Svg>
           </ScrollView>
         </View> */}
-        <View style={{ height: 60,
-            borderTopColor: 'gray',
-            borderTopWidth: 2,
-            borderBottomColor: 'gray',
-            borderBottomWidth: 2 }}>
+        <View style={{
+          height: 60,
+          borderTopColor: 'gray',
+          borderTopWidth: 2,
+          borderBottomColor: 'gray',
+          borderBottomWidth: 2 }}>
           <ScrollView horizontal>
-            <View style={{width: 50,
-                height: 50,
-                borderRadius: 25,
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: 3,
-                backgroundColor: styles.container.backgroundColor,
-                borderWidth: 3,
-                borderColor: 'lightblue' }}>
+            <View style={{
+              width: 50,
+              height: 50,
+              borderRadius: 25,
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: 3,
+              backgroundColor: styles.container.backgroundColor,
+              borderWidth: 3,
+              borderColor: 'lightblue' }}>
               <View style={[ { backgroundColor: 'greenyellow' }, styles.circle ]}>
                 <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
                   TR
