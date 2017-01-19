@@ -7,35 +7,97 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableHighlight,
   View
 } from 'react-native';
 // import Svg, { Circle, Rect, Text as SvgText } from 'react-native-svg';
 
+const trusteeColors = [
+  'greenyellow',
+  'dodgerblue',
+  'darkorange',
+  'fuchsia',
+  'red',
+  'cyan',
+  'green',
+  'moccasin'
+];
+
+// super fragile...
+function initials (trustee) {
+  if (trustee) {
+    return trustee.name[0] + trustee.name.split(' ')[1][0];
+  }
+  return '';
+}
+
 export class Topic extends Component {
   constructor (props) {
     super(props);
-    fetch('http://192.168.1.108:3714/api/secure/delegate/lookup?email=megesdal@gmail.com')
-      .then(response => {
-        console.log(response.status);
-        /*try {
-          return response.json();
-        } catch (error) {
-          console.error(error);
-        }*/
-      })
-      /*.then(responseJson => {
-        console.log(responseJson);
-      })*/
+    this.state = {
+      userId: 5,
+      selectedTrusteeIdx: 0,
+      trustees: [],
+      title: ''
+    };
+
+    fetch(`http://192.168.1.72:3714/api/user/${this.state.userId}`)
+      .then(response => response.json())
+      .then(userInfo => userInfo.trustees)
+      .then(trustees => this.setState({ trustees }))
       .catch(error => {
         console.error(error);
       });
+
+    fetch(`http://192.168.1.72:3714/api/topic/${this.props.id}`)
+      .then(response => response.json())
+      .then(topicInfo => topicInfo.text)
+      .then(title => this.setState({ title }))
+      .catch(error => {
+        console.error(error);
+      });
+  }
+
+  renderTrustee (trustee, trusteeIdx) {
+    const color = trusteeColors[trusteeIdx % trusteeColors.length];
+    const trusteeView = (
+      <TouchableHighlight
+        key={trusteeIdx}
+        onPress={() => this.setState({ selectedTrusteeIdx: trusteeIdx })}
+        style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <View style={[ { backgroundColor: color }, styles.circle ]}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
+            { initials(trustee) }
+          </Text>
+        </View>
+      </TouchableHighlight>
+    );
+    if (trusteeIdx === this.state.selectedTrusteeIdx) {
+      return (
+        <View
+          key={trusteeIdx}
+          style={{
+            width: 50,
+            height: 50,
+            borderRadius: 25,
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: 3,
+            backgroundColor: styles.container.backgroundColor,
+            borderWidth: 3,
+            borderColor: 'lightblue' }}>
+          {trusteeView}
+        </View>
+      );
+    }
+    return trusteeView;
   }
 
   render () {
     return (
       <View style={styles.container}>
         <Text style={styles.welcome}>
-          Mauna Kea Telescopes
+          { this.state.title }
         </Text>
         {/* <View style={{ height: 50,
             borderTopColor: 'gray',
@@ -128,6 +190,8 @@ export class Topic extends Component {
           borderBottomColor: 'gray',
           borderBottomWidth: 2 }}>
           <ScrollView horizontal>
+            { this.state.trustees.map((trustee, i) => this.renderTrustee(trustee, i))}
+            {/*
             <View style={{
               width: 50,
               height: 50,
@@ -184,12 +248,13 @@ export class Topic extends Component {
                 JD
               </Text>
             </View>
+            */}
           </ScrollView>
         </View>
         <View style={{ height: 60, flexDirection: 'row', alignItems: 'center' }}>
-          <View style={[ styles.circle, { backgroundColor: 'darkorange', marginRight: 0 } ]}>
+          <View style={[ styles.circle, { backgroundColor: trusteeColors[this.state.selectedTrusteeIdx % trusteeColors.length], marginRight: 0 } ]}>
             <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-              MR
+              { initials(this.state.trustees[this.state.selectedTrusteeIdx]) }
             </Text>
           </View>
           <View style={{ height: 3, width: 40, backgroundColor: 'gray' }} />
@@ -239,7 +304,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
-    marginTop: 20
+    marginTop: 70
   },
   welcome: {
     fontSize: 28,

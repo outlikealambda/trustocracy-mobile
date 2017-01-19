@@ -12,60 +12,46 @@ import {
 } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 
+function renderTopic (topic) {
+  return (
+    <TouchableHighlight key={topic.id} onPress={() => Actions.topic({ id: topic.id })}>
+      <Text style={{ fontSize: 18, fontWeight: 'bold', margin: 10 }}>
+        {topic.text}
+      </Text>
+    </TouchableHighlight>
+  );
+}
+
 export class TopicList extends Component {
+  constructor (props) {
+    super(props);
+    this.state = { topics: [] };
+    fetch('http://192.168.1.72:3714/api/topic')
+      .then(response => response.json())
+      .then(topics => this.setState({ topics }))
+      .catch(error => {
+        console.error(error);
+      });
+  }
+
   render () {
     return (
       <View style={styles.container}>
+        {/*
         <Text style={styles.welcome}>
-          Topics
+          Topics {this.state.topics.length}
         </Text>
+        */}
         <View style={{ flex: 5 }}>
           <ScrollView>
-            <TouchableHighlight onPress={() => Actions.topic({ id: 0 })}>
+            { this.state.topics.map(renderTopic) }
+            {/*
+            <TouchableHighlight key='-1' onPress={() => Actions.topic({ id: 0 })}>
               <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
                 Mauna Kea Telescopes
               </Text>
             </TouchableHighlight>
-            <View style={[ { backgroundColor: 'dodgerblue' }, styles.circle ]}>
-              <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-                AR
-              </Text>
-            </View>
-            <View style={[ { backgroundColor: 'darkorange' }, styles.circle ]}>
-              <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-                MR
-              </Text>
-            </View>
-            <View style={[ { backgroundColor: 'fuchsia' }, styles.circle ]}>
-              <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-                ME
-              </Text>
-            </View>
-            <View style={[ { backgroundColor: 'red' }, styles.circle ]}>
-              <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-                MA
-              </Text>
-            </View>
-            <View style={[ { backgroundColor: 'cyan' }, styles.circle ]}>
-              <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-                KY
-              </Text>
-            </View>
-            <View style={[ { backgroundColor: 'green' }, styles.circle ]}>
-              <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-                DP
-              </Text>
-            </View>
-            <View style={[ { backgroundColor: 'moccasin' }, styles.circle ]}>
-              <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-                MM
-              </Text>
-            </View>
-            <View style={[ { backgroundColor: 'lightgray' }, styles.circle ]}>
-              <Text style={{ fontSize: 18, fontWeight: 'bold', color: 'gray' }}>
-                JD
-              </Text>
-            </View>
+            */}
           </ScrollView>
         </View>
       </View>
@@ -79,7 +65,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
-    marginTop: 20
+    marginTop: 70
   },
   welcome: {
     fontSize: 28,
