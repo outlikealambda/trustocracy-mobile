@@ -76,7 +76,6 @@ export class Topic extends Component<void, Props, State> {
     const selectedConnection = this.state.connections[this.state.selectedConnectionIdx];
 
     const renderTrustee = (connection, connectionIdx) => {
-      console.log('Rendering', connection);
       const color =
         connection.opinion
           ? trusteeColors[connectionIdx % trusteeColors.length]
@@ -112,6 +111,29 @@ export class Topic extends Component<void, Props, State> {
         );
       }
       return trusteeView;
+    };
+
+    const renderAuthor = () => {
+      if (!selectedConnection || !selectedConnection.author) {
+        return [];
+      }
+      return (
+        <View style={{ height: 60, flexDirection: 'row', alignItems: 'center' }}>
+          <View style={[ styles.circle, { backgroundColor: trusteeColors[this.state.selectedConnectionIdx % trusteeColors.length], marginRight: 0 } ]}>
+            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
+              { initials(selectedConnection) }
+            </Text>
+          </View>
+          <View style={{ height: 3, width: 40, backgroundColor: 'gray' }} />
+          <View style={[ styles.circle, { backgroundColor: 'lightgray', marginLeft: 0, marginRight: 0 } ]} />
+          <View style={{ height: 3, width: 40, backgroundColor: 'gray' }} />
+          <View style={{ backgroundColor: 'lightgray', justifyContent: 'center', height: 40, borderRadius: 20 }}>
+            <Text style={{ margin: 8, fontSize: 16, fontWeight: 'bold' }}>
+              { selectedConnection.author.name }
+            </Text>
+          </View>
+        </View>
+      );
     };
 
     return (
@@ -271,21 +293,7 @@ export class Topic extends Component<void, Props, State> {
             */}
           </ScrollView>
         </View>
-        <View style={{ height: 60, flexDirection: 'row', alignItems: 'center' }}>
-          <View style={[ styles.circle, { backgroundColor: trusteeColors[this.state.selectedConnectionIdx % trusteeColors.length], marginRight: 0 } ]}>
-            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-              { initials(selectedConnection) }
-            </Text>
-          </View>
-          <View style={{ height: 3, width: 40, backgroundColor: 'gray' }} />
-          <View style={[ styles.circle, { backgroundColor: 'lightgray', marginLeft: 0, marginRight: 0 } ]} />
-          <View style={{ height: 3, width: 40, backgroundColor: 'gray' }} />
-          <View style={{ backgroundColor: 'lightgray', justifyContent: 'center', height: 40, borderRadius: 20 }}>
-            <Text style={{ margin: 8, fontSize: 16, fontWeight: 'bold' }}>
-              Harrison Guerra
-            </Text>
-          </View>
-        </View>
+        { renderAuthor() }
         {/*
         <Svg height='50' width='300'>
           <Rect x='25' y='24' width='250' height='2' fill='gray' />
