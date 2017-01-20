@@ -12,21 +12,24 @@ import {
 } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 
-function renderTopic (topic) {
-  return (
-    <TouchableHighlight key={topic.id} onPress={() => Actions.topic({ id: topic.id })}>
-      <Text style={{ fontSize: 18, fontWeight: 'bold', margin: 10 }}>
-        {topic.text}
-      </Text>
-    </TouchableHighlight>
-  );
-}
+type Topic = {
+  id: string,
+  text: string
+};
 
-export class TopicList extends Component {
-  constructor (props) {
+type Props = {};
+
+type State = {
+  topics: Array<Topic>
+};
+
+export class TopicList extends Component<void, Props, State> {
+  state: State
+
+  constructor (props: Props) {
     super(props);
     this.state = { topics: [] };
-    global.fetch('http://192.168.1.72:3714/api/topic')
+    global.fetch('http://192.168.1.115:3714/api/topic')
       .then(response => response.json())
       .then(topics => this.setState({ topics }))
       .catch(error => {
@@ -35,6 +38,16 @@ export class TopicList extends Component {
   }
 
   render () {
+    const renderTopic = topic => {
+      return (
+        <TouchableHighlight key={topic.id} onPress={() => Actions.topic({ id: topic.id })}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', margin: 10 }}>
+            {topic.text}
+          </Text>
+        </TouchableHighlight>
+      );
+    };
+
     return (
       <View style={styles.container}>
         {/*
