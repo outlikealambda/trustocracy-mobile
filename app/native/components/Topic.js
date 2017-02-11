@@ -11,6 +11,7 @@ import {
   View
 } from 'react-native';
 import Markdown from 'react-native-simple-markdown';
+import Icon from 'react-native-vector-icons/Octicons';
 // import Svg, { Circle, Rect, Text as SvgText } from 'react-native-svg';
 
 const trusteeColors = [
@@ -33,6 +34,25 @@ function initials (friend) {
   return '';
 }
 
+function selectedCircle (content, key) {
+  return (
+    <View
+      key={key}
+      style={{
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: 3,
+        backgroundColor: styles.container.backgroundColor,
+        borderWidth: 3,
+        borderColor: 'lightblue' }}>
+      {content}
+    </View>
+  );
+}
+
 type Props = {
   id: string
 }
@@ -41,8 +61,10 @@ type State = {
   userId: number,
   selectedConnectionIdx: number,
   selectedFriendIdx: number,
+  bookIdx: number,
   connections: Array<any>,
-  title: string
+  title: string,
+  expanded: boolean
 };
 
 export class Topic extends Component<void, Props, State> {
@@ -54,13 +76,15 @@ export class Topic extends Component<void, Props, State> {
       userId: 5,
       selectedConnectionIdx: 0,
       selectedFriendIdx: 0,
+      bookIdx: 0,
       connections: [],
-      title: ''
+      title: '',
+      expanded: true
     };
 
     global.fetch(`http://192.168.1.58:3714/api/topic/${this.props.id}/connected/${this.state.userId}`)
       .then(response => response.json())
-      .then(connections => this.setState({ connections }))
+      .then(connections => this.setState({ connections, bookIdx: connections.length }))
       .catch(error => {
         console.error(error);
       });
@@ -99,28 +123,43 @@ export class Topic extends Component<void, Props, State> {
         );
         if (connectionIdx === this.state.selectedConnectionIdx &&
             friendIdx === this.state.selectedFriendIdx) {
-          return (
-            <View
-              key={connectionIdx + ':' + friendIdx}
-              style={{
-                width: 50,
-                height: 50,
-                borderRadius: 25,
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: 3,
-                backgroundColor: styles.container.backgroundColor,
-                borderWidth: 3,
-                borderColor: 'lightblue' }}>
-              {trusteeView}
-            </View>
-          );
+          return selectedCircle(trusteeView, connectionIdx + ':' + friendIdx);
         }
         return trusteeView;
       };
 
       return (
         connection.friends.map(renderTrustee)
+      );
+    };
+
+    const renderBook = () => {
+      return (
+        <TouchableHighlight
+          key='book'
+          onPress={() => this.setState({ selectedConnectionIdx: this.state.bookIdx, selectedFriendIdx: 0, expanded: false })}
+          style={{ justifyContent: 'center', alignItems: 'center' }}>
+          <View style={[ { backgroundColor: 'wheat' }, styles.circle ]}>
+            <View style={{ backgroundColor: 'transparent' }}>
+              <Icon style={{ marginRight: 2, marginTop: 3 }} name='book' size={27} color='black' />
+            </View>
+          </View>
+        </TouchableHighlight>
+      );
+    };
+
+    const renderExpand = () => {
+      return (
+        <TouchableHighlight
+          key='book'
+          onPress={() => this.setState({ expanded: true })}
+          style={{ justifyContent: 'center', alignItems: 'center' }}>
+          <View style={[ { backgroundColor: 'wheat' }, styles.circle ]}>
+            <View style={{ backgroundColor: 'transparent' }}>
+              <Icon style={{ marginLeft: 12, marginTop: 2 }} name='chevron-left' size={28} color='black' />
+            </View>
+          </View>
+        </TouchableHighlight>
       );
     };
 
@@ -243,7 +282,14 @@ export class Topic extends Component<void, Props, State> {
           borderBottomColor: 'gray',
           borderBottomWidth: 2 }}>
           <ScrollView horizontal>
-            { this.state.connections.map(renderTrusteeSet) }
+            { this.state.expanded
+            ? this.state.connections.map(renderTrusteeSet)
+            : renderExpand()
+            }
+            { this.state.selectedConnectionIdx === this.state.bookIdx
+            ? selectedCircle(renderBook())
+            : renderBook()
+            }
             {/*
             <View style={{
               width: 50,
