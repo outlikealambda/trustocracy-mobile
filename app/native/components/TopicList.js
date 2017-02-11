@@ -29,7 +29,7 @@ export class TopicList extends Component<void, Props, State> {
   constructor (props: Props) {
     super(props);
     this.state = { topics: [] };
-    global.fetch('http://192.168.1.115:3714/api/topic')
+    global.fetch('http://192.168.1.58:3714/api/topic')
       .then(response => response.json())
       .then(topics => this.setState({ topics }))
       .catch(error => {

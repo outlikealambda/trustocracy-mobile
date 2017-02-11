@@ -25,9 +25,9 @@ const trusteeColors = [
 ];
 
 // super fragile...
-function initials (connection) {
-  if (connection) {
-    const { name } = connection.friend;
+function initials (friend) {
+  if (friend) {
+    const { name } = friend;
     return name[0] + name.split(' ')[1][0];
   }
   return '';
@@ -40,6 +40,7 @@ type Props = {
 type State = {
   userId: number,
   selectedConnectionIdx: number,
+  selectedFriendIdx: number,
   connections: Array<any>,
   title: string
 };
@@ -52,18 +53,19 @@ export class Topic extends Component<void, Props, State> {
     this.state = {
       userId: 5,
       selectedConnectionIdx: 0,
+      selectedFriendIdx: 0,
       connections: [],
       title: ''
     };
 
-    global.fetch(`http://192.168.1.115:3714/api/topic/${this.props.id}/connected/${this.state.userId}`)
+    global.fetch(`http://192.168.1.58:3714/api/topic/${this.props.id}/connected/${this.state.userId}`)
       .then(response => response.json())
       .then(connections => this.setState({ connections }))
       .catch(error => {
         console.error(error);
       });
 
-    global.fetch(`http://192.168.1.115:3714/api/topic/${this.props.id}`)
+    global.fetch(`http://192.168.1.58:3714/api/topic/${this.props.id}`)
       .then(response => response.json())
       .then(topicInfo => topicInfo.text)
       .then(title => this.setState({ title }))
@@ -74,43 +76,52 @@ export class Topic extends Component<void, Props, State> {
 
   render () {
     const selectedConnection = this.state.connections[this.state.selectedConnectionIdx];
+    const selectedFriend = selectedConnection ? selectedConnection.friends[this.state.selectedFriendIdx] : null;
 
-    const renderTrustee = (connection, connectionIdx) => {
+    const renderTrusteeSet = (connection, connectionIdx) => {
       const color =
         connection.opinion
           ? trusteeColors[connectionIdx % trusteeColors.length]
           : 'lightgray';
-      const trusteeView = (
-        <TouchableHighlight
-          key={connectionIdx}
-          onPress={() => this.setState({ selectedConnectionIdx: connectionIdx })}
-          style={{ justifyContent: 'center', alignItems: 'center' }}>
-          <View style={[ { backgroundColor: color }, styles.circle ]}>
-            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-              { initials(connection) }
-            </Text>
-          </View>
-        </TouchableHighlight>
-      );
-      if (connectionIdx === this.state.selectedConnectionIdx) {
-        return (
-          <View
-            key={connectionIdx}
-            style={{
-              width: 50,
-              height: 50,
-              borderRadius: 25,
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: 3,
-              backgroundColor: styles.container.backgroundColor,
-              borderWidth: 3,
-              borderColor: 'lightblue' }}>
-            {trusteeView}
-          </View>
+
+      const renderTrustee = (friend, friendIdx) => {
+        const trusteeView = (
+          <TouchableHighlight
+            key={connectionIdx + ':' + friendIdx}
+            onPress={() => this.setState({ selectedConnectionIdx: connectionIdx, selectedFriendIdx: friendIdx })}
+            style={{ justifyContent: 'center', alignItems: 'center' }}>
+            <View style={[ { backgroundColor: color }, styles.circle ]}>
+              <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
+                { initials(friend) }
+              </Text>
+            </View>
+          </TouchableHighlight>
         );
-      }
-      return trusteeView;
+        if (connectionIdx === this.state.selectedConnectionIdx &&
+            friendIdx === this.state.selectedFriendIdx) {
+          return (
+            <View
+              key={connectionIdx + ':' + friendIdx}
+              style={{
+                width: 50,
+                height: 50,
+                borderRadius: 25,
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: 3,
+                backgroundColor: styles.container.backgroundColor,
+                borderWidth: 3,
+                borderColor: 'lightblue' }}>
+              {trusteeView}
+            </View>
+          );
+        }
+        return trusteeView;
+      };
+
+      return (
+        connection.friends.map(renderTrustee)
+      );
     };
 
     const renderAuthor = () => {
@@ -121,7 +132,7 @@ export class Topic extends Component<void, Props, State> {
         <View style={{ height: 60, flexDirection: 'row', alignItems: 'center' }}>
           <View style={[ styles.circle, { backgroundColor: trusteeColors[this.state.selectedConnectionIdx % trusteeColors.length], marginRight: 0 } ]}>
             <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-              { initials(selectedConnection) }
+              { initials(selectedFriend) }
             </Text>
           </View>
           <View style={{ height: 3, width: 40, backgroundColor: 'gray' }} />
@@ -232,7 +243,7 @@ export class Topic extends Component<void, Props, State> {
           borderBottomColor: 'gray',
           borderBottomWidth: 2 }}>
           <ScrollView horizontal>
-            { this.state.connections.map(renderTrustee) }
+            { this.state.connections.map(renderTrusteeSet) }
             {/*
             <View style={{
               width: 50,
