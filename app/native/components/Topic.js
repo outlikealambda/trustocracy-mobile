@@ -114,11 +114,7 @@ export class Topic extends Component<void, Props, State> {
             key={connectionIdx + ':' + friendIdx}
             onPress={() => this.setState({ selectedConnectionIdx: connectionIdx, selectedFriendIdx: friendIdx })}
             style={{ justifyContent: 'center', alignItems: 'center' }}>
-            <View style={[ { backgroundColor: color }, styles.circle ]}>
-              <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-                { initials(friend) }
-              </Text>
-            </View>
+            {renderTrusteeInitials(color, initials(friend))}
           </TouchableHighlight>
         );
         if (connectionIdx === this.state.selectedConnectionIdx &&
@@ -133,35 +129,41 @@ export class Topic extends Component<void, Props, State> {
       );
     };
 
-    const renderBook = () => {
-      return (
-        <TouchableHighlight
-          key='book'
-          onPress={() => this.setState({ selectedConnectionIdx: this.state.bookIdx, selectedFriendIdx: 0, expanded: false })}
-          style={{ justifyContent: 'center', alignItems: 'center' }}>
-          <View style={[ { backgroundColor: 'wheat' }, styles.circle ]}>
-            <View style={{ backgroundColor: 'transparent' }}>
-              <Icon style={{ marginRight: 2, marginTop: 3 }} name='book' size={27} color='black' />
-            </View>
-          </View>
-        </TouchableHighlight>
-      );
-    };
+    const renderTrusteeCircle = (bgColor, innerRendered, extraStyles) => (
+      <View style={[styles.circle, {backgroundColor: bgColor}, extraStyles || {}]}>
+        {innerRendered}
+      </View>
+    );
 
-    const renderExpand = () => {
-      return (
-        <TouchableHighlight
-          key='book'
-          onPress={() => this.setState({ expanded: true })}
-          style={{ justifyContent: 'center', alignItems: 'center' }}>
-          <View style={[ { backgroundColor: 'wheat' }, styles.circle ]}>
-            <View style={{ backgroundColor: 'transparent' }}>
-              <Icon style={{ marginLeft: 12, marginTop: 2 }} name='chevron-left' size={28} color='black' />
-            </View>
-          </View>
-        </TouchableHighlight>
-      );
-    };
+    const renderTrusteeInitials = (bgColor, initials, styles) => renderTrusteeCircle(
+      bgColor,
+      (<Text style={{ fontSize: 18, fontWeight: 'bold' }}>{initials}</Text>),
+      styles
+    );
+
+    const renderIcon = (name, size, style) => (
+      <View style={{ backgroundColor: 'transparent' }}>
+        <Icon style={style} name={name} size={27} color='black' />
+      </View>
+    );
+
+    const renderBook = () => (
+      <TouchableHighlight
+        key='book'
+        onPress={() => this.setState({ selectedConnectionIdx: this.state.bookIdx, selectedFriendIdx: 0, expanded: false })}
+        style={{ justifyContent: 'center', alignItems: 'center' }}>
+        {renderTrusteeCircle('wheat', renderIcon('book', 27, {marginRight: 2, marginTop: 3}))}
+      </TouchableHighlight>
+    );
+
+    const renderExpand = () => (
+      <TouchableHighlight
+        key='book'
+        onPress={() => this.setState({ expanded: true })}
+        style={{ justifyContent: 'center', alignItems: 'center' }}>
+        {renderTrusteeCircle('wheat', renderIcon('chevron-left', 28, {marginLeft: 12, marginTop: 2}))}
+      </TouchableHighlight>
+    );
 
     const renderAuthor = () => {
       if (!selectedConnection || !selectedConnection.author) {
@@ -169,11 +171,11 @@ export class Topic extends Component<void, Props, State> {
       }
       return (
         <View style={{ height: 60, flexDirection: 'row', alignItems: 'center' }}>
-          <View style={[ styles.circle, { backgroundColor: trusteeColors[this.state.selectedConnectionIdx % trusteeColors.length], marginRight: 0 } ]}>
-            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-              { initials(selectedFriend) }
-            </Text>
-          </View>
+          {renderTrusteeInitials(
+            trusteeColors[this.state.selectedConnectionIdx % trusteeColors.length],
+            initials(selectedFriend),
+            {marginRight: 0}
+          )}
           <View style={{ height: 3, width: 40, backgroundColor: 'gray' }} />
           <View style={[ styles.circle, { backgroundColor: 'lightgray', marginLeft: 0, marginRight: 0 } ]} />
           <View style={{ height: 3, width: 40, backgroundColor: 'gray' }} />
