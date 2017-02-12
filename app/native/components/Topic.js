@@ -277,6 +277,8 @@ export class Topic extends Component<void, Props, State> {
         </View> */}
         <View style={{
           height: 60,
+          alignSelf: 'stretch',
+          alignItems: 'center',
           borderTopColor: 'gray',
           borderTopWidth: 2,
           borderBottomColor: 'gray',
