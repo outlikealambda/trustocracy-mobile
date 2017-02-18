@@ -64,8 +64,13 @@ type State = {
   bookIdx: number,
   connections: Array<any>,
   title: string,
-  expanded: boolean
+  expanded: boolean,
+  opinions: Array<any>,
+  selectedOpinionIdx: number,
+  selectedOpinion: any
 };
+
+const host = '192.168.2.240';
 
 export class Topic extends Component<void, Props, State> {
   state: State
@@ -79,20 +84,30 @@ export class Topic extends Component<void, Props, State> {
       bookIdx: 0,
       connections: [],
       title: '',
-      expanded: true
+      expanded: true,
+      opinions: [],
+      selectedOpinionIdx: -1,
+      selectedOpinion: null
     };
 
-    global.fetch(`http://192.168.1.58:3714/api/topic/${this.props.id}/connected/${this.state.userId}`)
+    global.fetch(`http://${host}:3714/api/topic/${this.props.id}/connected/${this.state.userId}`)
       .then(response => response.json())
       .then(connections => this.setState({ connections, bookIdx: connections.length }))
       .catch(error => {
         console.error(error);
       });
 
-    global.fetch(`http://192.168.1.58:3714/api/topic/${this.props.id}`)
+    global.fetch(`http://${host}:3714/api/topic/${this.props.id}`)
       .then(response => response.json())
       .then(topicInfo => topicInfo.text)
       .then(title => this.setState({ title }))
+      .catch(error => {
+        console.error(error);
+      });
+
+    global.fetch(`http://${host}:3714/api/topic/${this.props.id}/opinion`)
+      .then(response => response.json())
+      .then(opinions => this.setState({ opinions }))
       .catch(error => {
         console.error(error);
       });
@@ -101,6 +116,15 @@ export class Topic extends Component<void, Props, State> {
   render () {
     const selectedConnection = this.state.connections[this.state.selectedConnectionIdx];
     const selectedFriend = selectedConnection ? selectedConnection.friends[this.state.selectedFriendIdx] : null;
+
+    const fetchSelectedOpinion = opinionId => {
+      global.fetch(`http://${host}:3714/api/opinion/${opinionId}`)
+        .then(response => response.json())
+        .then(opinion => this.setState({ selectedOpinion: opinion }))
+        .catch(error => {
+          console.error(error);
+        });
+    };
 
     const renderTrusteeSet = (connection, connectionIdx) => {
       const color =
@@ -112,7 +136,10 @@ export class Topic extends Component<void, Props, State> {
         const trusteeView = (
           <TouchableHighlight
             key={connectionIdx + ':' + friendIdx}
-            onPress={() => this.setState({ selectedConnectionIdx: connectionIdx, selectedFriendIdx: friendIdx })}
+            onPress={() => this.setState({
+              selectedConnectionIdx: connectionIdx,
+              selectedFriendIdx: friendIdx,
+              selectedOpinion: null })}
             style={{ justifyContent: 'center', alignItems: 'center' }}>
             {renderTrusteeInitials(color, initials(friend))}
           </TouchableHighlight>
@@ -150,7 +177,11 @@ export class Topic extends Component<void, Props, State> {
     const renderBook = () => (
       <TouchableHighlight
         key='book'
-        onPress={() => this.setState({ selectedConnectionIdx: this.state.bookIdx, selectedFriendIdx: 0, expanded: false })}
+        onPress={() => this.setState({
+          selectedConnectionIdx: this.state.bookIdx,
+          selectedFriendIdx: 0,
+          expanded: false,
+          selectedOpinion: null })}
         style={{ justifyContent: 'center', alignItems: 'center' }}>
         {renderTrusteeCircle('wheat', renderIcon('book', 27, {marginRight: 2, marginTop: 3}))}
       </TouchableHighlight>
@@ -158,12 +189,15 @@ export class Topic extends Component<void, Props, State> {
 
     const renderExpand = () => (
       <TouchableHighlight
-        key='book'
+        key='expand'
         onPress={() => this.setState({ expanded: true })}
         style={{ justifyContent: 'center', alignItems: 'center' }}>
         {renderTrusteeCircle('wheat', renderIcon('chevron-left', 28, {marginLeft: 12, marginTop: 2}))}
       </TouchableHighlight>
     );
+
+    const renderAuthorCircle = author =>
+      renderTrusteeInitials('wheat', initials(author));
 
     const renderAuthor = () => {
       if (!selectedConnection || !selectedConnection.author) {
@@ -185,6 +219,26 @@ export class Topic extends Component<void, Props, State> {
             </Text>
           </View>
         </View>
+      );
+    };
+
+    const renderOpinionSelector = (opinion, opinionIdx) => {
+      return (
+        <TouchableHighlight
+          key={opinion.id}
+          onPress={() => {
+            fetchSelectedOpinion(opinion.id);
+            this.setState({
+              selectedOpinion: opinion,
+              selectedOpinionIdx: opinionIdx
+            });
+          }}>
+          <View style={{ marginTop: 10, marginBottom: 10 }}>
+            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
+              { opinion.author.name + ' : ' + opinion.author.influence }
+            </Text>
+          </View>
+        </TouchableHighlight>
       );
     };
 
@@ -290,9 +344,15 @@ export class Topic extends Component<void, Props, State> {
             ? this.state.connections.map(renderTrusteeSet)
             : renderExpand()
             }
-            { this.state.selectedConnectionIdx === this.state.bookIdx
+            { this.state.selectedConnectionIdx === this.state.bookIdx &&
+              !this.state.selectedOpinion
             ? selectedCircle(renderBook())
             : renderBook()
+            }
+            { this.state.selectedConnectionIdx === this.state.bookIdx &&
+              this.state.selectedOpinion
+            ? selectedCircle(renderAuthorCircle(this.state.selectedOpinion.author))
+            : <View />
             }
             {/*
             <View style={{
@@ -380,12 +440,27 @@ export class Topic extends Component<void, Props, State> {
           </SvgText>
         </Svg> */}
         <ScrollView>
-          <View style={styles.instructions}>
-            <Markdown>
-              { (selectedConnection ? (selectedConnection.opinion ? selectedConnection.opinion.text : '*...No connected opinion...*') : '') }
-              {/* I see now. You want to see a UI widget in many possible states for the purposes of seeing a visual regression. (By "widget", I mean some piede of HTML generated by a function, not the loaded word "component", which usually implies state. Althought it could be either.) Without saying too much, I know there is some programmatic HTML-based testing in the pipeline but actually seeing the rendered output would be a nice complement to that. */}
-            </Markdown>
-          </View>
+          { this.state.selectedConnectionIdx === this.state.bookIdx &&
+            (!this.state.selectedOpinion || !this.state.selectedOpinion.text)
+          ? this.state.opinions.map(renderOpinionSelector)
+          : (
+            <View style={styles.instructions}>
+              <Markdown>
+                { selectedConnection
+                ? (selectedConnection.opinion
+                  ? selectedConnection.opinion.text
+                  : '*...No connected opinion...*'
+                  )
+                : (this.state.selectedOpinion
+                  ? this.state.selectedOpinion.text
+                  : ''
+                  )
+                }
+                {/* I see now. You want to see a UI widget in many possible states for the purposes of seeing a visual regression. (By "widget", I mean some piede of HTML generated by a function, not the loaded word "component", which usually implies state. Althought it could be either.) Without saying too much, I know there is some programmatic HTML-based testing in the pipeline but actually seeing the rendered output would be a nice complement to that. */}
+              </Markdown>
+            </View>
+            )
+          }
         </ScrollView>
       </View>
     );
