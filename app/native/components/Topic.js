@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import Markdown from 'react-native-simple-markdown';
 import Icon from 'react-native-vector-icons/Octicons';
-// import Svg, { Circle, Rect, Text as SvgText } from 'react-native-svg';
 
 const trusteeColors = [
   'greenyellow',
@@ -75,8 +74,15 @@ const host = '127.0.0.1';
 export class Topic extends Component<void, Props, State> {
   state: State
 
+  static navigationOptions = {
+    title: ({ state }) => 'Topic: ' + state.params.title
+  }
+
   constructor (props: Props) {
     super(props);
+
+    const topicId = this.props.navigation.state.params.id;
+
     this.state = {
       userId: 5,
       selectedConnectionIdx: 0,
@@ -90,14 +96,14 @@ export class Topic extends Component<void, Props, State> {
       selectedOpinion: null
     };
 
-    global.fetch(`http://${host}:3714/api/topic/${this.props.id}/connected/${this.state.userId}`)
+    global.fetch(`http://${host}:3714/api/topic/${topicId}/connected/${this.state.userId}`)
       .then(response => response.json())
       .then(connections => this.setState({ connections, bookIdx: connections.length }))
       .catch(error => {
         console.error(error);
       });
 
-    global.fetch(`http://${host}:3714/api/topic/${this.props.id}`)
+    global.fetch(`http://${host}:3714/api/topic/${topicId}`)
       .then(response => response.json())
       .then(topicInfo => topicInfo.text)
       .then(title => this.setState({ title }))
@@ -105,7 +111,7 @@ export class Topic extends Component<void, Props, State> {
         console.error(error);
       });
 
-    global.fetch(`http://${host}:3714/api/topic/${this.props.id}/opinion`)
+    global.fetch(`http://${host}:3714/api/topic/${topicId}/opinion`)
       .then(response => response.json())
       .then(opinions => this.setState({ opinions }))
       .catch(error => {
@@ -472,15 +478,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-    marginTop: 70
+    backgroundColor: '#F5FCFF'
   },
   welcome: {
     fontSize: 28,
     fontWeight: 'bold',
     textAlign: 'center',
     margin: 10
-    // backgroundColor: 'orange'
   },
   instructions: {
     marginLeft: 20,
