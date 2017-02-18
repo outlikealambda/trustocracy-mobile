@@ -29,7 +29,7 @@ export class TopicList extends Component<void, Props, State> {
   constructor (props: Props) {
     super(props);
     this.state = { topics: [] };
-    const host = '192.168.2.240';
+    const host = '127.0.0.1';
     global.fetch(`http://${host}:3714/api/topic`)
       .then(response => response.json())
       .then(topics => this.setState({ topics }))
