@@ -174,9 +174,9 @@ export class Topic extends Component<void, Props, State> {
       styles
     );
 
-    const renderIcon = (name, size, style) => (
+    const renderIcon = (name, size, style, color) => (
       <View style={{ backgroundColor: 'transparent' }}>
-        <Icon style={style} name={name} size={27} color='black' />
+        <Icon style={style} name={name} size={size} color={color || 'black'} />
       </View>
     );
 
@@ -224,6 +224,7 @@ export class Topic extends Component<void, Props, State> {
           <View style={[styles.miniCircle]} />
           <View style={[styles.miniCircle]} />
           <View style={[styles.miniCircle]} />
+          {renderIcon('chevron-right', 16, {}, '#999')}
           <View style={{ backgroundColor: 'lightgray', justifyContent: 'center', height: 40, borderRadius: 20, marginRight: 8 }}>
             <Text style={{ margin: 8, fontSize: 16, fontWeight: 'bold' }}>
               { selectedConnection.author.name }
