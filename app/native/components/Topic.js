@@ -217,8 +217,8 @@ export class Topic extends Component<void, Props, State> {
           <View style={[styles.miniCircle]} />
           <View style={[styles.miniCircle]} />
           <Icon name='chevron-right' size={16} color='#999' />
-          <View style={{ backgroundColor: 'lightgray', justifyContent: 'center', height: 40, borderRadius: 20, marginRight: 8 }}>
-            <Text style={{ margin: 8, fontSize: 16, fontWeight: 'bold' }}>
+          <View style={[styles.roundedContainer, { backgroundColor: 'lightgray', marginRight: 8 }]}>
+            <Text style={{ margin: 8, marginLeft: 12, marginRight: 12, fontSize: 16, fontWeight: 'bold' }}>
               { selectedConnection.author.name }
             </Text>
           </View>
@@ -227,6 +227,14 @@ export class Topic extends Component<void, Props, State> {
     };
 
     const renderOpinionSelector = (opinion, opinionIdx) => {
+      const fontStyle = {
+        fontSize: 16,
+        fontWeight: 'bold',
+        margin: 8,
+        marginLeft: 12,
+        marginRight: 12
+      };
+
       return (
         <TouchableHighlight
           key={opinion.id}
@@ -237,10 +245,17 @@ export class Topic extends Component<void, Props, State> {
               selectedOpinionIdx: opinionIdx
             });
           }}>
-          <View style={{ marginTop: 10, marginBottom: 10 }}>
-            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-              { opinion.author.name + ' : ' + opinion.author.influence }
-            </Text>
+          <View style={{ flexDirection: 'row', margin: 8, justifyContent: 'center' }}>
+            <View style={[styles.roundedLeftHalf, { backgroundColor: 'lightgray', marginRight: 8 }]}>
+              <Text style={fontStyle}>
+                { opinion.author.name }
+              </Text>
+            </View>
+            <View style={[styles.roundedRightHalf, { backgroundColor: 'pink' }]}>
+              <Text style={fontStyle}>
+                { opinion.author.influence }
+              </Text>
+            </View>
           </View>
         </TouchableHighlight>
       );
@@ -334,6 +349,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     margin: 8
+  },
+  roundedContainer: {
+    justifyContent: 'center',
+    height: 40,
+    borderRadius: 20
+  },
+  roundedLeftHalf: {
+    height: 40,
+    borderTopLeftRadius: 20,
+    borderBottomLeftRadius: 20
+  },
+  roundedRightHalf: {
+    height: 40,
+    borderTopRightRadius: 20,
+    borderBottomRightRadius: 20
   },
   miniCircle: {
     width: 4,
