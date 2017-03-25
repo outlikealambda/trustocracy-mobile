@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import Markdown from 'react-native-simple-markdown';
 import Icon from 'react-native-vector-icons/Octicons';
+import { InitialsButton, IconButton } from './ElevatorButton.js';
 
 const trusteeColors = [
   'greenyellow',
@@ -121,6 +122,7 @@ export class Topic extends Component<void, Props, State> {
 
   render () {
     const selectedConnection = this.state.connections[this.state.selectedConnectionIdx];
+
     const selectedFriend = selectedConnection ? selectedConnection.friends[this.state.selectedFriendIdx] : null;
 
     const fetchSelectedOpinion = opinionId => {
@@ -132,7 +134,7 @@ export class Topic extends Component<void, Props, State> {
         });
     };
 
-    const renderTrusteeSet = (connection, connectionIdx) => {
+    const renderTrusteeGroup = (connection, connectionIdx) => {
       const color =
         connection.opinion
           ? trusteeColors[connectionIdx % trusteeColors.length]
@@ -140,20 +142,22 @@ export class Topic extends Component<void, Props, State> {
 
       const renderTrustee = (friend, friendIdx) => {
         const trusteeView = (
-          <TouchableHighlight
-            key={connectionIdx + ':' + friendIdx}
+          <InitialsButton
             onPress={() => this.setState({
               selectedConnectionIdx: connectionIdx,
               selectedFriendIdx: friendIdx,
-              selectedOpinion: null })}
-            style={{ justifyContent: 'center', alignItems: 'center' }}>
-            {renderTrusteeInitials(color, initials(friend))}
-          </TouchableHighlight>
+              selectedOpinion: null
+            })}
+            key={connectionIdx + ':' + friendIdx}
+            backgroundColor={color}
+            initials={initials(friend)} />
         );
+
         if (connectionIdx === this.state.selectedConnectionIdx &&
             friendIdx === this.state.selectedFriendIdx) {
           return selectedCircle(trusteeView, connectionIdx + ':' + friendIdx);
         }
+
         return trusteeView;
       };
 
@@ -162,60 +166,48 @@ export class Topic extends Component<void, Props, State> {
       );
     };
 
-    const renderTrusteeCircle = (bgColor, innerRendered, extraStyles) => (
-      <View style={[styles.circle, {backgroundColor: bgColor}, extraStyles || {}]}>
-        {innerRendered}
-      </View>
-    );
-
-    const renderTrusteeInitials = (bgColor, initials, styles) => renderTrusteeCircle(
-      bgColor,
-      (<Text style={{ fontSize: 18, fontWeight: 'bold' }}>{initials}</Text>),
-      styles
-    );
-
-    const renderIcon = (name, size, style, color) => (
-      <View style={{ backgroundColor: 'transparent' }}>
-        <Icon style={style} name={name} size={size} color={color || 'black'} />
-      </View>
-    );
-
     const renderBook = () => (
-      <TouchableHighlight
+      <IconButton
+        name='book'
         key='book'
+        backgroundColor='wheat'
+        size={27}
+        style={{marginRight: 2, marginTop: 3}}
         onPress={() => this.setState({
           selectedConnectionIdx: this.state.bookIdx,
           selectedFriendIdx: 0,
           expanded: false,
-          selectedOpinion: null })}
-        style={{ justifyContent: 'center', alignItems: 'center' }}>
-        {renderTrusteeCircle('wheat', renderIcon('book', 27, {marginRight: 2, marginTop: 3}))}
-      </TouchableHighlight>
+          selectedOpinion: null
+        })} />
     );
 
     const renderExpand = () => (
-      <TouchableHighlight
+      <IconButton
+        name='chevron-left'
         key='expand'
-        onPress={() => this.setState({ expanded: true })}
-        style={{ justifyContent: 'center', alignItems: 'center' }}>
-        {renderTrusteeCircle('wheat', renderIcon('chevron-left', 28, {marginLeft: 12, marginTop: 2}))}
-      </TouchableHighlight>
+        backgroundColor='wheat'
+        size={28}
+        style={{marginLeft: 12, marginTop: 2}}
+        onPress={() => this.setState({ expanded: true })} />
     );
 
-    const renderAuthorCircle = author =>
-      renderTrusteeInitials('wheat', initials(author));
+    const renderAuthorNavCircle = author => (
+      <InitialsButton
+        backgroundColor='wheat'
+        initials={initials(author)} />
+    );
 
-    const renderAuthor = () => {
+    const renderOpinionHeader = () => {
       if (!selectedConnection || !selectedConnection.author) {
         return [];
       }
+
       return (
         <View style={{ height: 60, flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          {renderTrusteeInitials(
-            trusteeColors[this.state.selectedConnectionIdx % trusteeColors.length],
-            initials(selectedFriend),
-            {marginRight: 0}
-          )}
+          <InitialsButton
+            backgroundColor={trusteeColors[this.state.selectedConnectionIdx % trusteeColors.length]}
+            initials={initials(selectedFriend)}
+            style={{marginRight: 0}} />
           <View style={[styles.miniCircle]} />
           <View style={[styles.miniCircle]} />
           <View style={[styles.miniCircle]} />
@@ -224,7 +216,7 @@ export class Topic extends Component<void, Props, State> {
           <View style={[styles.miniCircle]} />
           <View style={[styles.miniCircle]} />
           <View style={[styles.miniCircle]} />
-          {renderIcon('chevron-right', 16, {}, '#999')}
+          <Icon name='chevron-right' size={16} color='#999' />
           <View style={{ backgroundColor: 'lightgray', justifyContent: 'center', height: 40, borderRadius: 20, marginRight: 8 }}>
             <Text style={{ margin: 8, fontSize: 16, fontWeight: 'bold' }}>
               { selectedConnection.author.name }
@@ -269,7 +261,7 @@ export class Topic extends Component<void, Props, State> {
           borderBottomWidth: 2 }}>
           <ScrollView horizontal>
             { this.state.expanded
-            ? this.state.connections.map(renderTrusteeSet)
+            ? this.state.connections.map(renderTrusteeGroup)
             : renderExpand()
             }
             { this.state.selectedConnectionIdx === this.state.bookIdx &&
@@ -279,14 +271,14 @@ export class Topic extends Component<void, Props, State> {
             }
             { this.state.selectedConnectionIdx === this.state.bookIdx &&
               this.state.selectedOpinion
-            ? selectedCircle(renderAuthorCircle(this.state.selectedOpinion.author))
+            ? selectedCircle(renderAuthorNavCircle(this.state.selectedOpinion.author))
             : <View />
             }
           </ScrollView>
         </View>
         {/* mark as a row, so that it will fill horizontally */}
         <View style={{flexDirection: 'row'}}>
-          { renderAuthor() }
+          { renderOpinionHeader() }
         </View>
         <ScrollView>
           { this.state.selectedConnectionIdx === this.state.bookIdx &&
