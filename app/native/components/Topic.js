@@ -46,8 +46,26 @@ function selectedCircle (content, key) {
         justifyContent: 'center',
         margin: 3,
         backgroundColor: styles.container.backgroundColor,
-        borderWidth: 3,
-        borderColor: 'lightblue' }}>
+        borderWidth: 2,
+        borderColor: 'orange'
+      }}>
+      {content}
+    </View>
+  );
+}
+
+function influencerCircle (content, key) {
+  return (
+    <View
+      key={key}
+      style={{
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'turquoise'
+      }}>
       {content}
     </View>
   );
@@ -141,7 +159,7 @@ export class Topic extends Component<void, Props, State> {
           : 'lightgray';
 
       const renderTrustee = (friend, friendIdx) => {
-        const trusteeView = (
+        let trusteeView = (
           <InitialsButton
             onPress={() => this.setState({
               selectedConnectionIdx: connectionIdx,
@@ -155,7 +173,11 @@ export class Topic extends Component<void, Props, State> {
 
         if (connectionIdx === this.state.selectedConnectionIdx &&
             friendIdx === this.state.selectedFriendIdx) {
-          return selectedCircle(trusteeView, connectionIdx + ':' + friendIdx);
+          trusteeView = selectedCircle(trusteeView, 'selected' + connectionIdx + ':' + friendIdx);
+        }
+
+        if (friend.isInfluencer) {
+          trusteeView = influencerCircle(trusteeView, 'influencer' + connectionIdx + ':' + friendIdx);
         }
 
         return trusteeView;
@@ -202,12 +224,29 @@ export class Topic extends Component<void, Props, State> {
         return [];
       }
 
+      let trusteeCircle = (
+        <InitialsButton
+          backgroundColor={trusteeColors[this.state.selectedConnectionIdx % trusteeColors.length]}
+          initials={initials(selectedFriend)}
+          style={{
+            marginHorizontal: selectedFriend.isInfluencer ? 0 : 8
+          }} />
+      );
+
+      if (selectedFriend.isInfluencer) {
+        trusteeCircle = influencerCircle(trusteeCircle);
+      }
+
       return (
-        <View style={{ height: 60, flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <InitialsButton
-            backgroundColor={trusteeColors[this.state.selectedConnectionIdx % trusteeColors.length]}
-            initials={initials(selectedFriend)}
-            style={{marginRight: 0}} />
+        <View
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: 8
+          }}>
+          { trusteeCircle }
           <View style={[styles.miniCircle]} />
           <View style={[styles.miniCircle]} />
           <View style={[styles.miniCircle]} />
@@ -266,15 +305,24 @@ export class Topic extends Component<void, Props, State> {
         <Text style={styles.welcome}>
           { this.state.title }
         </Text>
-        <View style={{
-          height: 60,
-          alignSelf: 'stretch',
-          alignItems: 'center',
-          borderTopColor: 'gray',
-          borderTopWidth: 2,
-          borderBottomColor: 'gray',
-          borderBottomWidth: 2 }}>
-          <ScrollView horizontal>
+        <View
+          style={{
+            alignSelf: 'stretch',
+            alignItems: 'center',
+            borderTopColor: '#ddd',
+            borderTopWidth: 1,
+            borderBottomColor: '#ddd',
+            borderBottomWidth: 1,
+            height: 70
+          }}>
+          { /* ScrollView needs a height; either inherited or set, and even
+               if it's horizontal */}
+          <ScrollView
+            horizontal
+            contentContainerStyle={{
+              alignItems: 'center',
+              paddingHorizontal: 8
+            }}>
             { this.state.expanded
             ? this.state.connections.map(renderTrusteeGroup)
             : renderExpand()
@@ -292,32 +340,33 @@ export class Topic extends Component<void, Props, State> {
           </ScrollView>
         </View>
         {/* mark as a row, so that it will fill horizontally */}
-        <View style={{flexDirection: 'row'}}>
+        <View style={{flex: 0, flexDirection: 'row'}}>
           { renderOpinionHeader() }
         </View>
-        <ScrollView>
-          { this.state.selectedConnectionIdx === this.state.bookIdx &&
-            (!this.state.selectedOpinion || !this.state.selectedOpinion.text)
-          ? this.state.opinions.map(renderOpinionSelector)
-          : (
-            <View style={styles.instructions}>
-              <Markdown>
-                { selectedConnection
-                ? (selectedConnection.opinion
-                  ? selectedConnection.opinion.text
-                  : '*...No connected opinion...*'
-                  )
-                : (this.state.selectedOpinion
-                  ? this.state.selectedOpinion.text
-                  : ''
-                  )
-                }
-                {/* I see now. You want to see a UI widget in many possible states for the purposes of seeing a visual regression. (By "widget", I mean some piede of HTML generated by a function, not the loaded word "component", which usually implies state. Althought it could be either.) Without saying too much, I know there is some programmatic HTML-based testing in the pipeline but actually seeing the rendered output would be a nice complement to that. */}
-              </Markdown>
-            </View>
-            )
-          }
-        </ScrollView>
+        <View style={{flex: 1}}>
+          <ScrollView>
+            { this.state.selectedConnectionIdx === this.state.bookIdx &&
+              (!this.state.selectedOpinion || !this.state.selectedOpinion.text)
+            ? this.state.opinions.map(renderOpinionSelector)
+            : (
+              <View style={styles.instructions}>
+                <Markdown>
+                  { selectedConnection
+                  ? (selectedConnection.opinion
+                    ? selectedConnection.opinion.text
+                    : '*...No connected opinion...*'
+                    )
+                  : (this.state.selectedOpinion
+                    ? this.state.selectedOpinion.text
+                    : ''
+                    )
+                  }
+                </Markdown>
+              </View>
+              )
+            }
+          </ScrollView>
+        </View>
       </View>
     );
   }
@@ -331,6 +380,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5FCFF'
   },
   welcome: {
+    flex: 0,
     fontSize: 28,
     fontWeight: 'bold',
     textAlign: 'center',
@@ -341,14 +391,6 @@ const styles = StyleSheet.create({
     marginRight: 20,
     marginTop: 20,
     marginBottom: 5
-  },
-  circle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    margin: 8
   },
   roundedContainer: {
     justifyContent: 'center',
