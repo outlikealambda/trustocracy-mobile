@@ -19,6 +19,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     margin: 8
+  },
+  roundedContainer: {
+    justifyContent: 'center',
+    height: 40,
+    borderRadius: 20
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginVertical: 8,
+    marginHorizontal: 12
   }
 });
 
@@ -29,6 +40,30 @@ const wrapWithTouchable = (nativeComponent, onPress) => (
     {nativeComponent}
   </TouchableHighlight>
 );
+
+type RoundedProps = {
+  text: string,
+  style: Object<any>,
+  onPress: Function
+};
+
+export class RoundedButton extends Component<void, RoundedProps, void> {
+  render () {
+    const text = this.props.text;
+    const style = this.props.style || {};
+    const onPress = this.props.onPress;
+
+    const button = (
+      <View style={[styles.roundedContainer, style]}>
+        <Text style={styles.buttonText}>
+          { text }
+        </Text>
+      </View>
+    );
+
+    return onPress ? wrapWithTouchable(button, onPress) : button;
+  }
+}
 
 type IconProps = {
   backgroundColor: string,

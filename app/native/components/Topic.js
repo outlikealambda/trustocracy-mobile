@@ -12,7 +12,8 @@ import {
 } from 'react-native';
 import Markdown from 'react-native-simple-markdown';
 import Icon from 'react-native-vector-icons/Octicons';
-import { InitialsButton, IconButton } from './ElevatorButton.js';
+import { RoundedButton, InitialsButton, IconButton } from './Buttons.js';
+import { SlidingDrawer } from './SlidingDrawer.js';
 
 const trusteeColors = [
   'greenyellow',
@@ -85,7 +86,8 @@ type State = {
   expanded: boolean,
   opinions: Array<any>,
   selectedOpinionIdx: number,
-  selectedOpinion: any
+  selectedOpinion: any,
+  showDrawer: boolean
 };
 
 const host = '127.0.0.1';
@@ -112,7 +114,8 @@ export class Topic extends Component<void, Props, State> {
       expanded: true,
       opinions: [],
       selectedOpinionIdx: -1,
-      selectedOpinion: null
+      selectedOpinion: null,
+      showDrawer: false
     };
 
     global.fetch(`http://${host}:3714/api/topic/${topicId}/connected/${this.state.userId}`)
@@ -136,6 +139,12 @@ export class Topic extends Component<void, Props, State> {
       .catch(error => {
         console.error(error);
       });
+  }
+
+  toggleShowDrawer = () => {
+    this.setState({
+      showDrawer: !this.state.showDrawer
+    });
   }
 
   render () {
@@ -228,6 +237,7 @@ export class Topic extends Component<void, Props, State> {
         <InitialsButton
           backgroundColor={trusteeColors[this.state.selectedConnectionIdx % trusteeColors.length]}
           initials={initials(selectedFriend)}
+          onPress={this.toggleShowDrawer}
           style={{
             marginHorizontal: selectedFriend.isInfluencer ? 0 : 8
           }} />
@@ -256,24 +266,15 @@ export class Topic extends Component<void, Props, State> {
           <View style={[styles.miniCircle]} />
           <View style={[styles.miniCircle]} />
           <Icon name='chevron-right' size={16} color='#999' />
-          <View style={[styles.roundedContainer, { backgroundColor: 'lightgray', marginRight: 8 }]}>
-            <Text style={{ margin: 8, marginLeft: 12, marginRight: 12, fontSize: 16, fontWeight: 'bold' }}>
-              { selectedConnection.author.name }
-            </Text>
-          </View>
+          <RoundedButton
+            style={{backgroundColor: '#ccc', marginRight: 8}}
+            text={selectedConnection.author.name}
+            onPress={this.toggleShowDrawer} />
         </View>
       );
     };
 
     const renderOpinionSelector = (opinion, opinionIdx) => {
-      const fontStyle = {
-        fontSize: 16,
-        fontWeight: 'bold',
-        margin: 8,
-        marginLeft: 12,
-        marginRight: 12
-      };
-
       return (
         <TouchableHighlight
           key={opinion.id}
@@ -285,16 +286,12 @@ export class Topic extends Component<void, Props, State> {
             });
           }}>
           <View style={{ flexDirection: 'row', margin: 8, justifyContent: 'center' }}>
-            <View style={[styles.roundedLeftHalf, { backgroundColor: 'lightgray', marginRight: 8 }]}>
-              <Text style={fontStyle}>
-                { opinion.author.name }
-              </Text>
-            </View>
-            <View style={[styles.roundedRightHalf, { backgroundColor: 'pink' }]}>
-              <Text style={fontStyle}>
-                { opinion.author.influence }
-              </Text>
-            </View>
+            <RoundedButton
+              style={styles.roundedLeftHalf}
+              text={opinion.author.name} />
+            <RoundedButton
+              style={styles.roundedRightHalf}
+              text={opinion.author.influence} />
           </View>
         </TouchableHighlight>
       );
@@ -343,6 +340,9 @@ export class Topic extends Component<void, Props, State> {
         <View style={{flex: 0, flexDirection: 'row'}}>
           { renderOpinionHeader() }
         </View>
+        <SlidingDrawer open={this.state.showDrawer}>
+          <Text>There is a hydroflask on my desk.  Which is really a coffee table. And it is the desk which is really a coffee table, not the Hydroflask</Text>
+        </SlidingDrawer>
         <View style={{flex: 1}}>
           <ScrollView>
             { this.state.selectedConnectionIdx === this.state.bookIdx &&
@@ -392,20 +392,16 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 5
   },
-  roundedContainer: {
-    justifyContent: 'center',
-    height: 40,
-    borderRadius: 20
-  },
   roundedLeftHalf: {
-    height: 40,
-    borderTopLeftRadius: 20,
-    borderBottomLeftRadius: 20
+    borderTopRightRadius: 0,
+    borderBottomRightRadius: 0,
+    backgroundColor: '#ccc',
+    marginRight: 8
   },
   roundedRightHalf: {
-    height: 40,
-    borderTopRightRadius: 20,
-    borderBottomRightRadius: 20
+    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 0,
+    backgroundColor: 'pink'
   },
   miniCircle: {
     width: 4,
