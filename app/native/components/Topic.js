@@ -87,7 +87,9 @@ type State = {
   opinions: Array<any>,
   selectedOpinionIdx: number,
   selectedOpinion: any,
-  showDrawer: boolean
+  showFriendDrawer: boolean,
+  showAuthorDrawer: boolean,
+  drawerOpenDelay: number
 };
 
 const host = '127.0.0.1';
@@ -115,7 +117,9 @@ export class Topic extends Component<void, Props, State> {
       opinions: [],
       selectedOpinionIdx: -1,
       selectedOpinion: null,
-      showDrawer: false
+      showFriendDrawer: false,
+      showAuthorDrawer: false,
+      drawerOpenDelay: 0
     };
 
     global.fetch(`http://${host}:3714/api/topic/${topicId}/connected/${this.state.userId}`)
@@ -141,9 +145,23 @@ export class Topic extends Component<void, Props, State> {
       });
   }
 
-  toggleShowDrawer = () => {
+  toggleFriendDrawer = () => {
+    const drawerOpenDelay = this.state.showAuthorDrawer ? 500 : 0;
+
     this.setState({
-      showDrawer: !this.state.showDrawer
+      showAuthorDrawer: false,
+      showFriendDrawer: !this.state.showFriendDrawer,
+      drawerOpenDelay: drawerOpenDelay
+    });
+  }
+
+  toggleAuthorDrawer = () => {
+    const drawerOpenDelay = this.state.showFriendDrawer ? 500 : 0;
+
+    this.setState({
+      showFriendDrawer: false,
+      showAuthorDrawer: !this.state.showAuthorDrawer,
+      drawerOpenDelay: drawerOpenDelay
     });
   }
 
@@ -237,7 +255,7 @@ export class Topic extends Component<void, Props, State> {
         <InitialsButton
           backgroundColor={trusteeColors[this.state.selectedConnectionIdx % trusteeColors.length]}
           initials={initials(selectedFriend)}
-          onPress={this.toggleShowDrawer}
+          onPress={this.toggleFriendDrawer}
           style={{
             marginHorizontal: selectedFriend.isInfluencer ? 0 : 8
           }} />
@@ -269,7 +287,7 @@ export class Topic extends Component<void, Props, State> {
           <RoundedButton
             style={{backgroundColor: '#ccc', marginRight: 8}}
             text={selectedConnection.author.name}
-            onPress={this.toggleShowDrawer} />
+            onPress={this.toggleAuthorDrawer} />
         </View>
       );
     };
@@ -340,8 +358,11 @@ export class Topic extends Component<void, Props, State> {
         <View style={{flex: 0, flexDirection: 'row'}}>
           { renderOpinionHeader() }
         </View>
-        <SlidingDrawer open={this.state.showDrawer}>
-          <Text>There is a hydroflask on my desk.  Which is really a coffee table. And it is the desk which is really a coffee table, not the Hydroflask</Text>
+        <SlidingDrawer open={this.state.showFriendDrawer} openDelay={this.state.drawerOpenDelay}>
+          <Text>This is my friend drawer. There is a hydroflask on my desk.  Which is really a coffee table. And it is the desk which is really a coffee table, not the Hydroflask</Text>
+        </SlidingDrawer>
+        <SlidingDrawer open={this.state.showAuthorDrawer} openDelay={this.state.drawerOpenDelay}>
+          <Text>This is my author drawer. There is a hydroflask on my desk.  Which is really a coffee table. And it is the desk which is really a coffee table, not the Hydroflask</Text>
         </SlidingDrawer>
         <View style={{flex: 1}}>
           <ScrollView>

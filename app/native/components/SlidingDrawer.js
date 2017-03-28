@@ -18,23 +18,28 @@ export class SlidingDrawer extends Component<void, Props, State> {
     };
   }
 
-  show = () => {
-    this.resize(0, this.state.expandedHeight);
+  show = delay => {
+    this.resize(0, this.state.expandedHeight, delay);
   }
 
   hide = () => {
     this.resize(this.state.expandedHeight, 0);
   }
 
-  resize = (from, to) => {
+  resize = (from, to, delay) => {
+    delay = delay || 0;
+
     this.state.animation.setValue(from);
 
-    Animated.timing(
-      this.state.animation,
-      {
-        toValue: to
-      }
-    ).start();
+    Animated.sequence([
+      Animated.delay(delay),
+      Animated.timing(
+        this.state.animation,
+        {
+          toValue: to
+        }
+      )
+    ]).start();
   }
 
   _setHeight = event => {
@@ -48,7 +53,7 @@ export class SlidingDrawer extends Component<void, Props, State> {
 
   componentWillReceiveProps (next) {
     if (next.open !== this.props.open) {
-      next.open ? this.show() : this.hide();
+      next.open ? this.show(next.openDelay) : this.hide();
     }
   }
 
