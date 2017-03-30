@@ -137,7 +137,7 @@ export class Topic extends Component<void, Props, State> {
         console.error(error);
       });
 
-    global.fetch(`http://${host}:3714/api/topic/${topicId}/opinion`)
+    global.fetch(`http://${host}:3714/api/topic/${topicId}/opinions`)
       .then(response => response.json())
       .then(opinions => this.setState({ opinions }))
       .catch(error => {
