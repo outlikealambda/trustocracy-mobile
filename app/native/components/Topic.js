@@ -77,6 +77,7 @@ type Props = {
 }
 
 type State = {
+  topicId: number,
   userId: number,
   selectedConnectionIdx: number,
   selectedFriendIdx: number,
@@ -106,6 +107,7 @@ export class Topic extends Component<void, Props, State> {
     const topicId = this.props.navigation.state.params.id;
 
     this.state = {
+      topicId,
       userId: 5,
       selectedConnectionIdx: 0,
       selectedFriendIdx: 0,
@@ -120,26 +122,45 @@ export class Topic extends Component<void, Props, State> {
       showAuthorDrawer: false
     };
 
-    global.fetch(`http://${host}:3714/api/topic/${topicId}/connected/${this.state.userId}`)
+    this.fetchConnected(topicId, this.state.userId);
+    this.fetchTopicTitle(topicId);
+    this.fetchOpinions(topicId);
+  }
+
+  fetchConnected = (topicId, userId) => {
+    return global.fetch(`http://${host}:3714/api/topic/${topicId}/connected/${userId}`)
       .then(response => response.json())
-      .then(connections => this.setState({ connections, bookIdx: connections.length }))
+      .then(connections => this.animateStateChange({ connections, bookIdx: connections.length }))
       .catch(error => {
         console.error(error);
       });
+  }
 
-    global.fetch(`http://${host}:3714/api/topic/${topicId}`)
+  fetchTopicTitle = topicId => {
+    return global.fetch(`http://${host}:3714/api/topic/${topicId}`)
       .then(response => response.json())
       .then(topicInfo => topicInfo.text)
-      .then(title => this.setState({ title }))
+      .then(title => this.animateStateChange({ title }))
       .catch(error => {
         console.error(error);
       });
+  }
 
-    global.fetch(`http://${host}:3714/api/topic/${topicId}/opinions`)
+  fetchOpinions = topicId => {
+    return global.fetch(`http://${host}:3714/api/topic/${topicId}/opinions`)
       .then(response => response.json())
-      .then(opinions => this.setState({ opinions }))
+      .then(opinions => this.animateStateChange({ opinions }))
       .catch(error => {
         console.error(error);
+      });
+  }
+
+  fetchSelectedOpinion = opinionId => {
+    return global.fetch(`http://${host}:3714/api/opinion/${opinionId}`)
+      .then(response => response.json())
+      .catch(error => {
+        console.error('failed to retrieve opinion with id: ' + opinionId, error);
+        throw error;
       });
   }
 
@@ -167,15 +188,6 @@ export class Topic extends Component<void, Props, State> {
       },
       defaultState.hiddenDrawers
     ));
-  }
-
-  fetchSelectedOpinion = opinionId => {
-    return global.fetch(`http://${host}:3714/api/opinion/${opinionId}`)
-      .then(response => response.json())
-      .catch(error => {
-        console.error('failed to retrieve opinion with id: ' + opinionId, error);
-        throw error;
-      });
   }
 
   showBrowseSingleOpinion = selectedOpinionIdx => () => {
