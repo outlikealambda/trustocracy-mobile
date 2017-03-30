@@ -322,27 +322,34 @@ export class Topic extends Component<void, Props, State> {
       );
     };
 
+    const Bold = props => <Text style={{fontWeight: 'bold'}}>{props.children}</Text>;
+
     const renderTrusteeDrawer = friend => {
       if (!this.state.showFriendDrawer) return [];
+      if (!friend) return [];
 
-      const name = friend ? friend.name : 'my friend';
-      const action = friend && friend.isInfluencer ? 'Remove' : 'Delegate';
-      const backgroundColor = friend && friend.isInfluencer ? 'tomato' : 'lightgreen';
-      const onPress = friend && friend.isInfluencer ? () => console.log('remove!') : () => console.log('delegate!');
-      const text = friend && friend.isInfluencer
-        ? `${name} as my delegate`
-        : `my influence to ${name}`;
+      if (friend.isInfluencer) {
+        return (
+          <View style={styles.drawer}>
+            <Text><Bold>{friend.name}</Bold> is my delegate!</Text>
+          </View>
+        );
+      }
+
+      const onPress = () => console.log('delegate!');
 
       return (
-        <View style={styles.rowWrapper}>
-          <RoundedButton
-            text={action}
-            onPress={onPress}
-            style={{backgroundColor}}
-          />
-          <Text style={{flex: 1}}>
-            {text}
-          </Text>
+        <View style={styles.drawer}>
+          <View style={styles.rowWrapper}>
+            <RoundedButton
+              text={'Delegate'}
+              onPress={onPress}
+              style={{backgroundColor: 'lightgreen', marginRight: 4}}
+            />
+            <Text style={{flex: 1}}>
+              {`my influence to ${friend.name}`}
+            </Text>
+          </View>
         </View>
       );
     };
@@ -354,19 +361,12 @@ export class Topic extends Component<void, Props, State> {
       const {author} = selectedConnection;
 
       return (
-        <View style={{
-          flex: 0,
-          alignSelf: 'stretch',
-          justifyContent: 'flex-start',
-          paddingVertical: 8,
-          paddingHorizontal: 12,
-          backgroundColor: '#ddd'
-        }}>
-          <View style={styles.rowWrapper}>
+        <View style={styles.drawer}>
+          <View style={[styles.rowWrapper, {marginBottom: 8}]}>
             <RoundedButton
               text={'Delegate Directly'}
               onPress={() => console.log('hi')}
-              style={{backgroundColor: 'lightgreen'}}
+              style={{backgroundColor: 'lightgreen', marginRight: 4}}
             />
             <Text style={{flex: 1}}>to {author.name}</Text>
           </View>
@@ -554,5 +554,13 @@ const styles = StyleSheet.create({
   browseHeader: {
     fontSize: 14,
     color: '#999'
+  },
+  drawer: {
+    flex: 0,
+    alignSelf: 'stretch',
+    justifyContent: 'flex-start',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#ddd'
   }
 });
