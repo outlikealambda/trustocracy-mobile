@@ -382,22 +382,51 @@ export class Topic extends Component<void, Props, State> {
       );
     };
 
+    const renderBrowseOpinions = opinions => {
+      return (
+        <View style={{paddingVertical: 12}}>
+          {twoCol(
+            (<Text style={[styles.browseHeader, {marginRight: 8}]}>Author</Text>),
+            (<Text style={[styles.browseHeader, {marginLeft: 8}]}>Influence</Text>)
+          )}
+          {opinions.map(renderOpinionSelector)}
+        </View>
+      );
+    };
+
     const renderOpinionSelector = (opinion, opinionIdx) => {
       return (
         <TouchableHighlight
           key={opinion.id}
           onPress={this.showBrowseSingleOpinion(opinionIdx)}>
-          <View style={{ flexDirection: 'row', margin: 8, justifyContent: 'center' }}>
-            <RoundedButton
-              style={styles.roundedLeftHalf}
-              text={opinion.author.name} />
-            <RoundedButton
-              style={styles.roundedRightHalf}
-              text={opinion.author.influence} />
-          </View>
+          {
+            twoCol(
+              (
+                <RoundedButton
+                  style={styles.roundedLeftHalf}
+                  text={opinion.author.name} />
+              ),
+              (
+                <RoundedButton
+                  style={styles.roundedRightHalf}
+                  text={opinion.author.influence} />
+              )
+            )
+          }
         </TouchableHighlight>
       );
     };
+
+    const twoCol = (first, second) => (
+      <View style={{ margin: 8, flexDirection: 'row' }}>
+        <View style={{ flex: 5, alignItems: 'flex-end' }}>
+          {first}
+        </View>
+        <View style={{ flex: 3, alignItems: 'flex-start' }}>
+          {second}
+        </View>
+      </View>
+    );
 
     return (
       <View style={styles.container}>
@@ -406,7 +435,6 @@ export class Topic extends Component<void, Props, State> {
         </Text>
         <View
           style={{
-            alignSelf: 'stretch',
             alignItems: 'center',
             borderTopColor: '#ddd',
             borderTopWidth: 1,
@@ -448,7 +476,7 @@ export class Topic extends Component<void, Props, State> {
           <ScrollView>
             { this.state.selectedConnectionIdx === this.state.bookIdx &&
               (!this.state.selectedOpinion || !this.state.selectedOpinion.text)
-            ? this.state.opinions.map(renderOpinionSelector)
+            ? renderBrowseOpinions(this.state.opinions)
             : (
               <View style={styles.instructions} key={this.state.selectedConnectionIdx}>
                 <Markdown>
@@ -484,7 +512,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'flex-start',
-    alignItems: 'center',
+    alignItems: 'stretch',
     backgroundColor: '#F5FCFF'
   },
   welcome: {
@@ -503,13 +531,14 @@ const styles = StyleSheet.create({
   roundedLeftHalf: {
     borderTopRightRadius: 0,
     borderBottomRightRadius: 0,
-    backgroundColor: '#ccc',
-    marginRight: 8
+    backgroundColor: '#ccc'
   },
   roundedRightHalf: {
     borderTopLeftRadius: 0,
     borderBottomLeftRadius: 0,
-    backgroundColor: 'pink'
+    borderWidth: 1,
+    borderColor: 'pink'
+
   },
   miniCircle: {
     width: 4,
@@ -521,5 +550,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center'
+  },
+  browseHeader: {
+    fontSize: 14,
+    color: '#999'
   }
 });
