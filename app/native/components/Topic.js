@@ -88,8 +88,7 @@ type State = {
   selectedOpinionIdx: number,
   selectedOpinion: any,
   showFriendDrawer: boolean,
-  showAuthorDrawer: boolean,
-  drawerOpenDelay: number
+  showAuthorDrawer: boolean
 };
 
 const host = '127.0.0.1';
@@ -118,8 +117,7 @@ export class Topic extends Component<void, Props, State> {
       selectedOpinionIdx: -1,
       selectedOpinion: null,
       showFriendDrawer: false,
-      showAuthorDrawer: false,
-      drawerOpenDelay: 0
+      showAuthorDrawer: false
     };
 
     global.fetch(`http://${host}:3714/api/topic/${topicId}/connected/${this.state.userId}`)
