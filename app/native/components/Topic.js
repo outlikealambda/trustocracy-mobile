@@ -292,6 +292,35 @@ export class Topic extends Component<void, Props, State> {
       );
     };
 
+    const renderTrusteeDrawer = friend => {
+      const name = friend ? friend.name : 'my friend';
+      const action = friend && friend.isInfluencer ? 'Remove' : 'Delegate';
+      const backgroundColor = friend && friend.isInfluencer ? 'red' : 'lightgreen';
+      const onPress = friend && friend.isInfluencer ? () => console.log('remove!') : () => console.log('delegate!');
+      const text = friend && friend.isInfluencer
+        ? `${name} as my delegate`
+        : `my influence to ${name}`;
+
+      return (
+        <View style={{ alignSelf: 'stretch' }}>
+          <SlidingDrawer
+            open={this.state.showFriendDrawer}
+            openDelay={this.state.drawerOpenDelay}>
+            <View style={{flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center'}}>
+              <RoundedButton
+                text={action}
+                onPress={onPress}
+                style={{backgroundColor}}
+              />
+              <Text style={{flex: 1, backgroundColor: 'pink'}}>
+                {text}
+              </Text>
+            </View>
+          </SlidingDrawer>
+        </View>
+      );
+    };
+
     const renderOpinionSelector = (opinion, opinionIdx) => {
       return (
         <TouchableHighlight
@@ -358,11 +387,21 @@ export class Topic extends Component<void, Props, State> {
         <View style={{flex: 0, flexDirection: 'row'}}>
           { renderOpinionHeader() }
         </View>
-        <SlidingDrawer open={this.state.showFriendDrawer} openDelay={this.state.drawerOpenDelay}>
-          <Text>This is my friend drawer. There is a hydroflask on my desk.  Which is really a coffee table. And it is the desk which is really a coffee table, not the Hydroflask</Text>
-        </SlidingDrawer>
+          { /* selectedFriend && selectedFriend.isInfluencer
+            ? <RoundedButton
+              text={'Remove ' + selectedFriend.name}
+              style={{backgroundColor: 'red'}} />
+            : selectedFriend
+              ? <RoundedButton
+                text={'Delegate ' + selectedFriend.name}
+                style={{backgroundColor: 'green'}} />
+              : <View />
+              <Text>This is my friend drawer. There is a hydroflask on my desk.  Which is really a coffee table. And it is the desk which is really a coffee table, not the Hydroflask</Text>
+            */
+          }
+        {renderTrusteeDrawer(selectedFriend)}
         <SlidingDrawer open={this.state.showAuthorDrawer} openDelay={this.state.drawerOpenDelay}>
-          <Text>This is my author drawer. There is a hydroflask on my desk.  Which is really a coffee table. And it is the desk which is really a coffee table, not the Hydroflask</Text>
+          <Text>This is my author drawer. I keep my writing implements here. There is a hydroflask on my desk.  Which is really a coffee table. And it is the desk which is really a coffee table, not the Hydroflask</Text>
         </SlidingDrawer>
         <View style={{flex: 1}}>
           <ScrollView>
