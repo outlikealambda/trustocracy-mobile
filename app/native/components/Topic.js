@@ -4,6 +4,7 @@
 
 import React, { Component } from 'react';
 import {
+  LayoutAnimation,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,7 +14,6 @@ import {
 import Markdown from 'react-native-simple-markdown';
 import Icon from 'react-native-vector-icons/Octicons';
 import { RoundedButton, InitialsButton, IconButton } from './Buttons.js';
-import { SlidingDrawer } from './SlidingDrawer.js';
 
 const trusteeColors = [
   'greenyellow',
@@ -146,38 +146,77 @@ export class Topic extends Component<void, Props, State> {
   }
 
   toggleFriendDrawer = () => {
-    const drawerOpenDelay = this.state.showAuthorDrawer ? 500 : 0;
-
-    this.setState({
+    this.animateStateChange({
       showAuthorDrawer: false,
-      showFriendDrawer: !this.state.showFriendDrawer,
-      drawerOpenDelay: drawerOpenDelay
+      showFriendDrawer: !this.state.showFriendDrawer
     });
   }
 
   toggleAuthorDrawer = () => {
-    const drawerOpenDelay = this.state.showFriendDrawer ? 500 : 0;
-
-    this.setState({
+    this.animateStateChange({
       showFriendDrawer: false,
-      showAuthorDrawer: !this.state.showAuthorDrawer,
-      drawerOpenDelay: drawerOpenDelay
+      showAuthorDrawer: !this.state.showAuthorDrawer
     });
+  }
+
+  showBrowseAllOpinions = () => {
+    this.animateStateChange(Object.assign(
+      {
+        selectedConnectionIdx: this.state.bookIdx,
+        selectedFriendIdx: 0,
+        expanded: false,
+        selectedOpinion: null
+      },
+      defaultState.hiddenDrawers
+    ));
+  }
+
+  fetchSelectedOpinion = opinionId => {
+    return global.fetch(`http://${host}:3714/api/opinion/${opinionId}`)
+      .then(response => response.json())
+      .catch(error => {
+        console.error('failed to retrieve opinion with id: ' + opinionId, error);
+        throw error;
+      });
+  }
+
+  showBrowseSingleOpinion = selectedOpinionIdx => () => {
+    this.fetchSelectedOpinion(selectedOpinionIdx)
+      .then(selectedOpinion => {
+        this.animateStateChange({
+          selectedOpinion,
+          selectedOpinionIdx
+        });
+      });
+  }
+
+  showConnectedOpinion = (connectionIdx, friendIdx) => () => {
+    this.animateStateChange(Object.assign(
+      {
+        selectedConnectionIdx: connectionIdx,
+        selectedFriendIdx: friendIdx,
+        selectedOpinion: null
+      },
+      defaultState.hiddenDrawers
+    ));
+  }
+
+  showTrusteeIcons = () => {
+    this.animateStateChange({
+      expanded: true
+    });
+  }
+
+  animateStateChange = modifiedState => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
+
+    this.setState(modifiedState);
   }
 
   render () {
     const selectedConnection = this.state.connections[this.state.selectedConnectionIdx];
 
     const selectedFriend = selectedConnection ? selectedConnection.friends[this.state.selectedFriendIdx] : null;
-
-    const fetchSelectedOpinion = opinionId => {
-      global.fetch(`http://${host}:3714/api/opinion/${opinionId}`)
-        .then(response => response.json())
-        .then(opinion => this.setState({ selectedOpinion: opinion }))
-        .catch(error => {
-          console.error(error);
-        });
-    };
 
     const renderTrusteeGroup = (connection, connectionIdx) => {
       const color =
@@ -188,11 +227,7 @@ export class Topic extends Component<void, Props, State> {
       const renderTrustee = (friend, friendIdx) => {
         let trusteeView = (
           <InitialsButton
-            onPress={() => this.setState({
-              selectedConnectionIdx: connectionIdx,
-              selectedFriendIdx: friendIdx,
-              selectedOpinion: null
-            })}
+            onPress={this.showConnectedOpinion(connectionIdx, friendIdx)}
             key={connectionIdx + ':' + friendIdx}
             backgroundColor={color}
             initials={initials(friend)} />
@@ -222,12 +257,7 @@ export class Topic extends Component<void, Props, State> {
         backgroundColor='wheat'
         size={27}
         style={{marginRight: 2, marginTop: 3}}
-        onPress={() => this.setState({
-          selectedConnectionIdx: this.state.bookIdx,
-          selectedFriendIdx: 0,
-          expanded: false,
-          selectedOpinion: null
-        })} />
+        onPress={this.showBrowseAllOpinions} />
     );
 
     const renderExpand = () => (
@@ -237,7 +267,7 @@ export class Topic extends Component<void, Props, State> {
         backgroundColor='wheat'
         size={28}
         style={{marginLeft: 12, marginTop: 2}}
-        onPress={() => this.setState({ expanded: true })} />
+        onPress={this.showTrusteeIcons} />
     );
 
     const renderAuthorNavCircle = author => (
@@ -293,30 +323,61 @@ export class Topic extends Component<void, Props, State> {
     };
 
     const renderTrusteeDrawer = friend => {
+      if (!this.state.showFriendDrawer) return [];
+
       const name = friend ? friend.name : 'my friend';
       const action = friend && friend.isInfluencer ? 'Remove' : 'Delegate';
-      const backgroundColor = friend && friend.isInfluencer ? 'red' : 'lightgreen';
+      const backgroundColor = friend && friend.isInfluencer ? 'tomato' : 'lightgreen';
       const onPress = friend && friend.isInfluencer ? () => console.log('remove!') : () => console.log('delegate!');
       const text = friend && friend.isInfluencer
         ? `${name} as my delegate`
         : `my influence to ${name}`;
 
       return (
-        <View style={{ alignSelf: 'stretch' }}>
-          <SlidingDrawer
-            open={this.state.showFriendDrawer}
-            openDelay={this.state.drawerOpenDelay}>
-            <View style={{flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center'}}>
-              <RoundedButton
-                text={action}
-                onPress={onPress}
-                style={{backgroundColor}}
-              />
-              <Text style={{flex: 1, backgroundColor: 'pink'}}>
-                {text}
-              </Text>
-            </View>
-          </SlidingDrawer>
+        <View style={styles.rowWrapper}>
+          <RoundedButton
+            text={action}
+            onPress={onPress}
+            style={{backgroundColor}}
+          />
+          <Text style={{flex: 1}}>
+            {text}
+          </Text>
+        </View>
+      );
+    };
+
+    const renderAuthorDrawer = selectedConnection => {
+      if (!this.state.showAuthorDrawer) return [];
+      if (!selectedConnection) return [];
+
+      const {author} = selectedConnection;
+
+      return (
+        <View style={{
+          flex: 0,
+          alignSelf: 'stretch',
+          justifyContent: 'flex-start',
+          paddingVertical: 8,
+          paddingHorizontal: 12,
+          backgroundColor: '#ddd'
+        }}>
+          <View style={styles.rowWrapper}>
+            <RoundedButton
+              text={'Delegate Directly'}
+              onPress={() => console.log('hi')}
+              style={{backgroundColor: 'lightgreen'}}
+            />
+            <Text style={{flex: 1}}>to {author.name}</Text>
+          </View>
+          <Text style={{fontSize: 12, fontStyle: 'italic'}}>
+            {
+              `Can you personally vouch for ${author.name}, or are you an expert` +
+              ` in this topic and able to confirm the claims in this article? If` +
+              ` not, consider delegating to a friend who knows more about this` +
+              ` topic`
+            }
+          </Text>
         </View>
       );
     };
@@ -325,13 +386,7 @@ export class Topic extends Component<void, Props, State> {
       return (
         <TouchableHighlight
           key={opinion.id}
-          onPress={() => {
-            fetchSelectedOpinion(opinion.id);
-            this.setState({
-              selectedOpinion: opinion,
-              selectedOpinionIdx: opinionIdx
-            });
-          }}>
+          onPress={this.showBrowseSingleOpinion(opinionIdx)}>
           <View style={{ flexDirection: 'row', margin: 8, justifyContent: 'center' }}>
             <RoundedButton
               style={styles.roundedLeftHalf}
@@ -387,29 +442,15 @@ export class Topic extends Component<void, Props, State> {
         <View style={{flex: 0, flexDirection: 'row'}}>
           { renderOpinionHeader() }
         </View>
-          { /* selectedFriend && selectedFriend.isInfluencer
-            ? <RoundedButton
-              text={'Remove ' + selectedFriend.name}
-              style={{backgroundColor: 'red'}} />
-            : selectedFriend
-              ? <RoundedButton
-                text={'Delegate ' + selectedFriend.name}
-                style={{backgroundColor: 'green'}} />
-              : <View />
-              <Text>This is my friend drawer. There is a hydroflask on my desk.  Which is really a coffee table. And it is the desk which is really a coffee table, not the Hydroflask</Text>
-            */
-          }
         {renderTrusteeDrawer(selectedFriend)}
-        <SlidingDrawer open={this.state.showAuthorDrawer} openDelay={this.state.drawerOpenDelay}>
-          <Text>This is my author drawer. I keep my writing implements here. There is a hydroflask on my desk.  Which is really a coffee table. And it is the desk which is really a coffee table, not the Hydroflask</Text>
-        </SlidingDrawer>
+        {renderAuthorDrawer(selectedConnection)}
         <View style={{flex: 1}}>
           <ScrollView>
             { this.state.selectedConnectionIdx === this.state.bookIdx &&
               (!this.state.selectedOpinion || !this.state.selectedOpinion.text)
             ? this.state.opinions.map(renderOpinionSelector)
             : (
-              <View style={styles.instructions}>
+              <View style={styles.instructions} key={this.state.selectedConnectionIdx}>
                 <Markdown>
                   { selectedConnection
                   ? (selectedConnection.opinion
@@ -431,6 +472,13 @@ export class Topic extends Component<void, Props, State> {
     );
   }
 }
+
+const defaultState = {
+  hiddenDrawers: {
+    showAuthorDrawer: false,
+    showFriendDrawer: false
+  }
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -468,5 +516,10 @@ const styles = StyleSheet.create({
     height: 4,
     borderRadius: 2,
     backgroundColor: '#999'
+  },
+  rowWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center'
   }
 });
