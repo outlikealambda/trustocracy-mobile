@@ -368,10 +368,13 @@ export class Topic extends Component<void, Props, State> {
       if (person.isManual) {
         return (
           <View style={styles.drawer}>
-            <Text><Bold>{person.name}</Bold> is your delegate!  You have passed on <Bold>+{influence}</Bold>pts of influence</Text>
-            <View style={[styles.rowWrapper, {marginVertical: 8}]}>
+            <Text style={styles.drawerRow}>
+              <Bold>{person.name}</Bold> is your delegate!  You have passed on <Bold>+{influence}</Bold>pts of influence
+            </Text>
+            <View style={[styles.drawerRow, styles.rowWrapper, {marginLeft: -4}]}>
               <RoundedButton
                 text={'Remove'}
+                size={'small'}
                 onPress={() => console.log('remove!')}
                 style={{backgroundColor: '#aaa', marginRight: 4}}
               />
@@ -379,7 +382,7 @@ export class Topic extends Component<void, Props, State> {
                 {`${person.name} as my delegate`}
               </Text>
             </View>
-            <Text style={{fontSize: 12, fontStyle: 'italic'}}>
+            <Text style={[styles.drawerRow, {fontSize: 12, fontStyle: 'italic'}]}>
               {`This will redirect your influence to your top-ranked friend`}
             </Text>
           </View>
@@ -389,7 +392,9 @@ export class Topic extends Component<void, Props, State> {
       if (person.isInfluencer) {
         return (
           <View style={styles.drawer}>
-            <Text><Bold>{person.name}</Bold> is your default delegate!</Text>
+            <Text style={styles.drawerRow}>
+              <Bold>{person.name}</Bold> is your default delegate!
+            </Text>
           </View>
         );
       }
@@ -399,7 +404,7 @@ export class Topic extends Component<void, Props, State> {
       if (person.isRanked) {
         return (
           <View style={styles.drawer}>
-            <View style={styles.rowWrapper}>
+            <View style={[styles.drawerRow, styles.rowWrapper]}>
               <RoundedButton
                 text={'Delegate'}
                 onPress={setDelegate}
@@ -416,7 +421,7 @@ export class Topic extends Component<void, Props, State> {
       // we're left with an unconnected author
       return (
         <View style={styles.drawer}>
-          <View style={[styles.rowWrapper, {marginBottom: 8}]}>
+          <View style={[styles.drawerRow, styles.rowWrapper]}>
             <RoundedButton
               text={'Delegate Directly'}
               onPress={setDelegate}
@@ -424,7 +429,7 @@ export class Topic extends Component<void, Props, State> {
             />
             <Text style={{flex: 1}}>to {person.name}</Text>
           </View>
-          <Text style={{fontSize: 12, fontStyle: 'italic'}}>
+          <Text style={[styles.drawerRow, {fontSize: 12, fontStyle: 'italic'}]}>
             {
               `Can you personally vouch for ${person.name}, or are you an expert` +
               ` in this topic and able to confirm the claims in this article? If` +
@@ -615,8 +620,11 @@ const styles = StyleSheet.create({
     flex: 0,
     alignSelf: 'stretch',
     justifyContent: 'flex-start',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     backgroundColor: '#ddd'
+  },
+  drawerRow: {
+    marginVertical: 8
   }
 });

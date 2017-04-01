@@ -25,11 +25,22 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20
   },
+  roundedContainerSmall: {
+    justifyContent: 'center',
+    height: 32,
+    borderRadius: 16
+  },
   buttonText: {
     fontSize: 16,
     fontWeight: 'bold',
     marginVertical: 8,
     marginHorizontal: 12
+  },
+  buttonTextSmall: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginVertical: 4,
+    marginHorizontal: 8
   }
 });
 
@@ -43,6 +54,7 @@ const wrapWithTouchable = (nativeComponent, onPress) => (
 
 type RoundedProps = {
   text: string,
+  size: string,
   style: Object<any>,
   onPress: Function
 };
@@ -52,10 +64,13 @@ export class RoundedButton extends Component<void, RoundedProps, void> {
     const text = this.props.text;
     const style = this.props.style || {};
     const onPress = this.props.onPress;
+    const isSmall = this.props.size && this.props.size === 'small';
+    const containerStyle = isSmall ? styles.roundedContainerSmall : styles.roundedContainer;
+    const textStyle = isSmall ? styles.buttonTextSmall : styles.buttonText;
 
     const button = (
-      <View style={[styles.roundedContainer, style]}>
-        <Text style={styles.buttonText}>
+      <View style={[containerStyle, style]}>
+        <Text style={textStyle}>
           { text }
         </Text>
       </View>
