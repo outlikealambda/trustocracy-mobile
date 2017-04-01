@@ -79,6 +79,7 @@ type Props = {
 type State = {
   topicId: number,
   userId: number,
+  influence: number,
   selectedConnectionIdx: number,
   selectedFriendIdx: number,
   bookIdx: number,
@@ -108,7 +109,8 @@ export class Topic extends Component<void, Props, State> {
 
     this.state = {
       topicId,
-      userId: 5,
+      userId: 2,
+      influence: 0,
       selectedConnectionIdx: 0,
       selectedFriendIdx: 0,
       bookIdx: 0,
@@ -123,6 +125,7 @@ export class Topic extends Component<void, Props, State> {
     };
 
     this.fetchConnected(topicId, this.state.userId);
+    this.fetchInfluence(topicId, this.state.userId);
     this.fetchTopicTitle(topicId);
     this.fetchOpinions(topicId);
   }
@@ -131,6 +134,15 @@ export class Topic extends Component<void, Props, State> {
     return global.fetch(`http://${host}:3714/api/topic/${topicId}/connected/${userId}`)
       .then(response => response.json())
       .then(connections => this.animateStateChange({ connections, bookIdx: connections.length }))
+      .catch(error => {
+        console.error(error);
+      });
+  }
+
+  fetchInfluence = (topicId, userId) => {
+    return global.fetch(`http://${host}:3714/api/topic/${topicId}/user/${userId}/influence`)
+      .then(response => response.json())
+      .then(r => this.animateStateChange({ influence: r.influence }))
       .catch(error => {
         console.error(error);
       });
@@ -161,6 +173,22 @@ export class Topic extends Component<void, Props, State> {
       .catch(error => {
         console.error('failed to retrieve opinion with id: ' + opinionId, error);
         throw error;
+      });
+  }
+
+  fetchSetTarget = (topicId, userId, targetId) => {
+    return global.fetch(`http://${host}:3714/api/topic/${topicId}/user/${userId}/target/${targetId}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'plain/text'
+        },
+        body: ''
+      })
+      .then(() => {
+        this.fetchConnected(topicId, userId);
+        this.fetchInfluence(topicId, userId);
+        this.fetchOpinions(topicId);
       });
   }
 
@@ -334,55 +362,71 @@ export class Topic extends Component<void, Props, State> {
 
     const Bold = props => <Text style={{fontWeight: 'bold'}}>{props.children}</Text>;
 
-    const renderTrusteeDrawer = friend => {
-      if (!this.state.showFriendDrawer) return [];
-      if (!friend) return [];
+    const renderDrawer = (person, influence) => {
+      if (!person) return [];
 
-      if (friend.isInfluencer) {
+      if (person.isManual) {
         return (
           <View style={styles.drawer}>
-            <Text><Bold>{friend.name}</Bold> is my delegate!</Text>
+            <Text><Bold>{person.name}</Bold> is your delegate!  You have passed on <Bold>+{influence}</Bold>pts of influence</Text>
+            <View style={[styles.rowWrapper, {marginVertical: 8}]}>
+              <RoundedButton
+                text={'Remove'}
+                onPress={() => console.log('remove!')}
+                style={{backgroundColor: '#aaa', marginRight: 4}}
+              />
+              <Text style={{flex: 1}}>
+                {`${person.name} as my delegate`}
+              </Text>
+            </View>
+            <Text style={{fontSize: 12, fontStyle: 'italic'}}>
+              {`This will redirect your influence to your top-ranked friend`}
+            </Text>
           </View>
         );
       }
 
-      const onPress = () => console.log('delegate!');
-
-      return (
-        <View style={styles.drawer}>
-          <View style={styles.rowWrapper}>
-            <RoundedButton
-              text={'Delegate'}
-              onPress={onPress}
-              style={{backgroundColor: 'lightgreen', marginRight: 4}}
-            />
-            <Text style={{flex: 1}}>
-              {`my influence to ${friend.name}`}
-            </Text>
+      if (person.isInfluencer) {
+        return (
+          <View style={styles.drawer}>
+            <Text><Bold>{person.name}</Bold> is your default delegate!</Text>
           </View>
-        </View>
-      );
-    };
+        );
+      }
 
-    const renderAuthorDrawer = selectedConnection => {
-      if (!this.state.showAuthorDrawer) return [];
-      if (!selectedConnection) return [];
+      const setDelegate = () => this.fetchSetTarget(this.state.topicId, this.state.userId, person.id);
 
-      const {author} = selectedConnection;
+      if (person.isRanked) {
+        return (
+          <View style={styles.drawer}>
+            <View style={styles.rowWrapper}>
+              <RoundedButton
+                text={'Delegate'}
+                onPress={setDelegate}
+                style={{backgroundColor: 'lightgreen', marginRight: 4}}
+              />
+              <Text style={{flex: 1}}>
+                <Bold>+{influence}pts</Bold> of influence to {person.name}
+              </Text>
+            </View>
+          </View>
+        );
+      }
 
+      // we're left with an unconnected author
       return (
         <View style={styles.drawer}>
           <View style={[styles.rowWrapper, {marginBottom: 8}]}>
             <RoundedButton
               text={'Delegate Directly'}
-              onPress={() => console.log('hi')}
+              onPress={setDelegate}
               style={{backgroundColor: 'lightgreen', marginRight: 4}}
             />
-            <Text style={{flex: 1}}>to {author.name}</Text>
+            <Text style={{flex: 1}}>to {person.name}</Text>
           </View>
           <Text style={{fontSize: 12, fontStyle: 'italic'}}>
             {
-              `Can you personally vouch for ${author.name}, or are you an expert` +
+              `Can you personally vouch for ${person.name}, or are you an expert` +
               ` in this topic and able to confirm the claims in this article? If` +
               ` not, consider delegating to a friend who knows more about this` +
               ` topic`
@@ -404,22 +448,24 @@ export class Topic extends Component<void, Props, State> {
       );
     };
 
-    const renderOpinionSelector = (opinion, opinionIdx) => {
+    const renderOpinionSelector = (opinionInfo, opinionIdx) => {
+      console.log(JSON.stringify(opinionInfo, 2));
+
       return (
         <TouchableHighlight
-          key={opinion.id}
+          key={opinionInfo.id}
           onPress={this.showBrowseSingleOpinion(opinionIdx)}>
           {
             twoCol(
               (
                 <RoundedButton
                   style={styles.roundedLeftHalf}
-                  text={opinion.author.name} />
+                  text={opinionInfo.author.name} />
               ),
               (
                 <RoundedButton
                   style={styles.roundedRightHalf}
-                  text={opinion.author.influence} />
+                  text={opinionInfo.influence} />
               )
             )
           }
@@ -480,8 +526,8 @@ export class Topic extends Component<void, Props, State> {
         <View style={{flex: 0, flexDirection: 'row'}}>
           { renderOpinionHeader() }
         </View>
-        {renderTrusteeDrawer(selectedFriend)}
-        {renderAuthorDrawer(selectedConnection)}
+        {this.state.showFriendDrawer ? renderDrawer(selectedFriend, this.state.influence) : []}
+        {this.state.showAuthorDrawer ? renderDrawer(selectedConnection ? selectedConnection.author : {}, this.state.influence) : []}
         <View style={{flex: 1}}>
           <ScrollView>
             { this.state.selectedConnectionIdx === this.state.bookIdx &&
