@@ -265,6 +265,7 @@ export class Topic extends Component<void, Props, State> {
       const renderTrustee = (friend, friendIdx) => {
         let trusteeView = (
           <InitialsButton
+            shape={friend.isRanked ? 'circle' : 'square'}
             onPress={this.showConnectedOpinion(connectionIdx, friendIdx)}
             key={connectionIdx + ':' + friendIdx}
             backgroundColor={color}
@@ -290,6 +291,7 @@ export class Topic extends Component<void, Props, State> {
 
     const renderBook = () => (
       <IconButton
+        shape='circle'
         name='book'
         key='book'
         backgroundColor='wheat'
@@ -300,6 +302,7 @@ export class Topic extends Component<void, Props, State> {
 
     const renderExpand = () => (
       <IconButton
+        shape='circle'
         name='chevron-left'
         key='expand'
         backgroundColor='wheat'
@@ -310,6 +313,7 @@ export class Topic extends Component<void, Props, State> {
 
     const renderAuthorNavCircle = author => (
       <InitialsButton
+        shape='circle'
         backgroundColor='wheat'
         initials={initials(author)} />
     );
@@ -319,9 +323,12 @@ export class Topic extends Component<void, Props, State> {
         return [];
       }
 
+      const trusteeColor = trusteeColors[this.state.selectedConnectionIdx % trusteeColors.length];
+
       let trusteeCircle = (
         <InitialsButton
-          backgroundColor={trusteeColors[this.state.selectedConnectionIdx % trusteeColors.length]}
+          shape='circle'
+          backgroundColor={trusteeColor}
           initials={initials(selectedFriend)}
           onPress={this.toggleFriendDrawer}
           style={{

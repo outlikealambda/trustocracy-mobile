@@ -11,15 +11,41 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Octicons';
 
-const styles = StyleSheet.create({
-  circle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    margin: 8
+const buttonStyles = {
+  getStyle (shape) {
+    switch (shape.toLowerCase()) {
+      case 'circle':
+        return this.circle;
+      case 'square':
+        return this.square;
+      default:
+        console.warn('unknown shape, defaulting to circle');
+        return this.circle;
+    }
   },
+  circle: StyleSheet.create({
+    regular: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      alignItems: 'center',
+      justifyContent: 'center',
+      margin: 8
+    }
+  }),
+  square: StyleSheet.create({
+    regular: {
+      width: 40,
+      height: 40,
+      borderRadius: 2,
+      alignItems: 'center',
+      justifyContent: 'center',
+      margin: 8
+    }
+  })
+};
+
+const rectangularStyles = StyleSheet.create({
   roundedContainer: {
     justifyContent: 'center',
     height: 40,
@@ -65,8 +91,8 @@ export class RoundedButton extends Component<void, RoundedProps, void> {
     const style = this.props.style || {};
     const onPress = this.props.onPress;
     const isSmall = this.props.size && this.props.size === 'small';
-    const containerStyle = isSmall ? styles.roundedContainerSmall : styles.roundedContainer;
-    const textStyle = isSmall ? styles.buttonTextSmall : styles.buttonText;
+    const containerStyle = isSmall ? rectangularStyles.roundedContainerSmall : rectangularStyles.roundedContainer;
+    const textStyle = isSmall ? rectangularStyles.buttonTextSmall : rectangularStyles.buttonText;
 
     const button = (
       <View style={[containerStyle, style]}>
@@ -95,9 +121,10 @@ export class IconButton extends Component<void, IconProps, void> {
     const color = this.props.color || 'black';
     const style = this.props.style || {};
     const onPress = this.props.onPress;
+    const styles = buttonStyles.getStyle(this.props.shape);
 
     const icon = (
-      <View style={[styles.circle, {backgroundColor}]} >
+      <View style={[styles.regular, {backgroundColor}]} >
         <Icon style={[style, {backgroundColor: 'transparent'}]} name={name} size={size} color={color} />
       </View>
     );
@@ -118,9 +145,10 @@ export class InitialsButton extends Component<void, InitialsProps, void> {
     const initials = this.props.initials;
     const style = this.props.style || {};
     const onPress = this.props.onPress;
+    const styles = buttonStyles.getStyle(this.props.shape);
 
     const circleView = (
-      <View style={[styles.circle, {backgroundColor}, style]}>
+      <View style={[styles.regular, {backgroundColor}, style]}>
         <Text style={{fontSize: 18, fontWeight: 'bold'}}>
           {initials}
         </Text>
