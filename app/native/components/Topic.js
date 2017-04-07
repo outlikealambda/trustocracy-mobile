@@ -369,7 +369,8 @@ export class Topic extends Component<void, Props, State> {
         return (
           <View style={styles.drawer}>
             <Text style={styles.drawerRow}>
-              <Bold>{person.name}</Bold> is your delegate!  You have passed on <Bold>+{influence}</Bold>pts of influence
+              <Bold>{person.name}</Bold> is your delegate!{'\n'}
+              You have passed on <Bold>+{influence}pts</Bold> of influence
             </Text>
             <View style={[styles.drawerRow, styles.rowWrapper, {marginLeft: -4}]}>
               <RoundedButton
@@ -379,7 +380,7 @@ export class Topic extends Component<void, Props, State> {
                 style={{backgroundColor: '#aaa', marginRight: 4}}
               />
               <Text style={{flex: 1}}>
-                {`${person.name} as my delegate`}
+                <Bold>{person.name}</Bold> as my delegate
               </Text>
             </View>
             <Text style={[styles.drawerRow, {fontSize: 12, fontStyle: 'italic'}]}>
@@ -393,7 +394,8 @@ export class Topic extends Component<void, Props, State> {
         return (
           <View style={styles.drawer}>
             <Text style={styles.drawerRow}>
-              <Bold>{person.name}</Bold> is your default delegate!
+              <Bold>{person.name}</Bold> is your default delegate!{'\n'}
+              You have passed on <Bold>+{influence}pts</Bold> of influence
             </Text>
           </View>
         );
@@ -454,8 +456,6 @@ export class Topic extends Component<void, Props, State> {
     };
 
     const renderOpinionSelector = (opinionInfo, opinionIdx) => {
-      console.log(JSON.stringify(opinionInfo, 2));
-
       return (
         <TouchableHighlight
           key={opinionInfo.id}
