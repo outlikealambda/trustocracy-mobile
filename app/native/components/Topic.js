@@ -218,12 +218,12 @@ export class Topic extends Component<void, Props, State> {
     ));
   }
 
-  showBrowseSingleOpinion = selectedOpinionIdx => () => {
-    this.fetchSelectedOpinion(selectedOpinionIdx)
+  showBrowseSingleOpinion = opinionId => () => {
+    this.fetchSelectedOpinion(opinionId)
       .then(selectedOpinion => {
         this.animateStateChange({
           selectedOpinion,
-          selectedOpinionIdx
+          opinionId
         });
       });
   }
@@ -459,7 +459,7 @@ export class Topic extends Component<void, Props, State> {
       return (
         <TouchableHighlight
           key={opinionInfo.id}
-          onPress={this.showBrowseSingleOpinion(opinionIdx)}>
+          onPress={this.showBrowseSingleOpinion(opinionInfo.id)}>
           {
             twoCol(
               (
