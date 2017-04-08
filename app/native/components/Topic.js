@@ -35,6 +35,8 @@ function initials (friend) {
   return '';
 }
 
+// STATELESS RENDER FUNCTIONS
+
 function selectedCircle (content, key) {
   return (
     <View
@@ -72,6 +74,67 @@ function influencerCircle (content, key) {
   );
 }
 
+function renderPerson (person, color, isSelected, pressAction) {
+  let trusteeView = (
+    <InitialsButton
+      shape={person.isRanked ? 'circle' : 'square'}
+      onPress={pressAction}
+      key={person.id}
+      backgroundColor={color}
+      initials={initials(person)} />
+  );
+
+  if (isSelected) {
+    trusteeView = selectedCircle(trusteeView, 'selected' + person.id);
+  }
+
+  if (person.isInfluencer) {
+    trusteeView = influencerCircle(trusteeView, 'influencer' + person.id);
+  }
+
+  return trusteeView;
+}
+
+function renderOpinionSelector (opinionInfo, pressAction) {
+  const {id, influence, author} = opinionInfo;
+
+  return (
+    <TouchableHighlight
+      key={id}
+      onPress={pressAction}>
+      {
+        twoCol(
+          (
+            <RoundedButton
+              style={styles.roundedLeftHalf}
+              text={author.name} />
+          ),
+          (
+            <RoundedButton
+              style={styles.roundedRightHalf}
+              text={influence} />
+          )
+        )
+      }
+    </TouchableHighlight>
+  );
+}
+
+function twoCol (first, second) {
+  return (
+    <View style={{ margin: 8, flexDirection: 'row' }}>
+      <View style={{ flex: 5, alignItems: 'flex-end' }}>
+        {first}
+      </View>
+      <View style={{ flex: 3, alignItems: 'flex-start' }}>
+        {second}
+      </View>
+    </View>
+  );
+}
+
+// END STATELESS RENDER FUNCTIONS
+
 type Props = {
   id: string
 }
@@ -80,11 +143,9 @@ type State = {
   topicId: number,
   userId: number,
   influence: number,
-  selectedConnectionIdx: number,
-  selectedFriendIdx: number,
-  bookIdx: number,
   connections: Array<any>,
   title: string,
+  isBrowse : boolean,
   expanded: boolean,
   opinions: Array<any>,
   selectedOpinionIdx: number,
@@ -111,11 +172,11 @@ export class Topic extends Component<void, Props, State> {
       topicId,
       userId: 2,
       influence: 0,
-      selectedConnectionIdx: 0,
-      selectedFriendIdx: 0,
-      bookIdx: 0,
+      selectedConnection: null,
+      selectedFriend: null,
       connections: [],
       title: '',
+      isBrowse: false,
       expanded: true,
       opinions: [],
       selectedOpinionIdx: -1,
@@ -133,7 +194,13 @@ export class Topic extends Component<void, Props, State> {
   fetchConnected = (topicId, userId) => {
     return global.fetch(`http://${host}:3714/api/topic/${topicId}/connected/${userId}`)
       .then(response => response.json())
-      .then(connections => this.animateStateChange({ connections, bookIdx: connections.length }))
+      .then(connections => connections.map((connection, idx) => Object.assign(
+        connection,
+        {
+          color: trusteeColors[idx % trusteeColors.length]
+        }
+      )))
+      .then(connections => this.animateStateChange({ connections }))
       .catch(error => {
         console.error(error);
       });
@@ -209,8 +276,8 @@ export class Topic extends Component<void, Props, State> {
   showBrowseAllOpinions = () => {
     this.animateStateChange(Object.assign(
       {
-        selectedConnectionIdx: this.state.bookIdx,
-        selectedFriendIdx: 0,
+        isBrowse: true,
+        selectedFriendId: -1,
         expanded: false,
         selectedOpinion: null
       },
@@ -228,12 +295,13 @@ export class Topic extends Component<void, Props, State> {
       });
   }
 
-  showConnectedOpinion = (connectionIdx, friendIdx) => () => {
+  showConnectedOpinion = (selectedConnection, selectedFriend) => () => {
     this.animateStateChange(Object.assign(
       {
-        selectedConnectionIdx: connectionIdx,
-        selectedFriendIdx: friendIdx,
-        selectedOpinion: null
+        isBrowse: false,
+        selectedOpinion: null,
+        selectedConnection,
+        selectedFriend
       },
       defaultState.hiddenDrawers
     ));
@@ -251,41 +319,24 @@ export class Topic extends Component<void, Props, State> {
     this.setState(modifiedState);
   }
 
+  isSelectedFriend (person) {
+    return this.state.selectedFriend && this.state.selectedFriend.id === person.id;
+  }
+
   render () {
-    const selectedConnection = this.state.connections[this.state.selectedConnectionIdx];
-
-    const selectedFriend = selectedConnection ? selectedConnection.friends[this.state.selectedFriendIdx] : null;
-
-    const renderTrusteeGroup = (connection, connectionIdx) => {
+    const renderTrusteeGroup = connection => {
       const color =
         connection.opinion
-          ? trusteeColors[connectionIdx % trusteeColors.length]
+          ? connection.color
           : 'lightgray';
 
-      const renderTrustee = (friend, friendIdx) => {
-        let trusteeView = (
-          <InitialsButton
-            shape={friend.isRanked ? 'circle' : 'square'}
-            onPress={this.showConnectedOpinion(connectionIdx, friendIdx)}
-            key={connectionIdx + ':' + friendIdx}
-            backgroundColor={color}
-            initials={initials(friend)} />
-        );
-
-        if (connectionIdx === this.state.selectedConnectionIdx &&
-            friendIdx === this.state.selectedFriendIdx) {
-          trusteeView = selectedCircle(trusteeView, 'selected' + connectionIdx + ':' + friendIdx);
-        }
-
-        if (friend.isInfluencer) {
-          trusteeView = influencerCircle(trusteeView, 'influencer' + connectionIdx + ':' + friendIdx);
-        }
-
-        return trusteeView;
-      };
-
       return (
-        connection.friends.map(renderTrustee)
+        connection.friends.map(friend => renderPerson(
+          friend,
+          color,
+          this.isSelectedFriend(friend),
+          this.showConnectedOpinion(connection, friend, friend.id)
+        ))
       );
     };
 
@@ -319,52 +370,51 @@ export class Topic extends Component<void, Props, State> {
     );
 
     const renderOpinionHeader = () => {
-      if (!selectedConnection || !selectedConnection.author) {
+      if (!this.state.selectedConnection || !this.state.selectedFriend) {
         return [];
       }
 
-      const trusteeColor = trusteeColors[this.state.selectedConnectionIdx % trusteeColors.length];
+      const friend = this.state.selectedFriend;
+      const {author, color: friendColor} = this.state.selectedConnection;
 
-      let trusteeCircle = (
-        <InitialsButton
-          shape='circle'
-          backgroundColor={trusteeColor}
-          initials={initials(selectedFriend)}
-          onPress={this.toggleFriendDrawer}
-          style={{
-            marginHorizontal: selectedFriend.isInfluencer ? 0 : 8
-          }} />
+      const trusteeCircle = renderPerson(
+        friend,
+        friendColor,
+        true,
+        this.toggleFriendDrawer
       );
 
-      if (selectedFriend.isInfluencer) {
-        trusteeCircle = influencerCircle(trusteeCircle);
-      }
-
-      return (
-        <View
-          style={{
-            flex: 1,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: 8
-          }}>
-          { trusteeCircle }
-          <View style={[styles.miniCircle]} />
-          <View style={[styles.miniCircle]} />
-          <View style={[styles.miniCircle]} />
-          <View style={[styles.miniCircle]} />
-          <View style={[styles.miniCircle]} />
-          <View style={[styles.miniCircle]} />
-          <View style={[styles.miniCircle]} />
-          <View style={[styles.miniCircle]} />
-          <Icon name='chevron-right' size={16} color='#999' />
-          <RoundedButton
-            style={{backgroundColor: '#ccc', marginRight: 8}}
-            text={selectedConnection.author.name}
-            onPress={this.toggleAuthorDrawer} />
-        </View>
-      );
+      return author
+        ? (
+          <View
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: 8
+            }}>
+            { trusteeCircle }
+            <View style={[styles.miniCircle]} />
+            <View style={[styles.miniCircle]} />
+            <View style={[styles.miniCircle]} />
+            <View style={[styles.miniCircle]} />
+            <View style={[styles.miniCircle]} />
+            <View style={[styles.miniCircle]} />
+            <View style={[styles.miniCircle]} />
+            <View style={[styles.miniCircle]} />
+            <Icon name='chevron-right' size={16} color='#999' />
+            <RoundedButton
+              style={{backgroundColor: '#ccc', marginRight: 8}}
+              text={author.name}
+              onPress={this.toggleAuthorDrawer} />
+          </View>
+        )
+        : (
+          <View style={{padding: 8}}>
+            { trusteeCircle }
+          </View>
+        );
     };
 
     const Bold = props => <Text style={{fontWeight: 'bold'}}>{props.children}</Text>;
@@ -457,44 +507,10 @@ export class Topic extends Component<void, Props, State> {
             (<Text style={[styles.browseHeader, {marginRight: 8}]}>Author</Text>),
             (<Text style={[styles.browseHeader, {marginLeft: 8}]}>Influence</Text>)
           )}
-          {opinions.map(renderOpinionSelector)}
+          {opinions.map(opinion => renderOpinionSelector(opinion, this.showBrowseSingleOpinion(opinion.id)))}
         </View>
       );
     };
-
-    const renderOpinionSelector = (opinionInfo, opinionIdx) => {
-      return (
-        <TouchableHighlight
-          key={opinionInfo.id}
-          onPress={this.showBrowseSingleOpinion(opinionInfo.id)}>
-          {
-            twoCol(
-              (
-                <RoundedButton
-                  style={styles.roundedLeftHalf}
-                  text={opinionInfo.author.name} />
-              ),
-              (
-                <RoundedButton
-                  style={styles.roundedRightHalf}
-                  text={opinionInfo.influence} />
-              )
-            )
-          }
-        </TouchableHighlight>
-      );
-    };
-
-    const twoCol = (first, second) => (
-      <View style={{ margin: 8, flexDirection: 'row' }}>
-        <View style={{ flex: 5, alignItems: 'flex-end' }}>
-          {first}
-        </View>
-        <View style={{ flex: 3, alignItems: 'flex-start' }}>
-          {second}
-        </View>
-      </View>
-    );
 
     return (
       <View style={styles.container}>
@@ -522,15 +538,15 @@ export class Topic extends Component<void, Props, State> {
             ? this.state.connections.map(renderTrusteeGroup)
             : renderExpand()
             }
-            { this.state.selectedConnectionIdx === this.state.bookIdx &&
+            { this.state.isBrowse &&
               !this.state.selectedOpinion
             ? selectedCircle(renderBook())
             : renderBook()
             }
-            { this.state.selectedConnectionIdx === this.state.bookIdx &&
+            { this.state.isBrowse &&
               this.state.selectedOpinion
             ? selectedCircle(renderAuthorNavCircle(this.state.selectedOpinion.author))
-            : <View />
+            : []
             }
           </ScrollView>
         </View>
@@ -538,19 +554,19 @@ export class Topic extends Component<void, Props, State> {
         <View style={{flex: 0, flexDirection: 'row'}}>
           { renderOpinionHeader() }
         </View>
-        {this.state.showFriendDrawer ? renderDrawer(selectedFriend, this.state.influence) : []}
-        {this.state.showAuthorDrawer ? renderDrawer(selectedConnection ? selectedConnection.author : {}, this.state.influence) : []}
+        {this.state.showFriendDrawer ? renderDrawer(this.state.selectedFriend, this.state.influence) : []}
+        {this.state.showAuthorDrawer ? renderDrawer(this.state.selectedConnection ? this.state.selectedConnection.author : {}, this.state.influence) : []}
         <View style={{flex: 1}}>
           <ScrollView>
-            { this.state.selectedConnectionIdx === this.state.bookIdx &&
+            { this.state.isBrowse &&
               (!this.state.selectedOpinion || !this.state.selectedOpinion.text)
             ? renderBrowseOpinions(this.state.opinions)
             : (
-              <View style={styles.instructions} key={this.state.selectedConnectionIdx}>
+              <View style={styles.instructions} key={this.state.selectedConnection ? this.state.selectedConnection.id : 0}>
                 <Markdown>
-                  { selectedConnection
-                  ? (selectedConnection.opinion
-                    ? selectedConnection.opinion.text
+                  { this.state.selectedConnection
+                  ? (this.state.selectedConnection.opinion
+                    ? this.state.selectedConnection.opinion.text
                     : '*...No connected opinion...*'
                     )
                   : (this.state.selectedOpinion
