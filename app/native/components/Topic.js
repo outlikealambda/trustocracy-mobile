@@ -465,22 +465,22 @@ export class Topic extends Component<void, Props, State> {
       if (person.isManual) {
         return (
           <View style={styles.drawer}>
-            <Text style={styles.drawerRow}>
+            <Text style={[styles.drawerRow, {backgroundColor: 'lightgreen', paddingVertical: 16}]}>
               <Bold>{person.name}</Bold> is your delegate!{'\n'}
               You have passed on <Bold>+{influence}pts</Bold> of influence
             </Text>
-            <View style={[styles.drawerRow, styles.rowWrapper, {marginLeft: -4}]}>
+            <View style={[styles.drawerRow, styles.drawerTop, styles.drawerRowWrapper, {marginLeft: 0}]}>
               <RoundedButton
                 text={'Remove'}
                 size={'small'}
                 onPress={() => console.log('remove!')}
-                style={{backgroundColor: '#aaa', marginRight: 4}}
+                style={{backgroundColor: '#aaa', marginRight: 6}}
               />
               <Text style={{flex: 1}}>
                 <Bold>{person.name}</Bold> as my delegate
               </Text>
             </View>
-            <Text style={[styles.drawerRow, {fontSize: 12, fontStyle: 'italic'}]}>
+            <Text style={[styles.drawerRow, styles.drawerBottom, {fontSize: 12, fontStyle: 'italic'}]}>
               {`This will redirect your influence to your top-ranked friend`}
             </Text>
           </View>
@@ -490,7 +490,7 @@ export class Topic extends Component<void, Props, State> {
       if (person.isInfluencer) {
         return (
           <View style={styles.drawer}>
-            <Text style={styles.drawerRow}>
+            <Text style={[styles.drawerRow, {backgroundColor: 'lightgreen', padding: 16}]} >
               <Bold>{person.name}</Bold> is your default delegate!{'\n'}
               You have passed on <Bold>+{influence}pts</Bold> of influence
             </Text>
@@ -503,7 +503,7 @@ export class Topic extends Component<void, Props, State> {
       if (person.isRanked) {
         return (
           <View style={styles.drawer}>
-            <View style={[styles.drawerRow, styles.rowWrapper]}>
+            <View style={[styles.drawerRow, styles.drawerTop, styles.drawerBottom, styles.drawerRowWrapper]}>
               <RoundedButton
                 text={'Delegate'}
                 onPress={setDelegate}
@@ -520,7 +520,7 @@ export class Topic extends Component<void, Props, State> {
       // we're left with an unconnected author
       return (
         <View style={styles.drawer}>
-          <View style={[styles.drawerRow, styles.rowWrapper]}>
+          <View style={[styles.drawerRow, styles.drawerRowWrapper, styles.drawerTop]}>
             <RoundedButton
               text={'Delegate Directly'}
               onPress={setDelegate}
@@ -528,7 +528,7 @@ export class Topic extends Component<void, Props, State> {
             />
             <Text style={{flex: 1}}>to {person.name}</Text>
           </View>
-          <Text style={[styles.drawerRow, {fontSize: 12, fontStyle: 'italic'}]}>
+          <Text style={[styles.drawerRow, styles.drawerBottom, {fontSize: 12, fontStyle: 'italic'}]}>
             {
               `Can you personally vouch for ${person.name}, or are you an expert` +
               ` in this topic and able to confirm the claims in this article? If` +
@@ -670,11 +670,6 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: '#999'
   },
-  rowWrapper: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'center'
-  },
   browseHeader: {
     fontSize: 14,
     color: '#999'
@@ -683,11 +678,21 @@ const styles = StyleSheet.create({
     flex: 0,
     alignSelf: 'stretch',
     justifyContent: 'flex-start',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
     backgroundColor: '#ddd'
   },
+  drawerTop: {
+    paddingTop: 12
+  },
+  drawerBottom: {
+    paddingBottom: 12
+  },
   drawerRow: {
-    marginVertical: 8
+    paddingHorizontal: 16,
+    paddingVertical: 6
+  },
+  drawerRowWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center'
   }
 });
