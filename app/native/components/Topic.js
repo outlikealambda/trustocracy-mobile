@@ -74,22 +74,22 @@ function influencerCircle (content, key) {
   );
 }
 
-function renderPerson (person, color, isSelected, pressAction) {
+function renderPerson (person, color, isSelected, pressAction, keyPrefix = 'p') {
   let trusteeView = (
     <InitialsButton
       shape={person.isRanked ? 'circle' : 'square'}
       onPress={pressAction}
-      key={person.id}
+      key={keyPrefix + person.id}
       backgroundColor={color}
       initials={initials(person)} />
   );
 
   if (isSelected) {
-    trusteeView = selectedCircle(trusteeView, 'selected' + person.id);
+    trusteeView = selectedCircle(trusteeView, keyPrefix + 'selected' + person.id);
   }
 
   if (person.isInfluencer) {
-    trusteeView = influencerCircle(trusteeView, 'influencer' + person.id);
+    trusteeView = influencerCircle(trusteeView, keyPrefix + 'influencer' + person.id);
   }
 
   return trusteeView;
@@ -200,7 +200,10 @@ export class Topic extends Component<void, Props, State> {
           color: trusteeColors[idx % trusteeColors.length]
         }
       )))
-      .then(connections => this.animateStateChange({ connections }))
+      .then(connections => {
+        this.animateStateChange({ connections });
+        return connections;
+      })
       .catch(error => {
         console.error(error);
       });
@@ -252,11 +255,41 @@ export class Topic extends Component<void, Props, State> {
         },
         body: ''
       })
-      .then(() => {
-        this.fetchConnected(topicId, userId);
-        this.fetchInfluence(topicId, userId);
-        this.fetchOpinions(topicId);
+      .then(() => this.syncState(topicId, userId));
+  }
+
+  // When an action occurs which could change influence, we need to sync
+  // up with the server
+  syncState = (topicId, userId) => {
+    Promise.all([
+      this.fetchConnected(topicId, userId),
+      this.fetchInfluence(topicId, userId),
+      this.fetchOpinions(topicId)
+    ]).then(results => {
+      const [connections] = results;
+      const selectedConnection = this.findSelectedConnection(connections);
+      const selectedFriend = this.findSelectedFriend(selectedConnection);
+
+      this.animateStateChange({
+        selectedConnection,
+        selectedFriend
       });
+    });
+  }
+
+  findSelectedConnection = (connections) => {
+    const authorId = this.state.selectedConnection &&
+      this.state.selectedConnection.author &&
+      this.state.selectedConnection.author.id ||
+      -1;
+
+    return connections.find(c => c.author.id === authorId);
+  }
+
+  findSelectedFriend = connection => {
+    const friendId = this.state.selectedFriend ? this.state.selectedFriend.id : -1;
+
+    return connection.friends.find(f => f.id === friendId);
   }
 
   toggleFriendDrawer = () => {
@@ -384,8 +417,16 @@ export class Topic extends Component<void, Props, State> {
         this.toggleFriendDrawer
       );
 
-      return author
-        ? (
+      if (author) {
+        const authorCircle = renderPerson(
+          author,
+          author.isRanked || author.isManual ? friendColor : '#ccc',
+          this.isSelectedFriend(author),
+          this.toggleAuthorDrawer,
+          'author'
+        );
+
+        return (
           <View
             style={{
               flex: 1,
@@ -404,17 +445,16 @@ export class Topic extends Component<void, Props, State> {
             <View style={[styles.miniCircle]} />
             <View style={[styles.miniCircle]} />
             <Icon name='chevron-right' size={16} color='#999' />
-            <RoundedButton
-              style={{backgroundColor: '#ccc', marginRight: 8}}
-              text={author.name}
-              onPress={this.toggleAuthorDrawer} />
+            { authorCircle }
           </View>
-        )
-        : (
+        );
+      } else {
+        return (
           <View style={{padding: 8}}>
             { trusteeCircle }
           </View>
         );
+      }
     };
 
     const Bold = props => <Text style={{fontWeight: 'bold'}}>{props.children}</Text>;
