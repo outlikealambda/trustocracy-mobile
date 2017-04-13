@@ -418,12 +418,33 @@ export class Topic extends Component<void, Props, State> {
       );
 
       if (author) {
-        const authorCircle = renderPerson(
+        const authorSquare = renderPerson(
           author,
           author.isRanked || author.isManual ? friendColor : '#ccc',
           this.toggleAuthorDrawer,
           'author'
         );
+
+        const influenceSquare =
+          <View
+            style={{
+              height: 40,
+              marginVertical: 8,
+              marginLeft: -8,
+              paddingHorizontal: 8,
+              borderWidth: 1,
+              borderColor: '#ccc',
+              justifyContent: 'center'
+            }}
+            >
+            <Text
+              style={{
+                fontSize: 14
+              }}
+              >
+              <Bold>{this.state.selectedConnection.influence}</Bold> pts
+            </Text>
+          </View>;
 
         return (
           <View
@@ -444,7 +465,14 @@ export class Topic extends Component<void, Props, State> {
             <View style={[styles.miniCircle]} />
             <View style={[styles.miniCircle]} />
             <Icon name='chevron-right' size={16} color='#999' />
-            { authorCircle }
+            <View
+              style={{
+                flexDirection: 'row',
+                flex: 0
+              }}>
+              { authorSquare }
+              { influenceSquare }
+            </View>
           </View>
         );
       } else {
@@ -655,7 +683,6 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 0,
     borderWidth: 1,
     borderColor: 'pink'
-
   },
   miniCircle: {
     width: 4,
