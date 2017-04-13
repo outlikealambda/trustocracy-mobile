@@ -37,26 +37,6 @@ function initials (friend) {
 
 // STATELESS RENDER FUNCTIONS
 
-function selectedCircle (content, key) {
-  return (
-    <View
-      key={key}
-      style={{
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        alignItems: 'center',
-        justifyContent: 'center',
-        margin: 3,
-        backgroundColor: styles.container.backgroundColor,
-        borderWidth: 2,
-        borderColor: 'orange'
-      }}>
-      {content}
-    </View>
-  );
-}
-
 function influencerCircle (content, key) {
   return (
     <View
@@ -74,7 +54,7 @@ function influencerCircle (content, key) {
   );
 }
 
-function renderPerson (person, color, isSelected, pressAction, keyPrefix = 'p') {
+function renderPerson (person, color, pressAction, keyPrefix = 'p') {
   let trusteeView = (
     <InitialsButton
       shape={person.isRanked ? 'circle' : 'square'}
@@ -84,15 +64,35 @@ function renderPerson (person, color, isSelected, pressAction, keyPrefix = 'p') 
       initials={initials(person)} />
   );
 
-  if (isSelected) {
-    trusteeView = selectedCircle(trusteeView, keyPrefix + 'selected' + person.id);
-  }
-
   if (person.isInfluencer) {
     trusteeView = influencerCircle(trusteeView, keyPrefix + 'influencer' + person.id);
   }
 
   return trusteeView;
+}
+
+function renderForNav ({dom, isSelected}) {
+  const basicStyle = {
+    width: 56,
+    height: 68
+    // alignItems: 'flex-start'
+  };
+
+  const style = isSelected
+    ? {
+      borderBottomWidth: 4,
+      borderBottomColor: 'orange'
+    }
+    : {
+      // marginBottom: 4
+    };
+
+  return (
+    <View
+      style={[basicStyle, style]}>
+      {dom}
+    </View>
+  );
 }
 
 function renderOpinionSelector (opinionInfo, pressAction) {
@@ -364,12 +364,16 @@ export class Topic extends Component<void, Props, State> {
           : 'lightgray';
 
       return (
-        connection.friends.map(friend => renderPerson(
-          friend,
-          color,
-          this.isSelectedFriend(friend),
-          this.showConnectedOpinion(connection, friend, friend.id)
-        ))
+        connection.friends
+          .map(friend => ({
+            dom: renderPerson(
+              friend,
+              color,
+              this.showConnectedOpinion(connection, friend, friend.id)
+            ),
+            isSelected: this.isSelectedFriend(friend)
+          }))
+          .map(renderForNav)
       );
     };
 
@@ -413,7 +417,6 @@ export class Topic extends Component<void, Props, State> {
       const trusteeCircle = renderPerson(
         friend,
         friendColor,
-        true,
         this.toggleFriendDrawer
       );
 
@@ -421,7 +424,6 @@ export class Topic extends Component<void, Props, State> {
         const authorCircle = renderPerson(
           author,
           author.isRanked || author.isManual ? friendColor : '#ccc',
-          this.isSelectedFriend(author),
           this.toggleAuthorDrawer,
           'author'
         );
@@ -554,16 +556,10 @@ export class Topic extends Component<void, Props, State> {
 
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>
-          { this.state.title }
-        </Text>
         <View
           style={{
-            alignItems: 'center',
-            borderTopColor: '#ddd',
-            borderTopWidth: 1,
-            borderBottomColor: '#ddd',
-            borderBottomWidth: 1,
+            alignItems: 'flex-start',
+            marginTop: 12,
             height: 70
           }}>
           { /* ScrollView needs a height; either inherited or set, and even
@@ -576,16 +572,16 @@ export class Topic extends Component<void, Props, State> {
             }}>
             { this.state.expanded
             ? this.state.connections.map(renderTrusteeGroup)
-            : renderExpand()
+            : renderForNav({dom: renderExpand(), isSelected: false})
             }
             { this.state.isBrowse &&
               !this.state.selectedOpinion
-            ? selectedCircle(renderBook())
-            : renderBook()
+            ? renderForNav({dom: renderBook(), isSelected: true})
+            : renderForNav({dom: renderBook(), isSelected: false})
             }
             { this.state.isBrowse &&
               this.state.selectedOpinion
-            ? selectedCircle(renderAuthorNavCircle(this.state.selectedOpinion.author))
+            ? renderForNav({dom: renderAuthorNavCircle(this.state.selectedOpinion.author), isSelected: true})
             : []
             }
           </ScrollView>
