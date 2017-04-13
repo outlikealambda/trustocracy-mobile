@@ -311,7 +311,8 @@ export class Topic extends Component<void, Props, State> {
     this.animateStateChange(Object.assign(
       {
         isBrowse: true,
-        selectedFriendId: -1,
+        selectedFriend: null,
+        selectedConnection: null,
         expanded: false,
         selectedOpinion: null
       },
