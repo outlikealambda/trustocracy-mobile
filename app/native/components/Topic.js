@@ -592,7 +592,7 @@ export class Topic extends Component<void, Props, State> {
         </View>
         {/* mark as a row, so that it will fill horizontally */}
         <View style={{flex: 0, flexDirection: 'row'}}>
-          { renderOpinionHeader() }
+          {!this.state.isBrowse ? renderOpinionHeader() : []}
         </View>
         {this.state.showFriendDrawer ? renderDrawer(this.state.selectedFriend, this.state.influence) : []}
         {this.state.showAuthorDrawer ? renderDrawer(this.state.selectedConnection ? this.state.selectedConnection.author : {}, this.state.influence) : []}
