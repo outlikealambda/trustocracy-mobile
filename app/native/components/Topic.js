@@ -36,6 +36,9 @@ function initials (friend) {
 }
 
 // STATELESS RENDER FUNCTIONS
+function Bold (props) {
+  return (<Text style={{fontWeight: 'bold'}}>{props.children}</Text>);
+}
 
 function influencerCircle (content, key) {
   return (
@@ -101,15 +104,16 @@ function renderOpinionSelector (opinionInfo, pressAction) {
       onPress={pressAction}>
       {
         twoCol(
-          (
-            <RoundedButton
-              style={styles.roundedLeftHalf}
-              text={author.name} />
+          renderPerson(
+            author,
+            '#ccc'
           ),
           (
-            <RoundedButton
-              style={styles.roundedRightHalf}
-              text={influence} />
+            <View style={[styles.influenceSquare, {marginLeft: -9}]}>
+              <Text style={{fontSize: 14}}>
+                <Bold>{influence}</Bold> pts
+              </Text>
+            </View>
           )
         )
       }
@@ -120,7 +124,7 @@ function renderOpinionSelector (opinionInfo, pressAction) {
 function twoCol (first, second) {
   return (
     <View style={{ margin: 8, flexDirection: 'row' }}>
-      <View style={{ flex: 5, alignItems: 'flex-end' }}>
+      <View style={{ flex: 0, justifyContent: 'center' }}>
         {first}
       </View>
       <View style={{ flex: 3, alignItems: 'flex-start' }}>
@@ -425,27 +429,6 @@ export class Topic extends Component<void, Props, State> {
           'author'
         );
 
-        const influenceSquare =
-          <View
-            style={{
-              height: 40,
-              marginVertical: 8,
-              marginLeft: -8,
-              paddingHorizontal: 8,
-              borderWidth: 1,
-              borderColor: '#ccc',
-              justifyContent: 'center'
-            }}
-            >
-            <Text
-              style={{
-                fontSize: 14
-              }}
-              >
-              <Bold>{this.state.selectedConnection.influence}</Bold> pts
-            </Text>
-          </View>;
-
         return (
           <View
             style={{
@@ -470,8 +453,12 @@ export class Topic extends Component<void, Props, State> {
                 flexDirection: 'row',
                 flex: 0
               }}>
-              { authorSquare }
-              { influenceSquare }
+              {authorSquare}
+              <View style={[styles.influenceSquare, {marginLeft: -9}]}>
+                <Text style={{fontSize: 14}}>
+                  <Bold>{this.state.selectedConnection.influence}</Bold> pts
+                </Text>
+              </View>
             </View>
           </View>
         );
@@ -483,8 +470,6 @@ export class Topic extends Component<void, Props, State> {
         );
       }
     };
-
-    const Bold = props => <Text style={{fontWeight: 'bold'}}>{props.children}</Text>;
 
     const renderDrawer = (person, influence) => {
       if (!person) return [];
@@ -570,10 +555,6 @@ export class Topic extends Component<void, Props, State> {
     const renderBrowseOpinions = opinions => {
       return (
         <View style={{paddingVertical: 12}}>
-          {twoCol(
-            (<Text style={[styles.browseHeader, {marginRight: 8}]}>Author</Text>),
-            (<Text style={[styles.browseHeader, {marginLeft: 8}]}>Influence</Text>)
-          )}
           {opinions.map(opinion => renderOpinionSelector(opinion, this.showBrowseSingleOpinion(opinion.id)))}
         </View>
       );
@@ -690,10 +671,6 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: '#999'
   },
-  browseHeader: {
-    fontSize: 14,
-    color: '#999'
-  },
   drawer: {
     flex: 0,
     alignSelf: 'stretch',
@@ -714,5 +691,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center'
+  },
+
+  influenceSquare: {
+    height: 40,
+    marginVertical: 8,
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    justifyContent: 'center'
   }
 });
