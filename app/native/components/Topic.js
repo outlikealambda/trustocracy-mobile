@@ -75,7 +75,6 @@ function renderForNav ({dom, isSelected}) {
   const basicStyle = {
     width: 56,
     height: 68
-    // alignItems: 'flex-start'
   };
 
   const style = isSelected
@@ -83,9 +82,7 @@ function renderForNav ({dom, isSelected}) {
       borderBottomWidth: 4,
       borderBottomColor: 'orange'
     }
-    : {
-      // marginBottom: 4
-    };
+    : {};
 
   return (
     <View

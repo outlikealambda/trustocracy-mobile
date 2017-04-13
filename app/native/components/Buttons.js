@@ -63,7 +63,7 @@ const rectangularStyles = StyleSheet.create({
     marginHorizontal: 12
   },
   buttonTextSmall: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 'bold',
     marginVertical: 4,
     marginHorizontal: 8
