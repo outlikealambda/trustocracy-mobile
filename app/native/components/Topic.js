@@ -259,6 +259,15 @@ export class Topic extends Component<void, Props, State> {
       .then(() => this.syncState(topicId, userId));
   }
 
+  fetchClearTarget = (topicId, userId) => {
+    return global.fetch(`http://${host}:3714/api/topic/${topicId}/user/${userId}`,
+      {
+        method: 'DELETE'
+      }
+    )
+    .then(() => this.syncState(topicId, userId));
+  }
+
   // When an action occurs which could change influence, we need to sync
   // up with the server
   syncState = (topicId, userId) => {
@@ -475,6 +484,9 @@ export class Topic extends Component<void, Props, State> {
     const renderDrawer = (person, influence) => {
       if (!person) return [];
 
+      const setDelegate = () => this.fetchSetTarget(this.state.topicId, this.state.userId, person.id);
+      const clearDelegate = () => this.fetchClearTarget(this.state.topicId, this.state.userId);
+
       if (person.isManual) {
         return (
           <View style={styles.drawer}>
@@ -486,7 +498,7 @@ export class Topic extends Component<void, Props, State> {
               <RoundedButton
                 text={'Remove'}
                 size={'small'}
-                onPress={() => console.log('remove!')}
+                onPress={clearDelegate}
                 style={{backgroundColor: '#aaa', marginRight: 6}}
               />
               <Text style={{flex: 1}}>
@@ -510,8 +522,6 @@ export class Topic extends Component<void, Props, State> {
           </View>
         );
       }
-
-      const setDelegate = () => this.fetchSetTarget(this.state.topicId, this.state.userId, person.id);
 
       if (person.isRanked) {
         return (
