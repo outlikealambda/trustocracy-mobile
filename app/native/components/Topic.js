@@ -156,8 +156,6 @@ type State = {
   showAuthorDrawer: boolean
 };
 
-const host = '127.0.0.1';
-
 export class Topic extends Component<void, Props, State> {
   state: State
 
