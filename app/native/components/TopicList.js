@@ -57,6 +57,9 @@ export class TopicList extends Component<void, Props, State> {
 
     return (
       <View style={styles.container}>
+        <TouchableHighlight onPress={() => navigate('delegate')}>
+          <Text>Delegatesss</Text>
+        </TouchableHighlight>
         <View style={{ flex: 5 }}>
           <ScrollView>
             { this.state.topics.map(renderTopic) }
