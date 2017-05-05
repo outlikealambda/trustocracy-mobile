@@ -160,9 +160,9 @@ const host = '127.0.0.1';
 export class Topic extends Component<void, Props, State> {
   state: State
 
-  static navigationOptions = {
-    title: ({ state }) => 'Topic: ' + state.params.title
-  }
+  static navigationOptions = ({ navigation }) => ({
+    title: navigation.state.params.title
+  })
 
   constructor (props: Props) {
     super(props);
