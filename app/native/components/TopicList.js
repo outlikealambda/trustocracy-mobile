@@ -10,6 +10,7 @@ import {
   TouchableHighlight,
   View
 } from 'react-native';
+import * as Api from './api.js';
 
 type Topic = {
   id: string,
@@ -34,8 +35,7 @@ export class TopicList extends Component<void, Props, State> {
   constructor (props: Props) {
     super(props);
     this.state = { topics: [] };
-    const host = '127.0.0.1';
-    global.fetch(`http://${host}:3714/api/topic`)
+    Api.topics()
       .then(response => response.json())
       .then(topics => this.setState({ topics }))
       .catch(error => {

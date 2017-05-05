@@ -14,6 +14,7 @@ import {
 import Markdown from 'react-native-simple-markdown';
 import Icon from 'react-native-vector-icons/Octicons';
 import { RoundedButton, InitialsButton, IconButton } from './Buttons.js';
+import * as Api from './api';
 
 const trusteeColors = [
   'greenyellow',
@@ -193,7 +194,7 @@ export class Topic extends Component<void, Props, State> {
   }
 
   fetchConnected = (topicId, userId) => {
-    return global.fetch(`http://${host}:3714/api/topic/${topicId}/connected/${userId}`)
+    return Api.connected(topicId, userId)
       .then(response => response.json())
       .then(connections => connections.map((connection, idx) => Object.assign(
         connection,
@@ -211,7 +212,7 @@ export class Topic extends Component<void, Props, State> {
   }
 
   fetchInfluence = (topicId, userId) => {
-    return global.fetch(`http://${host}:3714/api/topic/${topicId}/user/${userId}/influence`)
+    return Api.influence(topicId, userId)
       .then(response => response.json())
       .then(r => this.animateStateChange({ influence: r.influence }))
       .catch(error => {
@@ -220,7 +221,7 @@ export class Topic extends Component<void, Props, State> {
   }
 
   fetchTopicTitle = topicId => {
-    return global.fetch(`http://${host}:3714/api/topic/${topicId}`)
+    return Api.topicTitle(topicId)
       .then(response => response.json())
       .then(topicInfo => topicInfo.text)
       .then(title => this.animateStateChange({ title }))
@@ -230,7 +231,7 @@ export class Topic extends Component<void, Props, State> {
   }
 
   fetchOpinions = topicId => {
-    return global.fetch(`http://${host}:3714/api/topic/${topicId}/opinions`)
+    return Api.opinions(topicId)
       .then(response => response.json())
       .then(opinions => this.animateStateChange({ opinions }))
       .catch(error => {
@@ -239,7 +240,7 @@ export class Topic extends Component<void, Props, State> {
   }
 
   fetchSelectedOpinion = opinionId => {
-    return global.fetch(`http://${host}:3714/api/opinion/${opinionId}`)
+    return Api.opinion(opinionId)
       .then(response => response.json())
       .catch(error => {
         console.error('failed to retrieve opinion with id: ' + opinionId, error);
@@ -248,24 +249,13 @@ export class Topic extends Component<void, Props, State> {
   }
 
   fetchSetTarget = (topicId, userId, targetId) => {
-    return global.fetch(`http://${host}:3714/api/topic/${topicId}/user/${userId}/target/${targetId}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'plain/text'
-        },
-        body: ''
-      })
+    return Api.target.set(topicId, userId, targetId)
       .then(() => this.syncState(topicId, userId));
   }
 
   fetchClearTarget = (topicId, userId) => {
-    return global.fetch(`http://${host}:3714/api/topic/${topicId}/user/${userId}`,
-      {
-        method: 'DELETE'
-      }
-    )
-    .then(() => this.syncState(topicId, userId));
+    return Api.target.clear(topicId, userId)
+      .then(() => this.syncState(topicId, userId));
   }
 
   // When an action occurs which could change influence, we need to sync
