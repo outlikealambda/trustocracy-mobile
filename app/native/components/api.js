@@ -20,3 +20,6 @@ export const target = {
     { method: 'DELETE' }
   )
 };
+export const friends = {
+  get: userId => global.fetch(`${api}/user/${userId}/friends`)
+};
