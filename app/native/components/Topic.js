@@ -15,6 +15,7 @@ import Markdown from 'react-native-simple-markdown';
 import Icon from 'react-native-vector-icons/Octicons';
 import { RoundedButton, InitialsButton, IconButton } from './Buttons.js';
 import * as Api from './api';
+import * as Utils from '../utils.js';
 
 const trusteeColors = [
   'greenyellow',
@@ -26,15 +27,6 @@ const trusteeColors = [
   'green',
   'moccasin'
 ];
-
-// super fragile...
-function initials (friend) {
-  if (friend) {
-    const { name } = friend;
-    return name[0] + name.split(' ')[1][0];
-  }
-  return '';
-}
 
 // STATELESS RENDER FUNCTIONS
 function Bold (props) {
@@ -65,7 +57,7 @@ function renderPerson (person, color, pressAction, keyPrefix = 'p') {
       onPress={pressAction}
       key={keyPrefix + person.id}
       backgroundColor={color}
-      initials={initials(person)} />
+      initials={Utils.initials(person)} />
   );
 
   if (person.isInfluencer) {
@@ -382,8 +374,7 @@ export class Topic extends Component<void, Props, State> {
         name='book'
         key='book'
         backgroundColor='wheat'
-        size={27}
-        style={{marginRight: 2, marginTop: 3}}
+        iconStyle={{fontSize: 27, height: 27, width: 27, marginRight: 1}}
         onPress={this.showBrowseAllOpinions} />
     );
 
@@ -393,8 +384,7 @@ export class Topic extends Component<void, Props, State> {
         name='chevron-left'
         key='expand'
         backgroundColor='wheat'
-        size={28}
-        style={{marginLeft: 12, marginTop: 2}}
+        iconStyle={{fontSize: 28, height: 28, width: 14}}
         onPress={this.showTrusteeIcons} />
     );
 
@@ -402,7 +392,7 @@ export class Topic extends Component<void, Props, State> {
       <InitialsButton
         shape='circle'
         backgroundColor='wheat'
-        initials={initials(author)} />
+        initials={Utils.initials(author)} />
     );
 
     const renderOpinionHeader = () => {
@@ -484,8 +474,8 @@ export class Topic extends Component<void, Props, State> {
             </Text>
             <View style={[styles.drawerRow, styles.drawerTop, styles.drawerRowWrapper, {marginLeft: 0}]}>
               <RoundedButton
-                text={'Remove'}
-                size={'small'}
+                text='Remove'
+                size='small'
                 onPress={clearDelegate}
                 style={{backgroundColor: '#aaa', marginRight: 6}}
               />

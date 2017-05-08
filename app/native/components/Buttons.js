@@ -12,18 +12,26 @@ import {
 import Icon from 'react-native-vector-icons/Octicons';
 
 const buttonStyles = {
-  getStyle (shape) {
+  getStyle (shape, isSmall) {
     switch (shape.toLowerCase()) {
       case 'circle':
-        return this.circle;
+        return isSmall ? this.circle.small : this.circle.regular;
       case 'square':
-        return this.square;
+        return isSmall ? this.square.small : this.square.regular;
       default:
         console.warn('unknown shape, defaulting to circle');
-        return this.circle;
+        return this.circle.regular;
     }
   },
   circle: StyleSheet.create({
+    small: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      alignItems: 'center',
+      justifyContent: 'center',
+      margin: 8
+    },
     regular: {
       width: 40,
       height: 40,
@@ -37,6 +45,14 @@ const buttonStyles = {
     regular: {
       width: 40,
       height: 40,
+      borderRadius: 2,
+      alignItems: 'center',
+      justifyContent: 'center',
+      margin: 8
+    },
+    small: {
+      width: 28,
+      height: 28,
       borderRadius: 2,
       alignItems: 'center',
       justifyContent: 'center',
@@ -117,15 +133,16 @@ export class IconButton extends Component<void, IconProps, void> {
   render () {
     const backgroundColor = this.props.backgroundColor;
     const name = this.props.name;
-    const size = this.props.size || 16;
+    const size = this.props.size || (this.props.isSmall ? 16 : 20);
     const color = this.props.color || 'black';
-    const style = this.props.style || {};
+    const iconStyle = this.props.iconStyle || {};
     const onPress = this.props.onPress;
-    const styles = buttonStyles.getStyle(this.props.shape);
+    const basicStyle = buttonStyles.getStyle(this.props.shape, this.props.isSmall);
+    const buttonStyle = this.props.buttonStyle || {};
 
     const icon = (
-      <View style={[styles.regular, {backgroundColor}]} >
-        <Icon style={[style, {backgroundColor: 'transparent'}]} name={name} size={size} color={color} />
+      <View style={[basicStyle, {backgroundColor}, buttonStyle]} >
+        <Icon style={[{backgroundColor: 'transparent'}, iconStyle]} name={name} size={size} color={color} />
       </View>
     );
 
@@ -145,16 +162,17 @@ export class InitialsButton extends Component<void, InitialsProps, void> {
     const initials = this.props.initials;
     const style = this.props.style || {};
     const onPress = this.props.onPress;
-    const styles = buttonStyles.getStyle(this.props.shape);
+    const buttonStyle = buttonStyles.getStyle(this.props.shape, this.props.isSmall);
+    const fontSize = this.props.isSmall ? 12 : 18;
 
-    const circleView = (
-      <View style={[styles.regular, {backgroundColor}, style]}>
-        <Text style={{fontSize: 18, fontWeight: 'bold'}}>
+    const button = (
+      <View style={[buttonStyle, {backgroundColor}, style]}>
+        <Text style={{fontSize, fontWeight: 'bold'}}>
           {initials}
         </Text>
       </View>
     );
 
-    return onPress ? wrapWithTouchable(circleView, onPress) : circleView;
+    return onPress ? wrapWithTouchable(button, onPress) : button;
   }
 }
