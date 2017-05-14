@@ -104,14 +104,14 @@ type RoundedProps = {
 export class RoundedButton extends Component<void, RoundedProps, void> {
   render () {
     const text = this.props.text;
-    const style = this.props.style || {};
     const onPress = this.props.onPress;
     const isSmall = this.props.size && this.props.size === 'small';
-    const containerStyle = isSmall ? rectangularStyles.roundedContainerSmall : rectangularStyles.roundedContainer;
+    const baseStyle = isSmall ? rectangularStyles.roundedContainerSmall : rectangularStyles.roundedContainer;
+    const buttonStyle = this.props.buttonStyle || {};
     const textStyle = isSmall ? rectangularStyles.buttonTextSmall : rectangularStyles.buttonText;
 
     const button = (
-      <View style={[containerStyle, style]}>
+      <View style={[baseStyle, buttonStyle]}>
         <Text style={textStyle}>
           { text }
         </Text>

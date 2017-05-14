@@ -477,7 +477,7 @@ export class Topic extends Component<void, Props, State> {
                 text='Remove'
                 size='small'
                 onPress={clearDelegate}
-                style={{backgroundColor: '#aaa', marginRight: 6}}
+                buttonStyle={{backgroundColor: '#aaa', marginRight: 6}}
               />
               <Text style={{flex: 1}}>
                 <Bold>{person.name}</Bold> as my delegate
@@ -508,7 +508,7 @@ export class Topic extends Component<void, Props, State> {
               <RoundedButton
                 text={'Delegate'}
                 onPress={setDelegate}
-                style={{backgroundColor: 'lightgreen', marginRight: 4}}
+                buttonStyle={{backgroundColor: 'lightgreen', marginRight: 4}}
               />
               <Text style={{flex: 1}}>
                 <Bold>+{influence}pts</Bold> of influence to {person.name}
@@ -525,7 +525,7 @@ export class Topic extends Component<void, Props, State> {
             <RoundedButton
               text={'Delegate Directly'}
               onPress={setDelegate}
-              style={{backgroundColor: 'lightgreen', marginRight: 4}}
+              buttonStyle={{backgroundColor: 'lightgreen', marginRight: 4}}
             />
             <Text style={{flex: 1}}>to {person.name}</Text>
           </View>
