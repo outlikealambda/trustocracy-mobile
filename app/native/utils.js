@@ -9,25 +9,50 @@ export function initials (friend) {
 
 export const array = {
   remove: (array, idxRem) =>
-      array.reduce((agg, elem, idx) => {
-        if (idx === idxRem) {
-          // skip element
-          return agg;
-        }
-        agg.push(elem);
+    array.reduce((agg, elem, idx) => {
+      if (idx === idxRem) {
+        // skip element
         return agg;
-      },
-      []
-    ),
-  insert: (array, idxNew, elemNew) =>
-      array.reduce((agg, elem, idx) => {
-        if (idx === idxNew) {
-          return agg.concat([elemNew, elem]);
-        }
+      }
 
-        agg.push(elem);
+      agg.push(Object.assign({}, elem));
+
+      return agg;
+    },
+    []
+  ),
+
+  removeWhere: (array, hasCondition) =>
+    array.reduce((agg, elem) => {
+      if (hasCondition(elem)) {
         return agg;
-      },
-      []
-    )
+      }
+
+      agg.push(Object.assign({}, elem));
+
+      return agg;
+    }, []
+  ),
+
+  insert: (array, idxNew, elemNew) =>
+    array.reduce((agg, elem, idx) => {
+      if (idx === idxNew) {
+        return agg.concat([elemNew, elem]);
+      }
+
+      agg.push(Object.assign({}, elem));
+
+      return agg;
+    },
+    []
+  )
+};
+
+export const log = {
+  promise: msg => {
+    return v => {
+      console.log(msg, JSON.stringify(v));
+      return v;
+    };
+  }
 };

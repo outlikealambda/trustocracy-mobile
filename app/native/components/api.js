@@ -1,25 +1,62 @@
+
 const api = 'http://127.0.0.1:3714/api';
 
-export const connected = (topicId, userId) => global.fetch(`${api}/topic/${topicId}/connected/${userId}`);
-export const influence = (topicId, userId) => global.fetch(`${api}/topic/${topicId}/user/${userId}/influence`);
-export const topics = () => global.fetch(`${api}/topic`);
-export const topicTitle = topicId => global.fetch(`${api}/topic/${topicId}`);
-export const opinions = topicId => global.fetch(`${api}/topic/${topicId}/opinions`);
-export const opinion = opinionId => global.fetch(`${api}/topic/opinion/${opinionId}`);
+const fetch = (path, opts = {}) => global.fetch(`${api}/${path}`, opts);
+
+export const connected = (topicId, userId) => fetch(`topic/${topicId}/connected/${userId}`);
+
+export const influence = (topicId, userId) => fetch(`topic/${topicId}/user/${userId}/influence`);
+
+export const topics = () => fetch('topic');
+
+export const topicTitle = topicId => fetch(`topic/${topicId}`);
+
+export const opinions = topicId => fetch(`topic/${topicId}/opinions`);
+
+export const opinion = opinionId => fetch(`opinion/${opinionId}`);
+
 export const target = {
-  set: (topicId, userId, targetId) => global.fetch(
-    `${api}/topic/${topicId}/user/${userId}/target/${targetId}`,
+  set: (topicId, userId, targetId) => fetch(
+    `topic/${topicId}/user/${userId}/target/${targetId}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'plain/text' },
       body: ''
     }
   ),
-  clear: (topicId, userId) => global.fetch(
-    `${api}/topic/${topicId}/user/${userId}`,
+
+  clear: (topicId, userId) => fetch(
+    `topic/${topicId}/user/${userId}`,
     { method: 'DELETE' }
   )
 };
+
 export const friends = {
-  get: userId => global.fetch(`${api}/user/${userId}/friends`)
+  get: userId => fetch(`user/${userId}/friends`),
+
+  // TODO
+  demote: () => null
+};
+
+export const pool = {
+  get: userId => fetch(`user/${userId}/pool`),
+
+  add: (userId, inputEmail) => fetch(
+    `user/${userId}/pool`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: {
+        email: inputEmail
+      }
+    }
+  ),
+
+  remove: (userId, friendId) => fetch(
+    `user/${userId}/pool/${friendId}`,
+    { method: 'DELETE' }
+  ),
+
+  // TODO
+  promote: () => null
 };

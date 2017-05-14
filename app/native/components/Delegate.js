@@ -3,6 +3,7 @@ import {
   LayoutAnimation,
   StyleSheet,
   Text,
+  TextInput,
   TouchableHighlight,
   View
 } from 'react-native';
@@ -12,13 +13,66 @@ import { InitialsButton, IconButton, RoundedButton } from './Buttons.js';
 import * as Utils from '../utils.js';
 import * as Colors from '../colors.js';
 
+const USER_ID = 2;
+
 class Add extends Component {
   static navigationOptions = {
     tabBarLabel: 'Add'
   }
 
+  constructor (props) {
+    super(props);
+
+    this.state = {
+      inputEmail: null,
+      recentlyAdded: []
+    };
+  }
+
+  animateStateChange = modifiedState => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
+
+    this.setState(modifiedState);
+  }
+
+  search = email => {
+    const recentlyAdded = this.state.recentlyAdded.concat([email]);
+
+    this.animateStateChange({recentlyAdded, inputEmail: null});
+  }
+
+  updateInput = inputEmail => this.setState({ inputEmail })
+
   render () {
-    return <Text>Lets Add together!</Text>;
+    return (
+      <View>
+        <View style={[addStyle.row, addStyle.headerRow]}>
+          <Text style={addStyle.header}>Add to your pool of friends</Text>
+        </View>
+        <View style={[addStyle.row]}>
+          <Text style={{marginLeft: 8, color: '#666'}}>Search by email</Text>
+          <TextInput
+            value={this.state.inputEmail}
+            style={addStyle.textInput}
+            multiline={false}
+            autoCorrect={false}
+            autoCapitalize='none'
+            keyboardType='email-address'
+            placeholder='jimbo@jimbo.com'
+            returnKeyType='search'
+            onChangeText={this.updateInput}
+            onSubmitEditing={event => this.search(event.nativeEvent.text)}
+            />
+        </View>
+        <View style={[addStyle.row]}>
+          {this.state.recentlyAdded.map(this.renderRecentlyAdded)}
+        </View>
+      </View>
+    );
+  }
+
+  renderRecentlyAdded = email => {
+    return <Text key={email}>Added {email}</Text>;
   }
 }
 
@@ -27,8 +81,145 @@ class Pool extends Component {
     tabBarLabel: 'Pool'
   }
 
+  animateStateChange = modifiedState => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
+
+    this.setState(modifiedState);
+  }
+
+  constructor (props) {
+    super(props);
+
+    this.state = {
+      pool: []
+    };
+
+    this.fetchPooled();
+  }
+
+  fetchPooled = () => {
+    Api.pool.get(USER_ID)
+      .then(response => response.json())
+      .then(Utils.log.promise('fetched pooled'))
+      .then(pool => {
+        this.animateStateChange({ pool });
+      });
+  }
+
+  toggleOpen = friendId => {
+    const pool = this.state.pool.map(f => Object.assign({}, f, {
+      expanded: f.id === friendId ? !f.expanded : f.expanded
+    }));
+
+    this.animateStateChange({ pool });
+  }
+
+  activate = friendId => {
+    const pool = this.state.pool.map(f => Object.assign({}, f, {
+      activated: f.id === friendId ? true : f.activated
+    }));
+
+    this.animateStateChange({ pool });
+    this.delayedHide(friendId);
+  }
+
+  remove = friendId => {
+    const pool = this.state.pool.map(f => Object.assign({}, f, {
+      removed: f.id === friendId ? true : f.removed
+    }));
+
+    this.animateStateChange({ pool });
+    this.delayedHide(friendId);
+  }
+
+  delayedHide = friendId => {
+    setTimeout(() => {
+      this.animateStateChange({
+        pool: Utils.array.removeWhere(this.state.pool, p => p.id === friendId)
+      });
+    }, 5000);
+  }
+
   render () {
-    return <Text>Lets Pool together!</Text>;
+    return (
+      <View>
+        <View style={[addStyle.row, addStyle.headerRow]}>
+          <Text style={addStyle.header}>Activate new delegates</Text>
+        </View>
+        <View>
+          {this.state.pool.map(this.renderFriend)}
+        </View>
+      </View>
+    );
+  }
+
+  renderFriend = (friend, idx) => {
+    if (friend.activated) {
+      return this.renderActivated(friend);
+    }
+
+    if (friend.removed) {
+      return this.renderRemoved(friend);
+    }
+
+    return this.renderPooled(friend);
+  }
+
+  renderActivated = friend => (
+    <View
+      key={friend.id}
+      style={[activeStyle.initialsRow, {marginLeft: 16}]}>
+      <Text>{friend.name} is now an Active Delegate</Text>
+    </View>
+  )
+
+  renderRemoved = friend => (
+    <View
+      key={friend.id}
+      style={[activeStyle.initialsRow, {marginLeft: 16}]}>
+      <Text>{friend.name} has been removed from the pool</Text>
+    </View>
+  )
+
+  renderPooled = friend => {
+    return (
+      <TouchableHighlight
+        key={friend.id}
+        onPress={() => this.toggleOpen(friend.id)}>
+        <View>
+          <View style={activeStyle.initialsRow}>
+            <InitialsButton
+              shape='circle'
+              backgroundColor='#efefef'
+              initials={Utils.initials(friend)}
+              />
+            <Text style={{flex: 1}}>{friend.name} {friend.expanded}</Text>
+            <IconButton
+              isSmall='true'
+              name='zap'
+              iconStyle={{fontSize: 16, height: 16, width: 10, color: 'white'}}
+              buttonStyle={{marginVertical: 2}}
+              shape='square'
+              backgroundColor={Colors.lightGreen}
+              onPress={() => this.activate(friend.id)}
+              />
+          </View>
+          { !friend.expanded
+            ? []
+            : (
+              <View style={[activeStyle.initialsRow, {backgroundColor: '#efefef', paddingHorizontal: 16, paddingVertical: 8}]}>
+                <RoundedButton
+                  buttonStyle={{backgroundColor: 'lightyellow', marginRight: 16}}
+                  text='Remove'
+                  onPress={() => this.remove(friend.id)}
+                  />
+                <Text>{friend.name} from the pool</Text>
+              </View>
+            )
+          }
+        </View>
+      </TouchableHighlight>
+    );
   }
 }
 
@@ -45,7 +236,7 @@ class Active extends Component {
       friends: [],
       lastSaved: [],
       isModified: false,
-      userId: 2
+      userId: USER_ID
     };
 
     Api.friends.get(this.state.userId)
@@ -132,14 +323,19 @@ class Active extends Component {
 
   render () {
     return (
-      <View style={styles.column}>
+      <View style={activeStyle.column}>
         <View style={{flex: 2, justifyContent: 'flex-start'}}>
-          {this.state.friends.map(this.renderFriend(this.state.friends.length), this)}
+          <View style={[addStyle.row, addStyle.headerRow]}>
+            <Text style={addStyle.header}>Rank your delegates</Text>
+          </View>
+          <View>
+            {this.state.friends.map(this.renderFriend(this.state.friends.length), this)}
+          </View>
         </View>
         { !this.isModified()
           ? []
           : (
-            <View style={styles.saveResetRow}>
+            <View style={activeStyle.saveResetRow}>
               <RoundedButton
                 text='Save'
                 buttonStyle={{backgroundColor: Colors.lightGreen, marginHorizontal: 8}}
@@ -169,7 +365,7 @@ class Active extends Component {
         onPress={toggle}>
         <View>
           <View
-            style={styles.initialsRow}>
+            style={activeStyle.initialsRow}>
             <InitialsButton
               shape='circle'
               backgroundColor='#efefef'
@@ -201,10 +397,10 @@ class Active extends Component {
               }
             </View>
           </View>
-          { (friend.expanded === false)
+          { !friend.expanded
             ? []
             : (
-              <View style={[styles.initialsRow, {backgroundColor: '#efefef', paddingHorizontal: 16, paddingVertical: 8}]}>
+              <View style={[activeStyle.initialsRow, {backgroundColor: '#efefef', paddingHorizontal: 16, paddingVertical: 8}]}>
                 <RoundedButton
                   onPress={deactivate}
                   buttonStyle={{backgroundColor: 'lightyellow', marginRight: 16}}
@@ -238,7 +434,31 @@ export const Delegate = TabNavigator({
   }
 });
 
-const styles = StyleSheet.create({
+const addStyle = StyleSheet.create({
+  header: {
+    fontSize: 20,
+    fontWeight: 'bold'
+  },
+  row: {
+    marginVertical: 8,
+    paddingHorizontal: 16
+  },
+  headerRow: {
+    alignItems: 'center',
+    marginVertical: 16
+  },
+  inputRow: {
+  },
+  textInput: {
+    paddingHorizontal: 8,
+    marginTop: 8,
+    height: 40,
+    borderColor: '#ddd',
+    borderWidth: 1
+  }
+});
+
+const activeStyle = StyleSheet.create({
   column: {
     flex: 1,
     justifyContent: 'space-between'
