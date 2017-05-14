@@ -44,11 +44,13 @@ class Active extends Component {
       isUpdating: true,
       friends: [],
       lastSaved: [],
+      isModified: false,
       userId: 2
     };
 
     Api.friends.get(this.state.userId)
       .then(response => response.json())
+      .then(friends => friends.map(f => Object.assign(f, {expanded: false})))
       .then(friends => this.setState({
         isUpdating: false,
         friends,
@@ -80,11 +82,22 @@ class Active extends Component {
     const lastSaved = this.state.lastSaved;
 
     this.animateStateChange({
-      friends: lastSaved
+      friends: lastSaved,
+      isModified: false
     });
   }
 
-  moveIt = (idxOld, idxNew) => () => {
+  saveMe = () => {
+    const friends = this.state.friends;
+
+    // TODO: update state on server
+    this.setState({
+      lastSaved: friends,
+      isModified: false
+    });
+  }
+
+  moveIt = (idxOld, idxNew) => {
     const friend = this.state.friends[idxOld];
     let shuffledFriends = Utils.array.remove(this.state.friends, idxOld);
 
@@ -96,7 +109,25 @@ class Active extends Component {
       shuffledFriends = Utils.array.insert(shuffledFriends, idxNew, friend);
     }
 
-    this.animateStateChange({ friends: shuffledFriends });
+    this.animateStateChange({ friends: shuffledFriends, isModified: true });
+  }
+
+  toggleOpen = toggledIdx => {
+    const friends = this.state.friends.map((f, idx) => {
+      if (idx === toggledIdx) {
+        f.expanded = !f.expanded;
+      } else {
+        f.expanded = false;
+      }
+
+      return f;
+    });
+
+    this.animateStateChange({ friends });
+  }
+
+  isModified = () => {
+    return this.state.isModified;
   }
 
   render () {
@@ -105,61 +136,83 @@ class Active extends Component {
         <View style={{flex: 2, justifyContent: 'flex-start'}}>
           {this.state.friends.map(this.renderFriend(this.state.friends.length), this)}
         </View>
-        <View style={styles.saveResetRow}>
-          <RoundedButton
-            text='Reset'
-            style={{backgroundColor: Colors.lightRed, marginHorizontal: 8}}
-            onPress={this.reset}
-            />
-          <RoundedButton
-            text='Save'
-            style={{backgroundColor: Colors.lightGreen, marginHorizontal: 8}}
-            />
-        </View>
+        { !this.isModified()
+          ? []
+          : (
+            <View style={styles.saveResetRow}>
+              <RoundedButton
+                text='Save'
+                buttonStyle={{backgroundColor: Colors.lightGreen, marginHorizontal: 8}}
+                onPress={this.saveMe}
+                />
+              <RoundedButton
+                text='Reset'
+                buttonStyle={{backgroundColor: Colors.lightRed, marginHorizontal: 8}}
+                onPress={this.reset}
+                />
+            </View>
+          )
+        }
       </View>
     );
   }
 
   renderFriend = friendCount => (friend, idx) => {
-    const moveUp = this.moveIt(idx, idx - 1);
-    const moveDown = this.moveIt(idx, idx + 1);
+    const moveUp = () => this.moveIt(idx, idx - 1);
+    const moveDown = () => this.moveIt(idx, idx + 1);
+    const deactivate = () => this.moveIt(idx);
+    const toggle = () => this.toggleOpen(idx);
 
     return (
       <TouchableHighlight
         key={friend.id}
-        onPress={() => { friend.expanded = !friend.expanded; }}>
-        <View
-          style={styles.initialsRow}>
-          <InitialsButton
-            shape='circle'
-            backgroundColor='#efefef'
-            initials={Utils.initials(friend)}
-            />
-          <Text style={{flex: 1}}>{friend.name}</Text>
-          <View style={{flex: 0}}>
-            { idx < 1 ? []
-              : <IconButton
-                isSmall='true'
-                name='arrow-up'
-                iconStyle={{fontSize: 16, height: 16, width: 10, color: 'white'}}
-                buttonStyle={{marginVertical: 2}}
-                shape='square'
-                backgroundColor={Colors.lightGreen}
-                onPress={moveUp}
-                />
-            }
-            { idx === friendCount - 1 ? []
-              : <IconButton
-                isSmall='true'
-                name='arrow-down'
-                iconStyle={{fontSize: 16, height: 16, width: 10, color: 'white'}}
-                buttonStyle={{marginVertical: 2}}
-                shape='square'
-                backgroundColor={Colors.lightRed}
-                onPress={moveDown}
-                />
-            }
+        onPress={toggle}>
+        <View>
+          <View
+            style={styles.initialsRow}>
+            <InitialsButton
+              shape='circle'
+              backgroundColor='#efefef'
+              initials={Utils.initials(friend)}
+              />
+            <Text style={{flex: 1}}>{friend.name}</Text>
+            <View style={{flex: 0}}>
+              { idx < 1 ? []
+                : <IconButton
+                  isSmall='true'
+                  name='arrow-up'
+                  iconStyle={{fontSize: 16, height: 16, width: 10, color: 'white'}}
+                  buttonStyle={{marginVertical: 2}}
+                  shape='square'
+                  backgroundColor={Colors.lightGreen}
+                  onPress={moveUp}
+                  />
+              }
+              { idx === friendCount - 1 ? []
+                : <IconButton
+                  isSmall='true'
+                  name='arrow-down'
+                  iconStyle={{fontSize: 16, height: 16, width: 10, color: 'white'}}
+                  buttonStyle={{marginVertical: 2}}
+                  shape='square'
+                  backgroundColor={Colors.lightRed}
+                  onPress={moveDown}
+                  />
+              }
+            </View>
           </View>
+          { (friend.expanded === false)
+            ? []
+            : (
+              <View style={[styles.initialsRow, {backgroundColor: '#efefef', paddingHorizontal: 16, paddingVertical: 8}]}>
+                <RoundedButton
+                  onPress={deactivate}
+                  buttonStyle={{backgroundColor: 'lightyellow', marginRight: 16}}
+                  text='Deactivate' />
+                <Text>{friend.name}</Text>
+              </View>
+            )
+          }
         </View>
       </TouchableHighlight>
     );
@@ -197,7 +250,7 @@ const styles = StyleSheet.create({
   },
   saveResetRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-around',
     marginBottom: 16,
     flex: 0
   }
