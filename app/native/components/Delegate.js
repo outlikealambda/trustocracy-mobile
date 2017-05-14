@@ -25,7 +25,9 @@ class Add extends Component {
 
     this.state = {
       inputEmail: null,
-      recentlyAdded: []
+      recentlyAdded: [],
+      recentlyFailed: [],
+      userId: USER_ID
     };
   }
 
@@ -36,9 +38,20 @@ class Add extends Component {
   }
 
   search = email => {
-    const recentlyAdded = this.state.recentlyAdded.concat([email]);
+    Api.pool.add(this.state.userId, email)
+      .then(response => {
+        if (response.status !== 200) {
+          this.animateStateChange({
+            recentlyFailed: this.state.recentlyFailed.concat([email])
+          });
+        } else {
+          this.animateStateChange({
+            recentlyAdded: this.state.recentlyAdded.concat([email])
+          });
+        }
+      });
 
-    this.animateStateChange({recentlyAdded, inputEmail: null});
+    this.setState({inputEmail: null});
   }
 
   updateInput = inputEmail => this.setState({ inputEmail })
@@ -67,12 +80,31 @@ class Add extends Component {
         <View style={[addStyle.row]}>
           {this.state.recentlyAdded.map(this.renderRecentlyAdded)}
         </View>
+        <View style={[addStyle.row]}>
+          {this.state.recentlyFailed.map(this.renderRecentlyFailed)}
+        </View>
       </View>
     );
   }
 
   renderRecentlyAdded = email => {
-    return <Text key={email}>Added {email}</Text>;
+    return (
+      <Text
+        style={{color: 'green'}}
+        key={email}>
+        Successfully added {email}
+      </Text>
+    );
+  }
+
+  renderRecentlyFailed = email => {
+    return (
+      <Text
+        style={{color: 'darkorange'}}
+        key={email}>
+        Could not locate {email}
+      </Text>
+    );
   }
 }
 
@@ -91,6 +123,7 @@ class Pool extends Component {
     super(props);
 
     this.state = {
+      userId: USER_ID,
       pool: []
     };
 
@@ -114,22 +147,40 @@ class Pool extends Component {
     this.animateStateChange({ pool });
   }
 
-  activate = friendId => {
+  updateStatus = (friendId, newStatus) => {
     const pool = this.state.pool.map(f => Object.assign({}, f, {
-      activated: f.id === friendId ? true : f.activated
+      status: f.id === friendId ? newStatus : f.status
     }));
 
     this.animateStateChange({ pool });
-    this.delayedHide(friendId);
+  }
+
+  activate = friendId => {
+    this.updateStatus(friendId, 'activating');
+
+    Api.pool.promote(this.state.userId, friendId)
+      .then(result => {
+        if (result.status !== 200) {
+          this.updateStatus(friendId, null);
+        } else {
+          this.updateStatus(friendId, 'activated');
+          this.delayedHide(friendId);
+        }
+      });
   }
 
   remove = friendId => {
-    const pool = this.state.pool.map(f => Object.assign({}, f, {
-      removed: f.id === friendId ? true : f.removed
-    }));
+    this.updateStatus(friendId, 'removing');
 
-    this.animateStateChange({ pool });
-    this.delayedHide(friendId);
+    Api.pool.remove(this.state.userId, friendId)
+      .then(result => {
+        if (result.status !== 200) {
+          this.updateStatus(friendId, null);
+        } else {
+          this.updateStatus(friendId, 'removed');
+          this.delayedHide(friendId);
+        }
+      });
   }
 
   delayedHide = friendId => {
@@ -154,31 +205,44 @@ class Pool extends Component {
   }
 
   renderFriend = (friend, idx) => {
-    if (friend.activated) {
-      return this.renderActivated(friend);
+    switch (friend.status) {
+      case 'activating':
+        return this.renderActivating(friend);
+      case 'activated':
+        return this.renderActivated(friend);
+      case 'removing':
+        return this.renderRemoving(friend);
+      case 'removed':
+        return this.renderRemoved(friend);
+      default:
+        return this.renderPooled(friend);
     }
-
-    if (friend.removed) {
-      return this.renderRemoved(friend);
-    }
-
-    return this.renderPooled(friend);
   }
 
-  renderActivated = friend => (
-    <View
-      key={friend.id}
-      style={[activeStyle.initialsRow, {marginLeft: 16}]}>
-      <Text>{friend.name} is now an Active Delegate</Text>
-    </View>
+  renderMessage = messageBuilder => {
+    return friend => (
+      <View
+        key={friend.id}
+        style={[activeStyle.initialsRow, {marginLeft: 16}]}>
+        <Text>{messageBuilder(friend)}</Text>
+      </View>
+    );
+  }
+
+  renderActivating = this.renderMessage(
+    ({name}) => `Activating ${name}`
   )
 
-  renderRemoved = friend => (
-    <View
-      key={friend.id}
-      style={[activeStyle.initialsRow, {marginLeft: 16}]}>
-      <Text>{friend.name} has been removed from the pool</Text>
-    </View>
+  renderActivated = this.renderMessage(
+    ({name}) => `${name} is now an Active Delegate`
+  )
+
+  renderRemoving = this.renderMessage(
+    ({name}) => `Removing ${name}`
+  )
+
+  renderRemoved = this.renderMessage(
+    ({name}) => `${name} has been removed from the pool`
   )
 
   renderPooled = friend => {

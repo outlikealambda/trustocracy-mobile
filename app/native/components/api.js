@@ -35,7 +35,7 @@ export const friends = {
   get: userId => fetch(`user/${userId}/friends`),
 
   // TODO
-  demote: () => null
+  demote: () => Promise.resolve({status: 200})
 };
 
 export const pool = {
@@ -46,9 +46,9 @@ export const pool = {
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: {
+      body: JSON.stringify({
         email: inputEmail
-      }
+      })
     }
   ),
 
@@ -58,5 +58,5 @@ export const pool = {
   ),
 
   // TODO
-  promote: () => null
+  promote: () => Promise.resolve({status: 200})
 };

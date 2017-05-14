@@ -51,7 +51,7 @@ export const array = {
 export const log = {
   promise: msg => {
     return v => {
-      console.log(msg, JSON.stringify(v));
+      console.log(msg, JSON.stringify(v, null, 2));
       return v;
     };
   }
