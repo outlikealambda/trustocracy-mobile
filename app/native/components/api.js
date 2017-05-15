@@ -34,6 +34,17 @@ export const target = {
 export const friends = {
   get: userId => fetch(`user/${userId}/friends`),
 
+  rank: (userId, delegates) => fetch(
+    `user/${userId}/delegates`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        delegates
+      })
+    }
+  ),
+
   // TODO
   demote: () => Promise.resolve({status: 200})
 };

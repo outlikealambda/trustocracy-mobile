@@ -333,13 +333,20 @@ class Active extends Component {
   }
 
   saveMe = () => {
+    this.setState({
+      status: 'saving'
+    });
+
     const friends = this.state.friends;
 
-    // TODO: update state on server
-    this.setState({
-      lastSaved: friends,
-      isModified: false
-    });
+    Api.friends.rank(this.state.userId, friends)
+      .then(res => {
+        this.setState({
+          lastSaved: friends,
+          isModified: false,
+          status: null
+        });
+      });
   }
 
   moveIt = (idxOld, idxNew) => {
