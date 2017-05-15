@@ -306,6 +306,10 @@ class Active extends Component {
     Api.friends.get(this.state.userId)
       .then(response => response.json())
       .then(friends => friends.map(f => Object.assign(f, {expanded: false})))
+      .then(friends => {
+        friends.sort((a, b) => a.rank - b.rank);
+        return friends;
+      })
       .then(friends => this.setState({
         isUpdating: false,
         friends,
@@ -317,20 +321,6 @@ class Active extends Component {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
 
     this.setState(modifiedState);
-  }
-
-  fetchFriends () {
-    this.setState({ isUpdating: true });
-
-    return Api.friends.get(this.state.userId)
-      .then(response => response.json())
-      .then(friends => {
-        this.setState({
-          isUpdating: false,
-          friends,
-          lastSaved: friends
-        });
-      });
   }
 
   reset = () => {
