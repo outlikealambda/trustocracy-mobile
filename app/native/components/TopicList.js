@@ -11,12 +11,7 @@ import {
   View
 } from 'react-native';
 import * as Api from './api.js';
-import Svg, {
-  G,
-  Path
-} from 'react-native-svg';
-import * as D3Shape from 'd3-shape';
-import { Prompts } from '../utils.js';
+import { Summary as PromptSummary } from './Prompt.js';
 
 type Topic = {
   id: string,
@@ -30,13 +25,6 @@ type Props = {
 type State = {
   topics: Array<Topic>
 };
-
-const pieColors = [
-  '#52BE80',
-  '#5499C7',
-  '#AF7AC5',
-  '#F4D03F'
-];
 
 export class TopicList extends Component<void, Props, State> {
   state: State
@@ -66,64 +54,15 @@ export class TopicList extends Component<void, Props, State> {
   }
 
   renderPrompt = prompt => {
-    const {id: key, options, text} = prompt;
-
-    if (Prompts.isScalar(prompt)) {
-      return [];
-    }
-
+    const {id: key, options} = prompt;
     const values = [];
 
     for (let i = 0; i < options.length; i++) {
       values.push(Math.random());
     }
 
-    const pies = D3Shape.pie().padAngle(Math.PI / 90)(values);
-    const arcGenerator = D3Shape.arc()
-      .innerRadius(20)
-      .outerRadius(50);
-
-    const arcs = pies.map(arcGenerator);
-
     return (
-      <View
-        key={key}
-        style={{
-          paddingVertical: 8,
-          paddingHorizontal: 16,
-          flexDirection: 'row',
-          flex: 1,
-          alignItems: 'center'
-        }}>
-        <Svg height='100' width='100'>
-          <G x='50' y='50' >
-            {arcs.map((arc, idx) => (
-              <Path
-                d={arc}
-                key={idx}
-                fill={pieColors[idx % pieColors.length]}
-              />
-            ))}
-          </G>
-        </Svg>
-        <View
-          style={{
-            padding: 8,
-            flex: 1
-          }}>
-          <Text>{text}</Text>
-          {options.map(option => (
-            <Text
-              key={option.sortOrder}
-              style={{
-                fontWeight: 'bold',
-                color: pieColors[option.sortOrder % pieColors.length]
-              }}>
-              {option.text}
-            </Text>
-          ))}
-        </View>
-      </View>
+      <PromptSummary key={key} prompt={prompt} summaryData={values} />
     );
   }
 
