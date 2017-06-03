@@ -68,42 +68,43 @@ function renderPerson (person, color, pressAction, keyPrefix = 'p') {
 }
 
 function renderPersonWithInfluence (influence, person, color, pressAction, keyPrefix = 'p') {
-  // const vertical = {
-  //   outer: {
-  //     width: 76
-  //   },
-  //   inner: {
-  //     alignItems: 'center',
-  //     borderWidth: 2,
-  //     borderColor: '#ccc',
-  //     marginHorizontal: 8,
-  //     marginTop: -8,
-  //     paddingVertical: 4
-  //   }
-  // };
-  const horizontal = {
+  const vertical = {
     outer: {
-      height: 76,
-      flexDirection: 'row'
+      width: 76
     },
     inner: {
       alignItems: 'center',
-      justifyContent: 'center',
       borderWidth: 2,
       borderColor: '#ccc',
-      marginVertical: 16,
-      marginLeft: -10,
-      paddingHorizontal: 8
+      marginHorizontal: 8,
+      marginTop: -12,
+      paddingVertical: 4
     }
   };
+
+  // const horizontal = {
+  //   outer: {
+  //     height: 76,
+  //     flexDirection: 'row'
+  //   },
+  //   inner: {
+  //     alignItems: 'center',
+  //     justifyContent: 'center',
+  //     borderWidth: 2,
+  //     borderColor: '#ccc',
+  //     marginVertical: 16,
+  //     marginLeft: -10,
+  //     paddingHorizontal: 8
+  //   }
+  // };
 
   return (
     <View
       key={keyPrefix + person.id}
-      style={horizontal.outer}>
+      style={vertical.outer}>
       {renderPerson(person, color, pressAction, keyPrefix)}
       <View
-        style={horizontal.inner}>
+        style={vertical.inner}>
         <Text
           style={{
             fontSize: 16
@@ -142,7 +143,7 @@ function renderOpinionSelector (opinionInfo, pressAction) {
   return (
     <TouchableHighlight
       onPress={pressAction}>
-      <View style={{width: 136}}>
+      <View style={{width: 76}}>
         {
           renderPersonWithInfluence(influence, author, '#ccc')
         }
@@ -167,6 +168,7 @@ type State = {
   expanded: boolean,
   opinions: Array<any>,
   prompts: Array<any>,
+  promptIdx: number,
   selectedOpinionIdx: number,
   selectedOpinion: any,
   showFriendDrawer: boolean,
@@ -197,6 +199,7 @@ export class Topic extends Component<void, Props, State> {
       expanded: true,
       opinions: [],
       prompts: [],
+      promptIdx: 0,
       selectedOpinionIdx: -1,
       selectedOpinion: null,
       showFriendDrawer: false,
@@ -603,7 +606,6 @@ export class Topic extends Component<void, Props, State> {
 
       return (
         <View
-          key={idx}
           style={[
             styles.scalarAnswer,
             answerTile,
@@ -624,52 +626,71 @@ export class Topic extends Component<void, Props, State> {
       );
     };
 
-    const renderAnswers = (answers, prompts) =>
-      answers.map(({promptId, selected, value}, idx) => {
-        const prompt = prompts[promptId];
+    const renderAnswers = (answer, prompt) => {
+      const {selected, value} = answer;
 
-        return (
-          promptUtils.isScalar(prompt)
-          ? renderScalarAnswer(value, idx)
-          : (
-            <View
-              key={idx}
-              style={[styles.multipleChoiceAnswer, answerTile]}>
-              <Text>{prompt.options[selected].text}</Text>
-            </View>
-          )
-        );
-      }
-    );
+      return (
+        promptUtils.isScalar(prompt)
+        ? renderScalarAnswer(value)
+        : (
+          <View
+            style={[styles.multipleChoiceAnswer, answerTile]}>
+            <Text>{prompt.options[selected].text}</Text>
+          </View>
+        )
+      );
+    };
 
-    const renderPrompts = prompts => {
+    const renderPrompt = (prompt, updateFn) => {
       return (
         // prompts row
         <View
           style={{
-            paddingLeft: 136,
-            flexDirection: 'row'
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginRight: 48,
+            marginLeft: 48,
+            marginVertical: 16
           }}>
-          {
-            prompts.map((prompt, idx) => (
-              <View
-                key={idx}
-                style={[
-                  answerTile
-                ]}>
-                <Text style={{textAlign: 'center'}}>{prompt.textShort}</Text>
-              </View>
-            ))
-          }
+          <IconButton
+            isSmall='true'
+            shape='circle'
+            name='chevron-left'
+            key='previous'
+            backgroundColor='#ddd'
+            style={{flex: 0}}
+            iconStyle={{fontSize: 20, height: 20, width: 10}}
+            onPress={() => updateFn(0)} />
+          <Text
+            style={{
+              flex: 1,
+              fontSize: 18,
+              textAlign: 'center',
+              paddingHorizontal: 8
+
+            }}>
+            {prompt.text}
+          </Text>
+          <IconButton
+            isSmall='true'
+            shape='circle'
+            name='chevron-right'
+            key='next'
+            backgroundColor='#ddd'
+            style={{flex: 0}}
+            iconStyle={{fontSize: 20, height: 20, width: 10}}
+            onPress={() => updateFn(0)} />
         </View>
       );
     };
 
-    const renderBrowseOpinions = (opinions, prompts) => {
+    const renderBrowseOpinions = (opinions, promptsMap, promptIdx, updatePromptFn) => {
+      const prompts = Object.values(promptsMap);
+
       return (
         <ScrollView>
           <View style={{paddingVertical: 12}}>
-            {renderPrompts(Object.values(prompts))}
+            {renderPrompt(prompts[promptIdx], updatePromptFn)}
             {
               opinions.map(
                 opinion => (
@@ -686,9 +707,9 @@ export class Topic extends Component<void, Props, State> {
                       renderOpinionSelector(opinion, this.showBrowseSingleOpinion(opinion.id))
                     }
                     <View
-                      style={styles.answers}>
+                      style={[styles.answers, {paddingRight: 48}]}>
                       {
-                        renderAnswers(opinion.answers, prompts)
+                        renderAnswers(opinion.answers[promptIdx], prompts[promptIdx])
                       }
                     </View>
                   </View>
@@ -753,7 +774,7 @@ export class Topic extends Component<void, Props, State> {
         <View style={{flex: 1}}>
           {
             this.state.isBrowse && (!this.state.selectedOpinion || !this.state.selectedOpinion.text)
-            ? renderBrowseOpinions(this.state.opinions, this.state.prompts)
+            ? renderBrowseOpinions(this.state.opinions, this.state.prompts, this.state.promptIdx, () => console.log('pressed!'))
             : renderOpinionText(this.state.selectedConnection, this.state.selectedOpinion)
           }
         </View>
@@ -836,6 +857,7 @@ const styles = StyleSheet.create({
     flex: 1
   },
   scalarAnswer: {
+    // width: 80
   },
   multipleChoiceAnswer: {
   }
