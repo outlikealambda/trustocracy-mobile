@@ -10,7 +10,7 @@ import {
 import { TabNavigator } from 'react-navigation';
 import * as Api from './api.js';
 import { InitialsButton, IconButton, RoundedButton } from './Buttons.js';
-import * as Utils from '../utils.js';
+import { Arrays, Log, Persons } from '../utils.js';
 import * as Colors from '../colors.js';
 
 const USER_ID = 2;
@@ -133,7 +133,7 @@ class Pool extends Component {
   fetchPooled = () => {
     Api.pool.get(USER_ID)
       .then(response => response.json())
-      .then(Utils.log.promise('fetched pooled'))
+      .then(Log.promise('fetched pooled'))
       .then(pool => {
         this.animateStateChange({ pool });
       });
@@ -186,7 +186,7 @@ class Pool extends Component {
   delayedHide = friendId => {
     setTimeout(() => {
       this.animateStateChange({
-        pool: Utils.array.removeWhere(this.state.pool, p => p.id === friendId)
+        pool: Arrays.removeWhere(this.state.pool, p => p.id === friendId)
       });
     }, 5000);
   }
@@ -255,7 +255,7 @@ class Pool extends Component {
             <InitialsButton
               shape='circle'
               backgroundColor='#efefef'
-              initials={Utils.initials(friend)}
+              initials={Persons.initials(friend)}
               />
             <Text style={{flex: 1}}>{friend.name} {friend.expanded}</Text>
             <IconButton
@@ -351,14 +351,14 @@ class Active extends Component {
 
   moveIt = (idxOld, idxNew) => {
     const friend = this.state.friends[idxOld];
-    let shuffledFriends = Utils.array.remove(this.state.friends, idxOld);
+    let shuffledFriends = Arrays.remove(this.state.friends, idxOld);
 
     if (idxNew === shuffledFriends.length) {
       // shuffled to the end, append
       shuffledFriends.push(friend);
     } else if (idxNew || idxNew === 0) {
       // insert at new position
-      shuffledFriends = Utils.array.insert(shuffledFriends, idxNew, friend);
+      shuffledFriends = Arrays.insert(shuffledFriends, idxNew, friend);
     }
 
     this.animateStateChange({ friends: shuffledFriends, isModified: true });
@@ -430,7 +430,7 @@ class Active extends Component {
             <InitialsButton
               shape='circle'
               backgroundColor='#efefef'
-              initials={Utils.initials(friend)}
+              initials={Persons.initials(friend)}
               />
             <Text style={{flex: 1}}>{friend.name}</Text>
             <View style={{flex: 0}}>

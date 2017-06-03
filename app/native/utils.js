@@ -1,13 +1,15 @@
-// super fragile...
-export function initials (friend) {
-  if (friend) {
-    const { name } = friend;
-    return name[0] + name.split(' ')[1][0];
+export const Persons = {
+  // super fragile...
+  initials: friend => {
+    if (friend) {
+      const { name } = friend;
+      return name[0] + name.split(' ')[1][0];
+    }
+    return '';
   }
-  return '';
-}
+};
 
-export const array = {
+export const Arrays = {
   remove: (array, idxRem) =>
     array.reduce((agg, elem, idx) => {
       if (idx === idxRem) {
@@ -48,7 +50,12 @@ export const array = {
   )
 };
 
-export const log = {
+export const Prompts = {
+  isScalar: prompt => prompt.type === 'SCALAR',
+  isMultipleChoice: prompt => prompt.type === 'MULTIPLE_CHOICE'
+};
+
+export const Log = {
   promise: msg => {
     return v => {
       console.log(msg, JSON.stringify(v, null, 2));

@@ -15,7 +15,10 @@ import Markdown from 'react-native-simple-markdown';
 import Icon from 'react-native-vector-icons/Octicons';
 import { RoundedButton, InitialsButton, IconButton } from './Buttons.js';
 import * as Api from './api';
-import * as Utils from '../utils.js';
+import {
+  Persons,
+  Prompts
+} from '../utils.js';
 
 const trusteeColors = [
   'greenyellow',
@@ -57,7 +60,7 @@ function renderPerson (person, color, pressAction, keyPrefix = 'p') {
       onPress={pressAction}
       key={keyPrefix + person.id}
       backgroundColor={color}
-      initials={Utils.initials(person)} />
+      initials={Persons.initials(person)} />
   );
 
   if (person.isInfluencer) {
@@ -435,7 +438,7 @@ export class Topic extends Component<void, Props, State> {
       <InitialsButton
         shape='circle'
         backgroundColor='wheat'
-        initials={Utils.initials(author)} />
+        initials={Persons.initials(author)} />
     );
 
     const renderOpinionHeader = () => {
@@ -577,11 +580,6 @@ export class Topic extends Component<void, Props, State> {
       );
     };
 
-    const promptUtils = {
-      isScalar: prompt => prompt.type === 'SCALAR',
-      isMultipleChoice: prompt => prompt.type === 'MULTIPLE_CHOICE'
-    };
-
     const answerTile = {
       marginHorizontal: 8,
       alignItems: 'center',
@@ -634,7 +632,7 @@ export class Topic extends Component<void, Props, State> {
       const {selected, value} = answer;
 
       return (
-        promptUtils.isScalar(prompt)
+        Prompts.isScalar(prompt)
         ? renderScalarAnswer(value)
         : (
           <View
