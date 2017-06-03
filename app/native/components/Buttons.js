@@ -162,11 +162,11 @@ export class InitialsButton extends Component<void, InitialsProps, void> {
     const onPress = this.props.onPress;
     const baseStyle = buttonStyles.getStyle(this.props.shape, this.props.isSmall);
     const buttonStyle = this.props.buttonStyle || {};
-    const fontSize = this.props.isSmall ? 12 : 22;
+    const fontSize = this.props.isSmall ? 12 : 24;
 
     const button = (
       <View style={[baseStyle, {backgroundColor}, buttonStyle]}>
-        <Text style={{fontSize, fontWeight: 'bold'}}>
+        <Text style={{fontSize, fontWeight: 'bold', color: '#444'}}>
           {initials}
         </Text>
       </View>
