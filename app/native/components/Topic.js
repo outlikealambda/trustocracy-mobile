@@ -38,9 +38,9 @@ function influencerCircle (content, key) {
     <View
       key={key}
       style={{
-        width: 64,
-        height: 64,
-        borderRadius: 32,
+        width: 76,
+        height: 76,
+        borderRadius: 40,
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'turquoise'
@@ -68,26 +68,45 @@ function renderPerson (person, color, pressAction, keyPrefix = 'p') {
 }
 
 function renderPersonWithInfluence (influence, person, color, pressAction, keyPrefix = 'p') {
+  // const vertical = {
+  //   outer: {
+  //     width: 76
+  //   },
+  //   inner: {
+  //     alignItems: 'center',
+  //     borderWidth: 2,
+  //     borderColor: '#ccc',
+  //     marginHorizontal: 8,
+  //     marginTop: -8,
+  //     paddingVertical: 4
+  //   }
+  // };
+  const horizontal = {
+    outer: {
+      height: 76,
+      flexDirection: 'row'
+    },
+    inner: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 2,
+      borderColor: '#ccc',
+      marginVertical: 16,
+      marginLeft: -10,
+      paddingHorizontal: 8
+    }
+  };
+
   return (
     <View
       key={keyPrefix + person.id}
-      style={{
-        width: 56
-      }}>
+      style={horizontal.outer}>
       {renderPerson(person, color, pressAction, keyPrefix)}
       <View
-        style={{
-          alignItems: 'center',
-          marginTop: -12
-        }}>
+        style={horizontal.inner}>
         <Text
           style={{
-            fontSize: 10,
-            backgroundColor: 'pink',
-            paddingVertical: 2,
-            paddingHorizontal: 4,
-            borderRadius: 6,
-            overflow: 'hidden'
+            fontSize: 16
           }}>
           {influence}
         </Text>
@@ -98,8 +117,8 @@ function renderPersonWithInfluence (influence, person, color, pressAction, keyPr
 
 function renderForNav ({dom, isSelected}) {
   const basicStyle = {
-    width: 64,
-    height: 72
+    width: 76,
+    height: 84
   };
 
   const style = isSelected
@@ -649,7 +668,8 @@ export class Topic extends Component<void, Props, State> {
                     flexDirection: 'row',
                     alignItems: 'center',
                     flex: 1,
-                    paddingHorizontal: 8
+                    paddingHorizontal: 8,
+                    paddingVertical: 8
                   }}>
                   {
                     renderOpinionSelector(opinion, this.showBrowseSingleOpinion(opinion.id))
@@ -744,7 +764,7 @@ const styles = StyleSheet.create({
   },
   selectorIconRow: {
     marginTop: 12,
-    height: 72
+    height: 84
   },
   scrollInterior: {
     alignItems: 'center',

@@ -33,9 +33,9 @@ const buttonStyles = {
       margin: 8
     },
     regular: {
-      width: 48,
-      height: 48,
-      borderRadius: 24,
+      width: 60,
+      height: 60,
+      borderRadius: 30,
       alignItems: 'center',
       justifyContent: 'center',
       margin: 8
@@ -43,8 +43,8 @@ const buttonStyles = {
   }),
   square: StyleSheet.create({
     regular: {
-      width: 48,
-      height: 48,
+      width: 60,
+      height: 60,
       borderRadius: 2,
       alignItems: 'center',
       justifyContent: 'center',
@@ -163,7 +163,7 @@ export class InitialsButton extends Component<void, InitialsProps, void> {
     const style = this.props.style || {};
     const onPress = this.props.onPress;
     const buttonStyle = buttonStyles.getStyle(this.props.shape, this.props.isSmall);
-    const fontSize = this.props.isSmall ? 12 : 18;
+    const fontSize = this.props.isSmall ? 12 : 22;
 
     const button = (
       <View style={[buttonStyle, {backgroundColor}, style]}>
