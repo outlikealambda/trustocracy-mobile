@@ -7,10 +7,10 @@
     "test": "jest"
   },
   "dependencies": {
-    "react": "~15.4.0-rc.4",
-    "react-native": "~0.42.0",
+    "react": "16.0.0-alpha.6",
+    "react-native": "^0.44.2",
     "react-native-simple-markdown": "^1.0.60-rc.3",
-    "react-native-svg": "^4.6.1",
+    "react-native-svg": "^5.1.8",
     "react-native-vector-icons": "^4.0.0",
     "react-navigation": "^1.0.0-beta.5"
   },
