@@ -576,23 +576,23 @@ export class Topic extends Component<void, Props, State> {
     };
 
     const answerTile = {
-      width: 80,
       marginHorizontal: 8,
       alignItems: 'center',
       justifyContent: 'center'
 
     };
 
-    const renderScalarAnswer = (value, idx) => {
-      const width = answerTile.width;
+    const renderScalarAnswer = value => {
       const height = 14;
       const goesLeft = value < 0.5;
+      const width = Math.abs(value - 0.51) * 100 / 1;
+      const left = goesLeft ? value * 100 / 1 : 51;
       const cornerRadius = 6;
 
       const style = {
         position: 'absolute',
-        left: goesLeft ? value * width : 0.5 * width,
-        right: goesLeft ? 0.5 * width : width * (1 - value),
+        left: left + '%',
+        width: width + '%',
         height,
         borderBottomLeftRadius: goesLeft ? cornerRadius : 0,
         borderTopLeftRadius: goesLeft ? cornerRadius : 0,
@@ -608,10 +608,18 @@ export class Topic extends Component<void, Props, State> {
             styles.scalarAnswer,
             answerTile,
             {
-              position: 'relative'
+              position: 'relative',
+              flex: 1
             }
           ]}>
           <View style={style} />
+          <View style={{
+            position: 'absolute',
+            left: '49%',
+            width: '2%',
+            height: 28,
+            backgroundColor: '#ccc'
+          }} />
         </View>
       );
     };
@@ -824,10 +832,10 @@ const styles = StyleSheet.create({
 
   // prompts
   answers: {
-    flexDirection: 'row'
+    flexDirection: 'row',
+    flex: 1
   },
   scalarAnswer: {
-    width: 80
   },
   multipleChoiceAnswer: {
   }
