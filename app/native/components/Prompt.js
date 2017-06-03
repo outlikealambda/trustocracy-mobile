@@ -9,19 +9,22 @@ import {
 import Svg, { G, Path } from 'react-native-svg';
 
 import * as D3Shape from 'd3-shape';
-import {Prompts} from '../utils.js';
+
+export const isScalar = prompt => prompt.type === 'SCALAR';
+
+export const isMultipleChoice = prompt => prompt.type === 'MULTIPLE_CHOICE';
 
 export class Summary extends Component {
   render () {
     const prompt = this.props.prompt;
 
-    if (Prompts.isScalar(prompt)) {
+    if (isScalar(prompt)) {
       return (
         <ScalarSummary {...this.props} />
       );
     }
 
-    if (Prompts.isMultipleChoice(prompt)) {
+    if (isMultipleChoice(prompt)) {
       return (
         <MultipleChoiceSummary {...this.props} />
       );
@@ -43,6 +46,8 @@ class ScalarSummary extends Component {
     height,
     width,
     viewStyle,
+    optionStyle,
+    headerStyle,
     summaryData
   }
  */

@@ -15,10 +15,8 @@ import Markdown from 'react-native-simple-markdown';
 import Icon from 'react-native-vector-icons/Octicons';
 import { RoundedButton, InitialsButton, IconButton } from './Buttons.js';
 import * as Api from './api';
-import {
-  Persons,
-  Prompts
-} from '../utils.js';
+import { Persons } from '../utils.js';
+import * as Prompt from './Prompt.js';
 
 const trusteeColors = [
   'greenyellow',
@@ -632,7 +630,7 @@ export class Topic extends Component<void, Props, State> {
       const {selected, value} = answer;
 
       return (
-        Prompts.isScalar(prompt)
+        Prompt.isScalar(prompt)
         ? renderScalarAnswer(value)
         : (
           <View

@@ -50,11 +50,6 @@ export const Arrays = {
   )
 };
 
-export const Prompts = {
-  isScalar: prompt => prompt.type === 'SCALAR',
-  isMultipleChoice: prompt => prompt.type === 'MULTIPLE_CHOICE'
-};
-
 export const Log = {
   promise: msg => {
     return v => {
