@@ -142,9 +142,11 @@ function renderOpinionSelector (opinionInfo, pressAction) {
   return (
     <TouchableHighlight
       onPress={pressAction}>
-      {
-        renderPersonWithInfluence(influence, author, '#ccc')
-      }
+      <View style={{width: 136}}>
+        {
+          renderPersonWithInfluence(influence, author, '#ccc')
+        }
+      </View>
     </TouchableHighlight>
   );
 }
@@ -637,7 +639,7 @@ export class Topic extends Component<void, Props, State> {
         // prompts row
         <View
           style={{
-            paddingLeft: 64,
+            paddingLeft: 136,
             flexDirection: 'row'
           }}>
           {
@@ -657,36 +659,57 @@ export class Topic extends Component<void, Props, State> {
 
     const renderBrowseOpinions = (opinions, prompts) => {
       return (
-        <View style={{paddingVertical: 12}}>
-          {renderPrompts(Object.values(prompts))}
-          {
-            opinions.map(
-              opinion => (
-                <View
-                  key={opinion.id}
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    flex: 1,
-                    paddingHorizontal: 8,
-                    paddingVertical: 8
-                  }}>
-                  {
-                    renderOpinionSelector(opinion, this.showBrowseSingleOpinion(opinion.id))
-                  }
+        <ScrollView>
+          <View style={{paddingVertical: 12}}>
+            {renderPrompts(Object.values(prompts))}
+            {
+              opinions.map(
+                opinion => (
                   <View
-                    style={styles.answers}>
+                    key={opinion.id}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      flex: 1,
+                      paddingHorizontal: 8,
+                      paddingVertical: 8
+                    }}>
                     {
-                      renderAnswers(opinion.answers, prompts)
+                      renderOpinionSelector(opinion, this.showBrowseSingleOpinion(opinion.id))
                     }
+                    <View
+                      style={styles.answers}>
+                      {
+                        renderAnswers(opinion.answers, prompts)
+                      }
+                    </View>
                   </View>
-                </View>
+                )
               )
-            )
-          }
-        </View>
+            }
+          </View>
+        </ScrollView>
       );
     };
+
+    const renderOpinionText = (selectedConnection, selectedOpinion) => (
+      <ScrollView>
+        <View style={styles.instructions}>
+          <Markdown>
+            { selectedConnection
+            ? (selectedConnection.opinion
+              ? selectedConnection.opinion.text
+              : '*...No connected opinion...*'
+              )
+            : (selectedOpinion
+              ? selectedOpinion.text
+              : ''
+              )
+            }
+          </Markdown>
+        </View>
+      </ScrollView>
+    );
 
     return (
       <View style={styles.container}>
@@ -720,28 +743,11 @@ export class Topic extends Component<void, Props, State> {
         {this.state.showFriendDrawer ? renderDrawer(this.state.selectedFriend, this.state.influence) : []}
         {this.state.showAuthorDrawer ? renderDrawer(this.state.selectedConnection ? this.state.selectedConnection.author : {}, this.state.influence) : []}
         <View style={{flex: 1}}>
-          <ScrollView>
-            { this.state.isBrowse &&
-              (!this.state.selectedOpinion || !this.state.selectedOpinion.text)
+          {
+            this.state.isBrowse && (!this.state.selectedOpinion || !this.state.selectedOpinion.text)
             ? renderBrowseOpinions(this.state.opinions, this.state.prompts)
-            : (
-              <View style={styles.instructions} key={this.state.selectedConnection ? this.state.selectedConnection.id : 0}>
-                <Markdown>
-                  { this.state.selectedConnection
-                  ? (this.state.selectedConnection.opinion
-                    ? this.state.selectedConnection.opinion.text
-                    : '*...No connected opinion...*'
-                    )
-                  : (this.state.selectedOpinion
-                    ? this.state.selectedOpinion.text
-                    : ''
-                    )
-                  }
-                </Markdown>
-              </View>
-              )
-            }
-          </ScrollView>
+            : renderOpinionText(this.state.selectedConnection, this.state.selectedOpinion)
+          }
         </View>
       </View>
     );
