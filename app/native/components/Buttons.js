@@ -33,9 +33,9 @@ const buttonStyles = {
       margin: 8
     },
     regular: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
+      width: 48,
+      height: 48,
+      borderRadius: 24,
       alignItems: 'center',
       justifyContent: 'center',
       margin: 8
@@ -43,8 +43,8 @@ const buttonStyles = {
   }),
   square: StyleSheet.create({
     regular: {
-      width: 40,
-      height: 40,
+      width: 48,
+      height: 48,
       borderRadius: 2,
       alignItems: 'center',
       justifyContent: 'center',
@@ -64,8 +64,8 @@ const buttonStyles = {
 const rectangularStyles = StyleSheet.create({
   roundedContainer: {
     justifyContent: 'center',
-    height: 40,
-    borderRadius: 20
+    height: 48,
+    borderRadius: 24
   },
   roundedContainerSmall: {
     justifyContent: 'center',

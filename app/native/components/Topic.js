@@ -38,9 +38,9 @@ function influencerCircle (content, key) {
     <View
       key={key}
       style={{
-        width: 56,
-        height: 56,
-        borderRadius: 28,
+        width: 64,
+        height: 64,
+        borderRadius: 32,
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'turquoise'
@@ -98,8 +98,8 @@ function renderPersonWithInfluence (influence, person, color, pressAction, keyPr
 
 function renderForNav ({dom, isSelected}) {
   const basicStyle = {
-    width: 56,
-    height: 68
+    width: 64,
+    height: 72
   };
 
   const style = isSelected
@@ -671,19 +671,12 @@ export class Topic extends Component<void, Props, State> {
     return (
       <View style={styles.container}>
         <View
-          style={{
-            alignItems: 'flex-start',
-            marginTop: 12,
-            height: 70
-          }}>
+          style={styles.selectorIconRow}>
           { /* ScrollView needs a height; either inherited or set, and even
                if it's horizontal */}
           <ScrollView
             horizontal
-            contentContainerStyle={{
-              alignItems: 'center',
-              paddingHorizontal: 8
-            }}>
+            contentContainerStyle={styles.scrollInterior}>
             { this.state.expanded
             ? this.state.connections.map(renderTrusteeGroup)
             : renderForNav({dom: renderExpand(), isSelected: false})
@@ -749,12 +742,13 @@ const styles = StyleSheet.create({
     alignItems: 'stretch',
     backgroundColor: '#F5FCFF'
   },
-  welcome: {
-    flex: 0,
-    fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    margin: 10
+  selectorIconRow: {
+    marginTop: 12,
+    height: 72
+  },
+  scrollInterior: {
+    alignItems: 'center',
+    paddingHorizontal: 8
   },
   instructions: {
     marginLeft: 20,
@@ -768,6 +762,8 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: '#999'
   },
+
+  // drawers
   drawer: {
     flex: 0,
     alignSelf: 'stretch',
@@ -790,6 +786,7 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
 
+  // influence
   influenceSquare: {
     height: 40,
     marginVertical: 8,
@@ -799,14 +796,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
 
+  // prompts
   answers: {
     flexDirection: 'row'
   },
-
   scalarAnswer: {
     width: 80
   },
-
   multipleChoiceAnswer: {
   }
 });
