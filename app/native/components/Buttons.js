@@ -133,16 +133,15 @@ export class IconButton extends Component<void, IconProps, void> {
   render () {
     const backgroundColor = this.props.backgroundColor;
     const name = this.props.name;
-    const size = this.props.size || (this.props.isSmall ? 16 : 20);
     const color = this.props.color || 'black';
     const iconStyle = this.props.iconStyle || {};
     const onPress = this.props.onPress;
-    const basicStyle = buttonStyles.getStyle(this.props.shape, this.props.isSmall);
+    const baseStyle = buttonStyles.getStyle(this.props.shape, this.props.isSmall);
     const buttonStyle = this.props.buttonStyle || {};
 
     const icon = (
-      <View style={[basicStyle, {backgroundColor}, buttonStyle]} >
-        <Icon style={[{backgroundColor: 'transparent'}, iconStyle]} name={name} size={size} color={color} />
+      <View style={[baseStyle, {backgroundColor}, buttonStyle]} >
+        <Icon style={[{backgroundColor: 'transparent'}, iconStyle]} name={name} color={color} />
       </View>
     );
 
@@ -160,13 +159,13 @@ export class InitialsButton extends Component<void, InitialsProps, void> {
   render () {
     const backgroundColor = this.props.backgroundColor;
     const initials = this.props.initials;
-    const style = this.props.style || {};
     const onPress = this.props.onPress;
-    const buttonStyle = buttonStyles.getStyle(this.props.shape, this.props.isSmall);
+    const baseStyle = buttonStyles.getStyle(this.props.shape, this.props.isSmall);
+    const buttonStyle = this.props.buttonStyle || {};
     const fontSize = this.props.isSmall ? 12 : 22;
 
     const button = (
-      <View style={[buttonStyle, {backgroundColor}, style]}>
+      <View style={[baseStyle, {backgroundColor}, buttonStyle]}>
         <Text style={{fontSize, fontWeight: 'bold'}}>
           {initials}
         </Text>

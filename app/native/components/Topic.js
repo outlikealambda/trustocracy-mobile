@@ -268,6 +268,10 @@ export class Topic extends Component<void, Props, State> {
       });
   }
 
+  updatePrompt = promptIdx => {
+    this.animateStateChange({promptIdx});
+  }
+
   fetchSelectedOpinion = opinionId => {
     return Api.opinion(opinionId)
       .then(response => response.json())
@@ -376,10 +380,10 @@ export class Topic extends Component<void, Props, State> {
     });
   }
 
-  animateStateChange = modifiedState => {
+  animateStateChange = (modifiedState, callback = () => {}) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
 
-    this.setState(modifiedState);
+    this.setState(modifiedState, callback);
   }
 
   isSelectedFriend (person) {
@@ -641,45 +645,74 @@ export class Topic extends Component<void, Props, State> {
       );
     };
 
-    const renderPrompt = (prompt, updateFn) => {
+    const smallIcon = {
+      fontSize: 20,
+      height: 20,
+      width: 10
+    };
+
+    const renderChevron = (isDisabled, leftRight, updateFn) =>
+      isDisabled
+        ? renderDisabledChevron(leftRight)
+        : renderEnabledChevron(leftRight, updateFn);
+
+    const renderDisabledChevron = leftRight => (
+      <IconButton
+        isSmall='true'
+        shape='circle'
+        name={'chevron-' + leftRight}
+        key={leftRight}
+        iconStyle={smallIcon}
+        color='#ccc'
+        backgroundColor='#efefef'
+        onPress={() => {}} />
+    );
+
+    const renderEnabledChevron = (leftRight, updateFn) => (
+      <IconButton
+        isSmall='true'
+        shape='circle'
+        name={'chevron-' + leftRight}
+        key={leftRight}
+        iconStyle={smallIcon}
+        color='#444'
+        backgroundColor='#ddd'
+        onPress={updateFn} />
+    );
+
+    const renderPrompt = (prompts, promptIdx, updateFn) => {
+      const prompt = prompts[promptIdx];
+      const isFirst = promptIdx === 0;
+      const isLast = promptIdx === prompts.length - 1;
+
       return (
         // prompts row
         <View
+          key='prompt'
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            marginRight: 48,
-            marginLeft: 48,
-            marginVertical: 16
+            marginRight: 40,
+            marginLeft: 40,
+            marginVertical: 16,
+            minHeight: 80,
+            flex: 1
           }}>
-          <IconButton
-            isSmall='true'
-            shape='circle'
-            name='chevron-left'
-            key='previous'
-            backgroundColor='#ddd'
-            style={{flex: 0}}
-            iconStyle={{fontSize: 20, height: 20, width: 10}}
-            onPress={() => updateFn(0)} />
+          {
+            renderChevron(isFirst, 'left', () => updateFn(promptIdx - 1))
+          }
           <Text
             style={{
               flex: 1,
               fontSize: 18,
               textAlign: 'center',
               paddingHorizontal: 8
-
             }}>
             {prompt.text}
           </Text>
-          <IconButton
-            isSmall='true'
-            shape='circle'
-            name='chevron-right'
-            key='next'
-            backgroundColor='#ddd'
-            style={{flex: 0}}
-            iconStyle={{fontSize: 20, height: 20, width: 10}}
-            onPress={() => updateFn(0)} />
+          {
+            renderChevron(isLast, 'right', () => updateFn(promptIdx + 1))
+          }
         </View>
       );
     };
@@ -690,7 +723,7 @@ export class Topic extends Component<void, Props, State> {
       return (
         <ScrollView>
           <View style={{paddingVertical: 12}}>
-            {renderPrompt(prompts[promptIdx], updatePromptFn)}
+            {renderPrompt(prompts, promptIdx, updatePromptFn)}
             {
               opinions.map(
                 opinion => (
@@ -774,7 +807,7 @@ export class Topic extends Component<void, Props, State> {
         <View style={{flex: 1}}>
           {
             this.state.isBrowse && (!this.state.selectedOpinion || !this.state.selectedOpinion.text)
-            ? renderBrowseOpinions(this.state.opinions, this.state.prompts, this.state.promptIdx, () => console.log('pressed!'))
+            ? renderBrowseOpinions(this.state.opinions, this.state.prompts, this.state.promptIdx, this.updatePrompt)
             : renderOpinionText(this.state.selectedConnection, this.state.selectedOpinion)
           }
         </View>
