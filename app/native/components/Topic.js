@@ -61,10 +61,39 @@ function renderPerson (person, color, pressAction, keyPrefix = 'p') {
   );
 
   if (person.isInfluencer) {
-    trusteeView = influencerCircle(trusteeView, keyPrefix + 'influencer' + person.id);
+    trusteeView = influencerCircle(trusteeView, keyPrefix + person.id);
   }
 
   return trusteeView;
+}
+
+function renderPersonWithInfluence (influence, person, color, pressAction, keyPrefix = 'p') {
+  return (
+    <View
+      key={keyPrefix + person.id}
+      style={{
+        width: 56
+      }}>
+      {renderPerson(person, color, pressAction, keyPrefix)}
+      <View
+        style={{
+          alignItems: 'center',
+          marginTop: -12
+        }}>
+        <Text
+          style={{
+            fontSize: 10,
+            backgroundColor: 'pink',
+            paddingVertical: 2,
+            paddingHorizontal: 4,
+            borderRadius: 6,
+            overflow: 'hidden'
+          }}>
+          {influence}
+        </Text>
+      </View>
+    </View>
+  );
 }
 
 function renderForNav ({dom, isSelected}) {
@@ -89,41 +118,15 @@ function renderForNav ({dom, isSelected}) {
 }
 
 function renderOpinionSelector (opinionInfo, pressAction) {
-  const {id, influence, author} = opinionInfo;
+  const {influence, author} = opinionInfo;
 
   return (
     <TouchableHighlight
-      key={id}
       onPress={pressAction}>
       {
-        twoCol(
-          renderPerson(
-            author,
-            '#ccc'
-          ),
-          (
-            <View style={[styles.influenceSquare, {marginLeft: -9}]}>
-              <Text style={{fontSize: 14}}>
-                <Bold>{influence}</Bold> pts
-              </Text>
-            </View>
-          )
-        )
+        renderPersonWithInfluence(influence, author, '#ccc')
       }
     </TouchableHighlight>
-  );
-}
-
-function twoCol (first, second) {
-  return (
-    <View style={{ margin: 8, flexDirection: 'row' }}>
-      <View style={{ flex: 0, justifyContent: 'center' }}>
-        {first}
-      </View>
-      <View style={{ flex: 3, alignItems: 'flex-start' }}>
-        {second}
-      </View>
-    </View>
   );
 }
 
@@ -142,6 +145,7 @@ type State = {
   isBrowse : boolean,
   expanded: boolean,
   opinions: Array<any>,
+  prompts: Array<any>,
   selectedOpinionIdx: number,
   selectedOpinion: any,
   showFriendDrawer: boolean,
@@ -171,6 +175,7 @@ export class Topic extends Component<void, Props, State> {
       isBrowse: false,
       expanded: true,
       opinions: [],
+      prompts: [],
       selectedOpinionIdx: -1,
       selectedOpinion: null,
       showFriendDrawer: false,
@@ -181,6 +186,7 @@ export class Topic extends Component<void, Props, State> {
     this.fetchInfluence(topicId, this.state.userId);
     this.fetchTopicTitle(topicId);
     this.fetchOpinions(topicId);
+    this.fetchPrompts(topicId);
   }
 
   fetchConnected = (topicId, userId) => {
@@ -224,6 +230,15 @@ export class Topic extends Component<void, Props, State> {
     return Api.opinions(topicId)
       .then(response => response.json())
       .then(opinions => this.animateStateChange({ opinions }))
+      .catch(error => {
+        console.error(error);
+      });
+  }
+
+  fetchPrompts = topicId => {
+    return Api.prompts(topicId)
+      .then(response => response.json())
+      .then(prompts => this.setState({prompts}))
       .catch(error => {
         console.error(error);
       });
@@ -410,13 +425,6 @@ export class Topic extends Component<void, Props, State> {
       );
 
       if (author) {
-        const authorSquare = renderPerson(
-          author,
-          author.isRanked || author.isManual ? friendColor : '#ccc',
-          this.toggleAuthorDrawer,
-          'author'
-        );
-
         return (
           <View
             style={{
@@ -441,12 +449,12 @@ export class Topic extends Component<void, Props, State> {
                 flexDirection: 'row',
                 flex: 0
               }}>
-              {authorSquare}
-              <View style={[styles.influenceSquare, {marginLeft: -9}]}>
-                <Text style={{fontSize: 14}}>
-                  <Bold>{this.state.selectedConnection.influence}</Bold> pts
-                </Text>
-              </View>
+              {renderPersonWithInfluence(
+                this.state.selectedConnection.influence,
+                author,
+                author.isRanked || author.isManual ? friendColor : '#ccc',
+                this.toggleAuthorDrawer
+              )}
             </View>
           </View>
         );
@@ -541,10 +549,121 @@ export class Topic extends Component<void, Props, State> {
       );
     };
 
-    const renderBrowseOpinions = opinions => {
+    const promptUtils = {
+      isScalar: prompt => prompt.type === 'SCALAR',
+      isMultipleChoice: prompt => prompt.type === 'MULTIPLE_CHOICE'
+    };
+
+    const answerTile = {
+      width: 80,
+      marginHorizontal: 8,
+      alignItems: 'center',
+      justifyContent: 'center'
+
+    };
+
+    const renderScalarAnswer = (value, idx) => {
+      const width = answerTile.width;
+      const height = 14;
+      const goesLeft = value < 0.5;
+      const cornerRadius = 6;
+
+      const style = {
+        position: 'absolute',
+        left: goesLeft ? value * width : 0.5 * width,
+        right: goesLeft ? 0.5 * width : width * (1 - value),
+        height,
+        borderBottomLeftRadius: goesLeft ? cornerRadius : 0,
+        borderTopLeftRadius: goesLeft ? cornerRadius : 0,
+        borderBottomRightRadius: goesLeft ? 0 : cornerRadius,
+        borderTopRightRadius: goesLeft ? 0 : cornerRadius,
+        backgroundColor: goesLeft ? 'blue' : 'orange'
+      };
+
+      return (
+        <View
+          key={idx}
+          style={[
+            styles.scalarAnswer,
+            answerTile,
+            {
+              position: 'relative'
+            }
+          ]}>
+          <View style={style} />
+        </View>
+      );
+    };
+
+    const renderAnswers = (answers, prompts) =>
+      answers.map(({promptId, selected, value}, idx) => {
+        const prompt = prompts[promptId];
+
+        return (
+          promptUtils.isScalar(prompt)
+          ? renderScalarAnswer(value, idx)
+          : (
+            <View
+              key={idx}
+              style={[styles.multipleChoiceAnswer, answerTile]}>
+              <Text>{prompt.options[selected].text}</Text>
+            </View>
+          )
+        );
+      }
+    );
+
+    const renderPrompts = prompts => {
+      return (
+        // prompts row
+        <View
+          style={{
+            paddingLeft: 64,
+            flexDirection: 'row'
+          }}>
+          {
+            prompts.map((prompt, idx) => (
+              <View
+                key={idx}
+                style={[
+                  answerTile
+                ]}>
+                <Text style={{textAlign: 'center'}}>{prompt.textShort}</Text>
+              </View>
+            ))
+          }
+        </View>
+      );
+    };
+
+    const renderBrowseOpinions = (opinions, prompts) => {
       return (
         <View style={{paddingVertical: 12}}>
-          {opinions.map(opinion => renderOpinionSelector(opinion, this.showBrowseSingleOpinion(opinion.id)))}
+          {renderPrompts(Object.values(prompts))}
+          {
+            opinions.map(
+              opinion => (
+                <View
+                  key={opinion.id}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    flex: 1,
+                    paddingHorizontal: 8
+                  }}>
+                  {
+                    renderOpinionSelector(opinion, this.showBrowseSingleOpinion(opinion.id))
+                  }
+                  <View
+                    style={styles.answers}>
+                    {
+                      renderAnswers(opinion.answers, prompts)
+                    }
+                  </View>
+                </View>
+              )
+            )
+          }
         </View>
       );
     };
@@ -591,7 +710,7 @@ export class Topic extends Component<void, Props, State> {
           <ScrollView>
             { this.state.isBrowse &&
               (!this.state.selectedOpinion || !this.state.selectedOpinion.text)
-            ? renderBrowseOpinions(this.state.opinions)
+            ? renderBrowseOpinions(this.state.opinions, this.state.prompts)
             : (
               <View style={styles.instructions} key={this.state.selectedConnection ? this.state.selectedConnection.id : 0}>
                 <Markdown>
@@ -643,17 +762,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 5
   },
-  roundedLeftHalf: {
-    borderTopRightRadius: 0,
-    borderBottomRightRadius: 0,
-    backgroundColor: '#ccc'
-  },
-  roundedRightHalf: {
-    borderTopLeftRadius: 0,
-    borderBottomLeftRadius: 0,
-    borderWidth: 1,
-    borderColor: 'pink'
-  },
   miniCircle: {
     width: 4,
     height: 4,
@@ -689,5 +797,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     justifyContent: 'center'
+  },
+
+  answers: {
+    flexDirection: 'row'
+  },
+
+  scalarAnswer: {
+    width: 80
+  },
+
+  multipleChoiceAnswer: {
   }
 });

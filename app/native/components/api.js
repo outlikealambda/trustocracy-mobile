@@ -13,6 +13,8 @@ export const topicTitle = topicId => fetch(`topic/${topicId}`);
 
 export const opinions = topicId => fetch(`topic/${topicId}/opinions`);
 
+export const prompts = topicId => fetch(`topic/${topicId}/prompts`);
+
 export const opinion = opinionId => fetch(`opinion/${opinionId}`);
 
 export const target = {
