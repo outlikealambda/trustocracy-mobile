@@ -11,7 +11,7 @@ import {
   View
 } from 'react-native';
 import * as Api from './api.js';
-import { Summary as PromptSummary } from './Prompt.js';
+import * as Prompt from './Prompt.js';
 
 type Topic = {
   id: string,
@@ -53,16 +53,31 @@ export class TopicList extends Component<void, Props, State> {
     ));
   }
 
-  renderPrompt = prompt => {
+  renderPrompt = (prompt, idx, array) => {
     const {id: key, options} = prompt;
     const values = [];
+    const isLast = (idx === array.length - 1);
 
-    for (let i = 0; i < options.length; i++) {
-      values.push(Math.random());
+    if (Prompt.isMultipleChoice(prompt)) {
+      for (let i = 0; i < options.length; i++) {
+        values.push(Math.random());
+      }
+    } else {
+      for (let i = 0; i < 10; i++) {
+        values.push(Math.random());
+      }
     }
 
     return (
-      <PromptSummary key={key} prompt={prompt} summaryData={values} />
+      <View
+        key={key}
+        style={{
+          flex: 1,
+          borderBottomWidth: isLast ? 0 : 1,
+          borderBottomColor: '#eee'
+        }}>
+        <Prompt.Summary prompt={prompt} summaryData={values} />
+      </View>
     );
   }
 
@@ -73,8 +88,8 @@ export class TopicList extends Component<void, Props, State> {
       <TouchableHighlight key={topic.id} onPress={() => navigate('topic', { id: topic.id, title: topic.text })}>
         <View
           style={{
-            borderBottomWidth: 2,
-            borderBottomColor: '#ddd'
+            borderTopWidth: 2,
+            borderTopColor: '#ccc'
           }}>
           <View
             style={{

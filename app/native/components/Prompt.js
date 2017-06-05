@@ -6,9 +6,10 @@ import {
   View
 } from 'react-native';
 
-import Svg, { G, Path } from 'react-native-svg';
+import Svg, { G, Path, Rect } from 'react-native-svg';
 
 import * as D3Shape from 'd3-shape';
+import * as D3Scale from 'd3-scale';
 
 export const isScalar = prompt => prompt.type === 'SCALAR';
 
@@ -32,11 +33,114 @@ export class Summary extends Component {
   }
 }
 
+/**
+  type ScalarProps = {
+    width,
+    height,
+    viewStyle,
+    prompt,
+    summaryData // should already be bucketed for a histogram
+  }
+ */
+
 class ScalarSummary extends Component {
+
   render () {
-    return null;
+    return (
+      <View
+        style={[styles.scalarContainer, this.props.viewStyle]}>
+        {
+          renderScalarPrompt(this.props, this.props.prompt)
+        }
+        {
+          renderHistogram(this.props, this.props.summaryData)
+        }
+        {
+          renderScalarLabels(this.props, this.props.prompt)
+        }
+      </View>
+    );
   }
 }
+
+const renderScalarPrompt = (renderingOptions, prompt) => {
+  return (
+    <View>
+      <Text
+        style={styles.scalarPrompt}>
+        {prompt.text}
+      </Text>
+    </View>
+  );
+};
+
+const renderScalarLabels = (renderingOptions, prompt) => {
+  return (
+    <View
+      style={{
+        marginVertical: 4,
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start'
+      }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          flex: 1
+        }}>
+        <View>
+          <Text style={styles.labelText}>
+            {prompt.options[0].text}
+          </Text>
+        </View>
+        <View>
+          <Text style={styles.labelText}>
+            {prompt.options[1].text}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+};
+
+const renderHistogram = (renderingOptions, data) => {
+  const width = renderingOptions.width || 320;
+  const height = renderingOptions.height || 64;
+
+  const maxData = Math.max(...data);
+
+  const xScale = D3Scale
+    .scaleBand()
+    .rangeRound([0, width])
+    .padding(0.2)
+    .domain(data);
+
+  const yScale = D3Scale
+    .scaleLinear()
+    .rangeRound([height, 0])
+    .domain([0, maxData]);
+
+  return (
+    <Svg width={width} height={height}>
+      <G>
+        {
+          data.map((bar, idx) => (
+            <Rect
+              key={idx}
+              x={xScale(bar)}
+              y={yScale(bar) / 2}
+              width={xScale.bandwidth()}
+              height={height - yScale(bar)}
+              fill={'#444'}
+              />
+          ))
+        }
+      </G>
+    </Svg>
+  );
+};
 
 /**
   type MultipleChoiceProps = {
@@ -56,8 +160,7 @@ class MultipleChoiceSummary extends Component {
   render () {
     return (
       <View
-        key={this.props.key}
-        style={[styles.summaryContainer, this.props.viewStyle]}>
+        style={[styles.multipleChoiceContainer, this.props.viewStyle]}>
         {
           renderPie(this.props, this.props.summaryData)
         }
@@ -118,11 +221,8 @@ const renderPiePrompt = (renderingOptions, prompt) => {
 
   return (
     <View
-      style={{
-        padding: 8,
-        flex: 1
-      }}>
-      <Text style={[headerStyle]}>{prompt.text}</Text>
+      style={styles.piePrompt}>
+      <Text style={[styles.piePromptHeader, headerStyle]}>{prompt.text}</Text>
       {prompt.options.map(option => (
         <Text
           key={option.sortOrder}
@@ -139,14 +239,42 @@ const renderPiePrompt = (renderingOptions, prompt) => {
 };
 
 const styles = StyleSheet.create({
-  summaryContainer: {
+  scalarContainer: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    flex: 1,
+    alignItems: 'center',
+    flexDirection: 'column'
+  },
+  multipleChoiceContainer: {
     paddingVertical: 8,
     paddingHorizontal: 16,
     flexDirection: 'row',
     flex: 1,
     alignItems: 'center'
   },
+  piePrompt: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    flex: 1
+  },
+  piePromptHeader: {
+    marginBottom: 4,
+    fontSize: 16
+  },
   piePromptOption: {
+    marginLeft: 4,
+    marginTop: 2,
+    fontSize: 16,
     fontWeight: 'bold'
+  },
+  labelText: {
+    color: '#666',
+    fontStyle: 'italic'
+  },
+  scalarPrompt: {
+    padding: 8,
+    paddingBottom: 16,
+    fontSize: 16
   }
 });
