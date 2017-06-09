@@ -49,7 +49,7 @@ export class TopicList extends Component<void, Props, State> {
     return Promise.all(topics.map(topic =>
       Api.prompts(topic.id)
         .then(response => response.json())
-        .then(prompts => Object.assign({}, topic, {prompts: Object.values(prompts)}))
+        .then(prompts => Object.assign({}, topic, {prompts}))
     ));
   }
 
@@ -84,8 +84,14 @@ export class TopicList extends Component<void, Props, State> {
   renderTopic = (topic, topicIdx) => {
     const { navigate } = this.props.navigation;
 
+    const navigationOptions = {
+      id: topic.id,
+      title: topic.text,
+      prompts: topic.prompts
+    };
+
     return (
-      <TouchableHighlight key={topic.id} onPress={() => navigate('topic', { id: topic.id, title: topic.text })}>
+      <TouchableHighlight key={topic.id} onPress={() => navigate('topic', navigationOptions)}>
         <View
           style={{
             borderTopWidth: 2,

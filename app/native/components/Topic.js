@@ -187,9 +187,11 @@ export class Topic extends Component<void, Props, State> {
     super(props);
 
     const topicId = this.props.navigation.state.params.id;
+    const prompts = this.props.navigation.state.params.prompts;
 
     this.state = {
       topicId,
+      prompts,
       userId: 2,
       influence: 0,
       selectedConnection: null,
@@ -199,7 +201,6 @@ export class Topic extends Component<void, Props, State> {
       isBrowse: false,
       expanded: true,
       opinions: [],
-      prompts: [],
       promptIdx: 0,
       selectedOpinionIdx: -1,
       selectedOpinion: null,
@@ -211,7 +212,6 @@ export class Topic extends Component<void, Props, State> {
     this.fetchInfluence(topicId, this.state.userId);
     this.fetchTopicTitle(topicId);
     this.fetchOpinions(topicId);
-    this.fetchPrompts(topicId);
   }
 
   fetchConnected = (topicId, userId) => {
@@ -255,15 +255,6 @@ export class Topic extends Component<void, Props, State> {
     return Api.opinions(topicId)
       .then(response => response.json())
       .then(opinions => this.animateStateChange({ opinions }))
-      .catch(error => {
-        console.error(error);
-      });
-  }
-
-  fetchPrompts = topicId => {
-    return Api.prompts(topicId)
-      .then(response => response.json())
-      .then(prompts => this.setState({prompts}))
       .catch(error => {
         console.error(error);
       });
@@ -713,9 +704,7 @@ export class Topic extends Component<void, Props, State> {
       );
     };
 
-    const renderBrowseOpinions = (opinions, promptsMap, promptIdx, updatePromptFn) => {
-      const prompts = Object.values(promptsMap);
-
+    const renderBrowseOpinions = (opinions, prompts, promptIdx, updatePromptFn) => {
       return (
         <ScrollView>
           <View style={{paddingVertical: 12}}>
