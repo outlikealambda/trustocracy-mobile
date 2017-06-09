@@ -41,7 +41,7 @@ export class TopicList extends Component<void, Props, State> {
       .then(this.fetchPrompts)
       .then(topics => this.setState({ topics }))
       .catch(error => {
-        console.error(error);
+        console.error('error fetching topics', error);
       });
   }
 

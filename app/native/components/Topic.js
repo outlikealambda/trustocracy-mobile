@@ -69,50 +69,29 @@ function renderPerson (person, color, pressAction, keyPrefix = 'p') {
 }
 
 function renderPersonWithInfluence (influence, person, color, pressAction, keyPrefix = 'p') {
-  const vertical = {
+  const horizontal = {
     outer: {
-      width: 76
-    },
-    inner: {
-      alignItems: 'center',
-      borderWidth: 2,
-      borderColor: '#ccc',
-      marginHorizontal: 8,
-      marginTop: -12,
-      paddingVertical: 4
+      height: 76,
+      flexDirection: 'row'
     }
   };
-
-  // const horizontal = {
-  //   outer: {
-  //     height: 76,
-  //     flexDirection: 'row'
-  //   },
-  //   inner: {
-  //     alignItems: 'center',
-  //     justifyContent: 'center',
-  //     borderWidth: 2,
-  //     borderColor: '#ccc',
-  //     marginVertical: 16,
-  //     marginLeft: -10,
-  //     paddingHorizontal: 8
-  //   }
-  // };
 
   return (
     <View
       key={keyPrefix + person.id}
-      style={vertical.outer}>
+      style={horizontal.outer}>
       {renderPerson(person, color, pressAction, keyPrefix)}
-      <View
-        style={vertical.inner}>
-        <Text
-          style={{
-            fontSize: 16
-          }}>
-          {influence}
-        </Text>
-      </View>
+      {renderInfluence(influence, {marginLeft: -10})}
+    </View>
+  );
+}
+
+function renderInfluence (influence, style = {}) {
+  return (
+    <View style={[styles.influence, style]}>
+      <Text style={{fontSize: 16}}>
+        {influence}
+      </Text>
     </View>
   );
 }
@@ -154,6 +133,23 @@ function renderOpinionSelector (opinionInfo, pressAction) {
 }
 
 // END STATELESS RENDER FUNCTIONS
+
+// STATELESS HELPER FUNCTIONS
+
+function findInfluencerConnectionCombo (connections) {
+  for (let i = 0; i < connections.length; i++) {
+    for (let j = 0; j < connections[i].friends.length; j++) {
+      if (connections[i].friends[j].isInfluencer) {
+        return {
+          connection: connections[i],
+          friend: connections[i].friends[j]
+        };
+      }
+    }
+  }
+
+  return {};
+}
 
 type Props = {
   id: string
@@ -228,7 +224,8 @@ export class Topic extends Component<void, Props, State> {
         return connections;
       })
       .catch(error => {
-        console.error(error);
+        console.error('fetch connected error', error);
+        throw error;
       });
   }
 
@@ -237,7 +234,8 @@ export class Topic extends Component<void, Props, State> {
       .then(response => response.json())
       .then(r => this.animateStateChange({ influence: r.influence }))
       .catch(error => {
-        console.error(error);
+        console.error('fetch influence error', error);
+        throw error;
       });
   }
 
@@ -247,7 +245,8 @@ export class Topic extends Component<void, Props, State> {
       .then(topicInfo => topicInfo.text)
       .then(title => this.animateStateChange({ title }))
       .catch(error => {
-        console.error(error);
+        console.error('fetch topic title', error);
+        throw error;
       });
   }
 
@@ -256,7 +255,8 @@ export class Topic extends Component<void, Props, State> {
       .then(response => response.json())
       .then(opinions => this.animateStateChange({ opinions }))
       .catch(error => {
-        console.error(error);
+        console.error('fetch opinions error', error);
+        throw error;
       });
   }
 
@@ -395,7 +395,7 @@ export class Topic extends Component<void, Props, State> {
             dom: renderPerson(
               friend,
               color,
-              this.showConnectedOpinion(connection, friend, friend.id)
+              this.showConnectedOpinion(connection, friend)
             ),
             isSelected: this.isSelectedFriend(friend)
           }))
@@ -487,6 +487,42 @@ export class Topic extends Component<void, Props, State> {
       }
     };
 
+    const renderTopicInfo = (influence, connections) => {
+      if (!connections.length) {
+        return null;
+      }
+
+      const found = findInfluencerConnectionCombo(connections);
+      const {friend: activeInfluencer, connection: activeConnection} = found;
+
+      return (
+        <View
+          style={{
+            flex: 1,
+            alignItems: 'center'
+          }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-around',
+              alignItems: 'center',
+              flex: 0
+            }}>
+            <Text>You have</Text>
+            {renderInfluence(influence)}
+            <Text>influence</Text>
+          </View>
+          {
+            renderPerson(
+              activeInfluencer,
+              'pink',
+              this.showConnectedOpinion(activeConnection, activeInfluencer)
+            )
+          }
+        </View>
+      );
+    };
+
     const renderDrawer = (person, influence) => {
       if (!person) return [];
 
@@ -573,7 +609,6 @@ export class Topic extends Component<void, Props, State> {
       marginHorizontal: 8,
       alignItems: 'center',
       justifyContent: 'center'
-
     };
 
     const renderScalarAnswer = value => {
@@ -739,27 +774,35 @@ export class Topic extends Component<void, Props, State> {
       );
     };
 
-    const renderOpinionText = (selectedConnection, selectedOpinion) => (
+    const renderOpinionText = (opinion, defaultText = '') => (
       <ScrollView>
         <View style={styles.instructions}>
           <Markdown>
-            { selectedConnection
-            ? (selectedConnection.opinion
-              ? selectedConnection.opinion.text
-              : '*...No connected opinion...*'
-              )
-            : (selectedOpinion
-              ? selectedOpinion.text
-              : ''
-              )
+            { opinion
+              ? opinion.text
+              : defaultText
             }
           </Markdown>
         </View>
       </ScrollView>
     );
 
+    const renderBody = state => {
+      if (state.isBrowse) {
+        return state.selectedOpinion && state.selectedOpinion.text
+          ? renderOpinionText(state.selectedOpinion)
+          : renderBrowseOpinions(state.opinions, state.prompts, state.promptIdx, this.updatePrompt);
+      } else {
+        return state.selectedConnection && state.selectedConnection.opinion
+          ? renderOpinionText(state.selectedConnection.opinion)
+          : renderTopicInfo(state.influence, state.connections);
+      }
+    };
+
     return (
       <View style={styles.container}>
+
+        {/* NAVIGATION */}
         <View
           style={styles.selectorIconRow}>
           { /* ScrollView needs a height; either inherited or set, and even
@@ -771,18 +814,18 @@ export class Topic extends Component<void, Props, State> {
             ? this.state.connections.map(renderTrusteeGroup)
             : renderForNav({dom: renderExpand(), isSelected: false})
             }
-            { this.state.isBrowse &&
-              !this.state.selectedOpinion
+            { this.state.isBrowse && !this.state.selectedOpinion
             ? renderForNav({dom: renderBook(), isSelected: true})
             : renderForNav({dom: renderBook(), isSelected: false})
             }
-            { this.state.isBrowse &&
-              this.state.selectedOpinion
+            { this.state.isBrowse && this.state.selectedOpinion
             ? renderForNav({dom: renderAuthorNavCircle(this.state.selectedOpinion.author), isSelected: true})
             : []
             }
           </ScrollView>
         </View>
+
+        {/* BODY */}
         {/* mark as a row, so that it will fill horizontally */}
         <View style={{flex: 0, flexDirection: 'row'}}>
           {!this.state.isBrowse ? renderOpinionHeader() : []}
@@ -790,10 +833,16 @@ export class Topic extends Component<void, Props, State> {
         {this.state.showFriendDrawer ? renderDrawer(this.state.selectedFriend, this.state.influence) : []}
         {this.state.showAuthorDrawer ? renderDrawer(this.state.selectedConnection ? this.state.selectedConnection.author : {}, this.state.influence) : []}
         <View style={{flex: 1}}>
+          { renderBody(this.state) }
+          { // topic info or specific connection (when not browsing)
+            // !this.state.isBrowse && !this.state.selectedConnection && this.state.connections && this.state.connections.length
+            // ? renderTopicInfo(this.state.influence, this.state.connections)
+            // : renderOpinionText(this.state.selectedConnection && this.state.selectedConnection.opinion, 'No connection available')
+          }
           {
-            this.state.isBrowse && (!this.state.selectedOpinion || !this.state.selectedOpinion.text)
-            ? renderBrowseOpinions(this.state.opinions, this.state.prompts, this.state.promptIdx, this.updatePrompt)
-            : renderOpinionText(this.state.selectedConnection, this.state.selectedOpinion)
+            // this.state.isBrowse && (!this.state.selectedOpinion || !this.state.selectedOpinion.text)
+            // ? renderBrowseOpinions(this.state.opinions, this.state.prompts, this.state.promptIdx, this.updatePrompt)
+            // : renderOpinionText(this.state.selectedOpinion)
           }
         </View>
       </View>
@@ -860,13 +909,13 @@ const styles = StyleSheet.create({
   },
 
   // influence
-  influenceSquare: {
-    height: 40,
-    marginVertical: 8,
-    paddingHorizontal: 8,
-    borderWidth: 1,
+  influence: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
     borderColor: '#ccc',
-    justifyContent: 'center'
+    marginVertical: 16,
+    paddingHorizontal: 8
   },
 
   // prompts
