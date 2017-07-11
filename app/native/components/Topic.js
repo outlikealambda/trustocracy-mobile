@@ -170,7 +170,6 @@ type State = {
   connections: Array<any>,
   title: string,
   isBrowse : boolean,
-  expanded: boolean,
   opinions: Array<any>,
   prompts: Array<any>,
   promptIdx: number,
@@ -204,7 +203,6 @@ export class Topic extends Component<void, Props, State> {
       connections: [],
       title: '',
       isBrowse: false,
-      expanded: true,
       opinions: [],
       promptIdx: 0,
       selectedOpinionIdx: -1,
@@ -346,7 +344,6 @@ export class Topic extends Component<void, Props, State> {
         isBrowse: true,
         selectedFriend: null,
         selectedConnection: null,
-        expanded: false,
         selectedOpinion: null
       },
       defaultState.hiddenDrawers
@@ -373,12 +370,6 @@ export class Topic extends Component<void, Props, State> {
       },
       defaultState.hiddenDrawers
     ));
-  }
-
-  showTrusteeIcons = () => {
-    this.animateStateChange({
-      expanded: true
-    });
   }
 
   animateStateChange = (modifiedState, callback = () => {}) => {
@@ -422,78 +413,71 @@ export class Topic extends Component<void, Props, State> {
         onPress={this.showBrowseAllOpinions} />
     );
 
-    const renderExpand = () => (
-      <IconButton
-        shape='circle'
-        name='chevron-left'
-        key='expand'
-        backgroundColor='wheat'
-        iconStyle={{fontSize: 28, height: 28, width: 14}}
-        onPress={this.showTrusteeIcons} />
-    );
-
-    const renderAuthorNavCircle = author => (
-      <InitialsButton
-        shape='circle'
-        backgroundColor='wheat'
-        initials={Persons.initials(author)} />
-    );
-
-    const renderOpinionHeader = () => {
+    const renderConnectionHeader = () => {
       if (!this.state.selectedConnection || !this.state.selectedFriend) {
         return [];
       }
 
       const friend = this.state.selectedFriend;
-      const {author, color: friendColor} = this.state.selectedConnection;
+      const {author, color: friendColor, influence} = this.state.selectedConnection;
 
-      const trusteeCircle = renderPerson(
-        friend,
-        friendColor,
-        this.toggleFriendDrawer
+      return (
+        <FriendAuthorConnection
+          friend={
+            friend && Object.assign({color: friendColor}, friend)
+          }
+          author={
+            author && Object.assign({influence}, author)
+          }
+        />
       );
+    };
 
-      if (author) {
-        return (
-          <View
-            style={{
-              flex: 1,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: 8
-            }}>
-            { trusteeCircle }
-            <View style={[styles.miniCircle]} />
-            <View style={[styles.miniCircle]} />
-            <View style={[styles.miniCircle]} />
-            <View style={[styles.miniCircle]} />
-            <View style={[styles.miniCircle]} />
-            <View style={[styles.miniCircle]} />
-            <View style={[styles.miniCircle]} />
-            <View style={[styles.miniCircle]} />
-            <Octicons name='chevron-right' size={20} color='#999' />
-            <View
-              style={{
-                flexDirection: 'row',
-                flex: 0
-              }}>
-              {renderPersonWithInfluence(
-                this.state.selectedConnection.influence,
-                author,
-                author.isRanked || author.isManual ? friendColor : '#ccc',
-                this.toggleAuthorDrawer
-              )}
-            </View>
-          </View>
-        );
-      } else {
-        return (
-          <View style={{padding: 8}}>
-            { trusteeCircle }
-          </View>
-        );
+    const renderBrowsedHeader = () => {
+      if (!this.state.selectedOpinion) {
+        return [];
       }
+
+      const {author, influence} = this.state.selectedOpinion;
+
+      return (
+        <FriendAuthorConnection
+          author={
+            Object.assign({influence}, author)
+          }
+        />
+      );
+    };
+
+    const FriendAuthorConnection = ({friend, author}) => {
+      return (
+        <View
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: 8
+          }}>
+          { friend && renderPerson(friend, friend.color, this.toggleFriendDrawer)}
+          { friend && author && <View style={[styles.miniCircle]} /> }
+          { friend && author && <View style={[styles.miniCircle]} /> }
+          { friend && author && <View style={[styles.miniCircle]} /> }
+          { friend && author && <View style={[styles.miniCircle]} /> }
+          { friend && author && <View style={[styles.miniCircle]} /> }
+          { friend && author && <View style={[styles.miniCircle]} /> }
+          { friend && author && <View style={[styles.miniCircle]} /> }
+          { friend && author && <View style={[styles.miniCircle]} /> }
+          { friend && author && <Octicons name='chevron-right' size={20} color='#999' /> }
+          { author &&
+            renderPersonWithInfluence(
+              author.influence,
+              author,
+              author.isRanked || author.isManual ? friend.color : '#ccc',
+              this.toggleAuthorDrawer
+            )}
+        </View>
+      );
     };
 
     const renderTopicInfo = (influence, connections) => {
@@ -807,25 +791,15 @@ export class Topic extends Component<void, Props, State> {
           <ScrollView
             horizontal
             contentContainerStyle={styles.scrollInterior}>
-            { this.state.expanded
-            ? this.state.connections.map(renderTrusteeGroup)
-            : renderForNav({dom: renderExpand(), isSelected: false})
-            }
-            { this.state.isBrowse && !this.state.selectedOpinion
-            ? renderForNav({dom: renderBook(), isSelected: true})
-            : renderForNav({dom: renderBook(), isSelected: false})
-            }
-            { this.state.isBrowse && this.state.selectedOpinion
-            ? renderForNav({dom: renderAuthorNavCircle(this.state.selectedOpinion.author), isSelected: true})
-            : []
-            }
+            { this.state.connections.map(renderTrusteeGroup) }
+            { renderForNav({dom: renderBook(), isSelected: this.state.isBrowse}) }
           </ScrollView>
         </View>
 
         {/* BODY */}
         {/* mark as a row, so that it will fill horizontally */}
         <View style={{flex: 0, flexDirection: 'row'}}>
-          {!this.state.isBrowse ? renderOpinionHeader() : []}
+          {!this.state.isBrowse ? renderConnectionHeader() : renderBrowsedHeader() }
         </View>
         {this.state.showFriendDrawer ? renderDrawer(this.state.selectedFriend, this.state.influence) : []}
         {this.state.showAuthorDrawer ? renderDrawer(this.state.selectedConnection ? this.state.selectedConnection.author : {}, this.state.influence) : []}
