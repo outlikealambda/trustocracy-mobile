@@ -14,11 +14,12 @@ import {
 import Markdown from 'react-native-simple-markdown';
 import { Octicons } from '@expo/vector-icons';
 import { DelegateIcon } from './delegate/Delegate.js';
-import { RoundedButton, InitialsButton, IconButton, Sizes } from './Buttons.js';
+import { RoundedButton, IconButton, Sizes } from './Buttons.js';
 import { TopicInfo } from './TopicInfo.js';
 import * as Api from './api';
-import { Persons } from '../utils.js';
 import * as Metric from './Metric.js';
+import * as Person from './Person.js';
+import Influence from './Influence.js';
 
 const trusteeColors = [
   'greenyellow',
@@ -36,48 +37,6 @@ function Bold (props) {
   return (<Text style={{fontWeight: 'bold'}}>{props.children}</Text>);
 }
 
-function influencerCircle (content, key) {
-  return (
-    <View
-      key={key}
-      style={{
-        borderWidth: 4,
-        borderRadius: 100,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderColor: 'turquoise'
-      }}>
-      {content}
-    </View>
-  );
-}
-
-function renderPerson (person, color, pressAction, keyPrefix = 'p') {
-  const buttonStyle = person.isInfluencer
-    ? {
-      margin: 2
-    }
-    : {
-      margin: 6
-    };
-
-  let trusteeView = (
-    <InitialsButton
-      shape={person.isRanked ? 'circle' : 'square'}
-      onPress={pressAction}
-      key={keyPrefix + person.id}
-      backgroundColor={color}
-      buttonStyle={buttonStyle}
-      initials={Persons.initials(person)} />
-  );
-
-  if (person.isInfluencer) {
-    trusteeView = influencerCircle(trusteeView, keyPrefix + person.id);
-  }
-
-  return trusteeView;
-}
-
 function renderPersonWithInfluence (influence, person, color, pressAction, keyPrefix = 'p') {
   const horizontal = {
     outer: {
@@ -89,18 +48,17 @@ function renderPersonWithInfluence (influence, person, color, pressAction, keyPr
     <View
       key={keyPrefix + person.id}
       style={horizontal.outer}>
-      {renderPerson(person, color, pressAction, keyPrefix)}
-      {renderInfluence(influence, {marginLeft: -10})}
-    </View>
-  );
-}
-
-function renderInfluence (influence, style = {}, fontSize = 16) {
-  return (
-    <View style={[styles.influence, style]}>
-      <Text style={{fontSize}}>
-        {influence}
-      </Text>
+      <Person.Button
+        person={
+          Object.assign({color}, person)
+        }
+        pressAction={pressAction}
+        keyPrefix={keyPrefix}
+      />
+      <Influence
+        influence={influence}
+        style={{marginLeft: -10}}
+        />
     </View>
   );
 }
@@ -392,10 +350,13 @@ export class Topic extends Component<void, Props, State> {
       return (
         connection.friends
           .map(friend => ({
-            dom: renderPerson(
-              friend,
-              color,
-              this.showConnectedOpinion(connection, friend)
+            dom: (
+              <Person.Button
+                person={
+                  Object.assign({color}, friend)
+                }
+                pressAction={this.showConnectedOpinion(connection, friend)}
+              />
             ),
             isSelected: this.isSelectedFriend(friend)
           }))
@@ -459,7 +420,12 @@ export class Topic extends Component<void, Props, State> {
             justifyContent: 'space-between',
             padding: 8
           }}>
-          { friend && renderPerson(friend, friend.color, this.toggleFriendDrawer)}
+          { friend &&
+            <Person.Button
+              person={friend}
+              pressAction={this.toggleFriendDrawer}
+            />
+          }
           { friend && author && <View style={[styles.miniCircle]} /> }
           { friend && author && <View style={[styles.miniCircle]} /> }
           { friend && author && <View style={[styles.miniCircle]} /> }
@@ -490,16 +456,16 @@ export class Topic extends Component<void, Props, State> {
 
       return (
         <TopicInfo
-          influence={renderInfluence(
-            influence,
-            {paddingVertical: 4},
-            20
-          )}
-          delegate={renderPerson(
-            activeInfluencer,
-            'pink',
-            this.showConnectedOpinion(activeConnection, activeInfluencer)
-          )}
+          influence={influence}
+          delegate={
+            <Person.Button
+              person={Object.assign(
+                {color: 'pink'},
+                activeInfluencer
+              )}
+              pressAction={this.showConnectedOpinion(activeConnection, activeInfluencer)}
+            />
+          }
           />
       );
     };
@@ -867,16 +833,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center'
-  },
-
-  // influence
-  influence: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#ccc',
-    marginVertical: 16,
-    paddingHorizontal: 8
   },
 
   // prompts

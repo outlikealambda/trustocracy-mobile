@@ -4,6 +4,7 @@ import {
   Text,
   View
 } from 'react-native';
+import Influence from './Influence.js';
 
 export class TopicInfo extends Component {
   render () {
@@ -11,7 +12,12 @@ export class TopicInfo extends Component {
       <View style={styles.container}>
         <View style={styles.row}>
           <InfoText>You wield</InfoText>
-          <View style={styles.inlineComponent}>{this.props.influence}</View>
+          <View style={styles.inlineComponent}>
+            <Influence
+              influence={this.props.influence}
+              style={{paddingVertical: 4}}
+              fontSize={20} />
+          </View>
           <InfoText>influence</InfoText>
         </View>
         <View style={styles.row}>
