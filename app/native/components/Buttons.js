@@ -9,7 +9,7 @@ import {
   TouchableHighlight,
   View
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Octicons';
+import { Octicons } from '@expo/vector-icons';
 
 const buttonStyles = {
   getStyle (shape, isSmall) {
@@ -94,14 +94,16 @@ const wrapWithTouchable = (nativeComponent, onPress) => (
   </TouchableHighlight>
 );
 
-type RoundedProps = {
-  text: string,
-  size: string,
-  style: Object<any>,
-  onPress: Function
-};
+/*
+  type RoundedProps = {
+    text: string,
+    size: string,
+    style: Object<any>,
+    onPress: Function
+  };
+*/
 
-export class RoundedButton extends Component<void, RoundedProps, void> {
+export class RoundedButton extends Component {
   render () {
     const text = this.props.text;
     const onPress = this.props.onPress;
@@ -122,14 +124,16 @@ export class RoundedButton extends Component<void, RoundedProps, void> {
   }
 }
 
-type IconProps = {
-  backgroundColor: string,
-  name: string,
-  size: number,
-  style: Object<any>
-};
+/*
+  type IconProps = {
+    backgroundColor: string,
+    name: string,
+    size: number,
+    style: Object<any>
+  };
+*/
 
-export class IconButton extends Component<void, IconProps, void> {
+export class IconButton extends Component {
   render () {
     const backgroundColor = this.props.backgroundColor;
     const name = this.props.name;
@@ -141,7 +145,7 @@ export class IconButton extends Component<void, IconProps, void> {
 
     const icon = (
       <View style={[baseStyle, {backgroundColor}, buttonStyle]} >
-        <Icon style={[{backgroundColor: 'transparent'}, iconStyle]} name={name} color={color} />
+        <Octicons style={[{backgroundColor: 'transparent'}, iconStyle]} name={name} color={color} />
       </View>
     );
 
@@ -149,13 +153,15 @@ export class IconButton extends Component<void, IconProps, void> {
   }
 }
 
-type InitialsProps = {
-  backgroundColor: string,
-  initials: string,
-  circleStyle: Object<any>
-};
+/*
+  type InitialsProps = {
+    backgroundColor: string,
+    initials: string,
+    circleStyle: Object<any>
+  };
+*/
 
-export class InitialsButton extends Component<void, InitialsProps, void> {
+export class InitialsButton extends Component {
   render () {
     const backgroundColor = this.props.backgroundColor;
     const initials = this.props.initials;

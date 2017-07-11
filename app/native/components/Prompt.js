@@ -6,7 +6,7 @@ import {
   View
 } from 'react-native';
 
-import Svg, { G, Path, Rect } from 'react-native-svg';
+import { Svg } from 'expo';
 
 import * as D3Shape from 'd3-shape';
 import * as D3Scale from 'd3-scale';
@@ -124,10 +124,10 @@ const renderHistogram = (renderingOptions, data) => {
 
   return (
     <Svg width={width} height={height}>
-      <G>
+      <Svg.G>
         {
           data.map((bar, idx) => (
-            <Rect
+            <Svg.Rect
               key={idx}
               x={xScale(bar)}
               y={yScale(bar) / 2}
@@ -137,7 +137,7 @@ const renderHistogram = (renderingOptions, data) => {
               />
           ))
         }
-      </G>
+      </Svg.G>
     </Svg>
   );
 };
@@ -198,19 +198,19 @@ const renderPie = (renderingOptions, data) => {
 
   return (
     <Svg width={width} height={height}>
-      <G x={width / 2} y={height / 2}>
+      <Svg.G x={width / 2} y={height / 2}>
         {
           D3Shape.pie().padAngle(padAngle)(data)
             .map(D3Shape.arc().innerRadius(innerRadius).outerRadius(outerRadius))
             .map((arc, idx) => (
-              <Path
+              <Svg.Path
                 d={arc}
                 key={idx}
                 fill={getPieColor(idx)}
                 />
             ))
         }
-      </G>
+      </Svg.G>
     </Svg>
   );
 };

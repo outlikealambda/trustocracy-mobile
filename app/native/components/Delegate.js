@@ -8,7 +8,7 @@ import {
   View
 } from 'react-native';
 import { TabNavigator } from 'react-navigation';
-import Icon from 'react-native-vector-icons/Octicons';
+import { Octicons } from '@expo/vector-icons';
 import * as Api from './api.js';
 import { InitialsButton, IconButton, RoundedButton } from './Buttons.js';
 import { Arrays, Log, Persons } from '../utils.js';
@@ -498,7 +498,7 @@ export const Delegate = TabNavigator({
 
 export const DelegateIcon = navigate => (
   <TouchableHighlight onPress={() => navigate('delegate')}>
-    <Icon
+    <Octicons
       name='organization'
       size={32}
       style={{marginRight: 12}} />

@@ -12,7 +12,7 @@ import {
   View
 } from 'react-native';
 import Markdown from 'react-native-simple-markdown';
-import Icon from 'react-native-vector-icons/Octicons';
+import { Octicons } from '@expo/vector-icons';
 import { DelegateIcon } from './Delegate.js';
 import { RoundedButton, InitialsButton, IconButton } from './Buttons.js';
 import { TopicInfo } from './TopicInfo.js';
@@ -466,7 +466,7 @@ export class Topic extends Component<void, Props, State> {
             <View style={[styles.miniCircle]} />
             <View style={[styles.miniCircle]} />
             <View style={[styles.miniCircle]} />
-            <Icon name='chevron-right' size={16} color='#999' />
+            <Octicons name='chevron-right' size={20} color='#999' />
             <View
               style={{
                 flexDirection: 'row',
