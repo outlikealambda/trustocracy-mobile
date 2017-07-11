@@ -477,24 +477,28 @@ class Rank extends Component {
   }
 }
 
-export const Delegate = TabNavigator({
-  add: { screen: Add },
-  pool: { screen: Activate },
-  active: { screen: Rank }
-}, {
-  swipeEnabled: true,
-  lazy: true,
-  tabBarOptions: {
-    showIcon: false,
-    activeBackgroundColor: 'blue',
-    style: {
-      backgroundColor: 'pink'
-    },
-    labelStyle: {
-      fontSize: 16
+export const Delegate = TabNavigator(
+  {
+    add: { screen: Add },
+    activate: { screen: Activate },
+    rank: { screen: Rank }
+  },
+  {
+    swipeEnabled: true,
+    lazy: true,
+    backBehavior: 'none',
+    tabBarOptions: {
+      showIcon: false,
+      activeBackgroundColor: 'blue',
+      style: {
+        backgroundColor: 'orange'
+      },
+      labelStyle: {
+        fontSize: 16
+      }
     }
   }
-});
+);
 
 export const DelegateIcon = navigate => (
   <TouchableHighlight onPress={() => navigate('delegate')}>
