@@ -5,7 +5,7 @@ import {
   View
 } from 'react-native';
 
-import { InitialsButton, RoundedButton, IconButton } from '../Buttons.js';
+import { InitialsButton, RoundedButton, IconButton, Sizes } from '../Buttons.js';
 
 import { styles } from './styles.js';
 import { Persons } from '../../utils.js';
@@ -68,7 +68,7 @@ export class Rank extends Component {
 
   iconUp = idx => (
     <IconButton
-      isSmall='true'
+      size={Sizes.SMALL}
       name='arrow-up'
       iconStyle={{fontSize: 16, height: 16, width: 10, color: 'white'}}
       buttonStyle={{marginVertical: 2}}
@@ -80,7 +80,7 @@ export class Rank extends Component {
 
   iconDown = idx => (
     <IconButton
-      isSmall='true'
+      size={Sizes.SMALL}
       name='arrow-down'
       iconStyle={{fontSize: 16, height: 16, width: 10, color: 'white'}}
       buttonStyle={{marginVertical: 2}}

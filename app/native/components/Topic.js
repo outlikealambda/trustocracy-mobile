@@ -14,7 +14,7 @@ import {
 import Markdown from 'react-native-simple-markdown';
 import { Octicons } from '@expo/vector-icons';
 import { DelegateIcon } from './delegate/Delegate.js';
-import { RoundedButton, InitialsButton, IconButton } from './Buttons.js';
+import { RoundedButton, InitialsButton, IconButton, Sizes} from './Buttons.js';
 import { TopicInfo } from './TopicInfo.js';
 import * as Api from './api';
 import { Persons } from '../utils.js';
@@ -671,7 +671,7 @@ export class Topic extends Component<void, Props, State> {
 
     const renderDisabledChevron = leftRight => (
       <IconButton
-        isSmall='true'
+        size={Sizes.SMALL}
         shape='circle'
         name={'chevron-' + leftRight}
         key={leftRight}
@@ -683,7 +683,7 @@ export class Topic extends Component<void, Props, State> {
 
     const renderEnabledChevron = (leftRight, updateFn) => (
       <IconButton
-        isSmall='true'
+        size={Sizes.SMALL}
         shape='circle'
         name={'chevron-' + leftRight}
         key={leftRight}

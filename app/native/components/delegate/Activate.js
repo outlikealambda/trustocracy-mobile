@@ -101,12 +101,10 @@ export class Activate extends Component {
               />
             <Text style={{flex: 1}}>{friend.name} {expanded}</Text>
             <IconButton
-              isSmall='true'
               name='zap'
-              iconStyle={{fontSize: 16, height: 16, width: 10, color: 'white'}}
+              iconStyle={[styles.iconStyle, {width: 20}]}
               buttonStyle={{marginVertical: 2}}
-              shape='square'
-              backgroundColor={Colors.lightGreen}
+              backgroundColor={Colors.electricBlue}
               onPress={() => activate(friend.id)}
               />
           </View>
