@@ -4,7 +4,6 @@ import {
 } from 'react-native';
 
 import { InitialsButton } from './Buttons.js';
-import { Persons } from '../utils.js';
 import Influence from './Influence.js';
 
 // Optional influence argument toggles influence badge
@@ -27,7 +26,7 @@ export const Button = ({person, pressAction, influence}) => {
       key={key}
       backgroundColor={color}
       buttonStyle={buttonStyle}
-      initials={Persons.initials(person)} />;
+      initials={initials(person)} />;
 
   if (isInfluencer) {
     button = markAsInfluencer(button, key);
@@ -74,4 +73,12 @@ function addInfluenceBadge (personButton, influence, key) {
         />
     </View>
   );
+}
+  // super fragile...
+function initials (friend) {
+  if (friend) {
+    const { name } = friend;
+    return name[0] + name.split(' ')[1][0];
+  }
+  return '';
 }

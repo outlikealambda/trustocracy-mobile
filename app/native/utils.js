@@ -1,14 +1,3 @@
-export const Persons = {
-  // super fragile...
-  initials: friend => {
-    if (friend) {
-      const { name } = friend;
-      return name[0] + name.split(' ')[1][0];
-    }
-    return '';
-  }
-};
-
 export const Arrays = {
   insert: (array, idxNew, item) => {
     const copy = array.slice(array);
