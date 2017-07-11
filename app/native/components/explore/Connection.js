@@ -9,6 +9,8 @@ import { RoundedButton } from '../Buttons.js';
 
 import { Octicons } from '@expo/vector-icons';
 
+import { Arrays } from '../../utils.js';
+
 const BoldText = props => {
   return (<Text style={{fontWeight: 'bold'}}>{props.children}</Text>);
 };
@@ -128,8 +130,6 @@ export class Connection extends Component {
   render () {
     const {state, friend, author, influence, toggleFriend, toggleAuthor, choose, clear} = this.props;
 
-    console.log('friend', friend, 'author', author);
-
     return (
       <View style={{flex: 0}}>
         <View style={{flex: 0, flexDirection: 'row'}}>
@@ -147,14 +147,9 @@ export class Connection extends Component {
                 pressAction={toggleFriend}
               />
             }
-            { friend && author && <View style={[styles.miniCircle]} /> }
-            { friend && author && <View style={[styles.miniCircle]} /> }
-            { friend && author && <View style={[styles.miniCircle]} /> }
-            { friend && author && <View style={[styles.miniCircle]} /> }
-            { friend && author && <View style={[styles.miniCircle]} /> }
-            { friend && author && <View style={[styles.miniCircle]} /> }
-            { friend && author && <View style={[styles.miniCircle]} /> }
-            { friend && author && <View style={[styles.miniCircle]} /> }
+            { friend && author &&
+              Arrays.range(8, idx => <View key={idx} style={[styles.miniCircle]} />)
+            }
             { friend && author && <Octicons name='chevron-right' size={20} color='#999' /> }
             { author &&
               <Person.Button

@@ -22,7 +22,9 @@ export const Arrays = {
 
       return agg;
     }, []
-  )
+  ),
+
+  range: (len, mapFn = () => {}) => Array.from(new Array(len), (x, idx) => mapFn(idx))
 };
 
 export const Log = {
