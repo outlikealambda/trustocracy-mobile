@@ -10,6 +10,7 @@ import {
   TouchableHighlight,
   View
 } from 'react-native';
+import { DelegateIcon } from './Delegate.js';
 import * as Api from './api.js';
 import * as Prompt from './Prompt.js';
 
@@ -29,10 +30,12 @@ type State = {
 export class TopicList extends Component<void, Props, State> {
   state: State
 
-  static navigationOptions = {
-    title: 'Topics'
-  };
-
+  static navigationOptions = ({navigation, screenProps}) => {
+    return {
+      title: 'Topics',
+      headerRight: DelegateIcon(navigation.navigate)
+    };
+  }
   constructor (props: Props) {
     super(props);
     this.state = { topics: [] };
@@ -113,20 +116,9 @@ export class TopicList extends Component<void, Props, State> {
     );
   };
 
-  renderDelegateButton = () => {
-    const { navigate } = this.props.navigation;
-
-    return (
-      <TouchableHighlight onPress={() => navigate('delegate')}>
-        <Text>Delegatesss</Text>
-      </TouchableHighlight>
-    );
-  }
-
   render () {
     return (
       <View style={styles.container}>
-        {this.renderDelegateButton()}
         <View style={{ flex: 1, alignSelf: 'stretch' }}>
           <ScrollView>
             { this.state.topics.map(this.renderTopic) }

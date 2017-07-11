@@ -8,6 +8,7 @@ import {
   View
 } from 'react-native';
 import { TabNavigator } from 'react-navigation';
+import Icon from 'react-native-vector-icons/Octicons';
 import * as Api from './api.js';
 import { InitialsButton, IconButton, RoundedButton } from './Buttons.js';
 import { Arrays, Log, Persons } from '../utils.js';
@@ -494,6 +495,15 @@ export const Delegate = TabNavigator({
     }
   }
 });
+
+export const DelegateIcon = navigate => (
+  <TouchableHighlight onPress={() => navigate('delegate')}>
+    <Icon
+      name='organization'
+      size={32}
+      style={{marginRight: 12}} />
+  </TouchableHighlight>
+);
 
 const addStyle = StyleSheet.create({
   header: {

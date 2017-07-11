@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import Markdown from 'react-native-simple-markdown';
 import Icon from 'react-native-vector-icons/Octicons';
+import { DelegateIcon } from './Delegate.js';
 import { RoundedButton, InitialsButton, IconButton } from './Buttons.js';
 import * as Api from './api';
 import { Persons } from '../utils.js';
@@ -180,7 +181,8 @@ export class Topic extends Component<void, Props, State> {
   state: State
 
   static navigationOptions = ({ navigation }) => ({
-    title: navigation.state.params.title
+    title: navigation.state.params.title,
+    headerRight: DelegateIcon(navigation.navigate)
   })
 
   constructor (props: Props) {
