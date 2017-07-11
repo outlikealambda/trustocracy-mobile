@@ -40,9 +40,8 @@ export const styles = StyleSheet.create({
     marginBottom: 16,
     flex: 0
   },
-  iconStyle: {
-    color: '#efefef',
-    fontSize: 32
+  icon: {
+    color: '#efefef'
   },
   buttonStyle: {
     backgroundColor: '#555'

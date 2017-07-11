@@ -5,7 +5,7 @@ import {
   View
 } from 'react-native';
 
-import { InitialsButton, RoundedButton, IconButton } from '../Buttons.js';
+import { InitialsButton, RoundedButton, IconButton, Sizes } from '../Buttons.js';
 
 import { styles } from './styles.js';
 import { Persons } from '../../utils.js';
@@ -102,7 +102,8 @@ export class Activate extends Component {
             <Text style={{flex: 1}}>{friend.name} {expanded}</Text>
             <IconButton
               name='zap'
-              iconStyle={[styles.iconStyle, {width: 20}]}
+              size={Sizes.MEDIUM}
+              iconStyle={[styles.icon, {width: 24 * (20 / 32)}]}
               buttonStyle={{marginVertical: 2}}
               backgroundColor={Colors.electricBlue}
               onPress={() => activate(friend.id)}

@@ -14,7 +14,7 @@ import {
 import Markdown from 'react-native-simple-markdown';
 import { Octicons } from '@expo/vector-icons';
 import { DelegateIcon } from './delegate/Delegate.js';
-import { RoundedButton, InitialsButton, IconButton, Sizes} from './Buttons.js';
+import { RoundedButton, InitialsButton, IconButton, Sizes } from './Buttons.js';
 import { TopicInfo } from './TopicInfo.js';
 import * as Api from './api';
 import { Persons } from '../utils.js';

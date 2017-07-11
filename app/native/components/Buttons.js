@@ -11,6 +11,21 @@ import {
 } from 'react-native';
 import { Octicons } from '@expo/vector-icons';
 
+const iconStyles = {
+  get (size = Sizes.LARGE) {
+    return this[normalizeSize(size)];
+  },
+  large: {
+    fontSize: 32
+  },
+  medium: {
+    fontSize: 24
+  },
+  small: {
+    fontSize: 16
+  }
+};
+
 const buttonStyles = {
   getStyle (shape = 'circle', size = Sizes.LARGE) {
     size = normalizeSize(size);
@@ -34,6 +49,14 @@ const buttonStyles = {
       justifyContent: 'center',
       margin: 8
     },
+    medium: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      alignItems: 'center',
+      justifyContent: 'center',
+      margin: 8
+    },
     large: {
       width: 60,
       height: 60,
@@ -47,6 +70,14 @@ const buttonStyles = {
     large: {
       width: 60,
       height: 60,
+      borderRadius: 2,
+      alignItems: 'center',
+      justifyContent: 'center',
+      margin: 8
+    },
+    medium: {
+      width: 44,
+      height: 44,
       borderRadius: 2,
       alignItems: 'center',
       justifyContent: 'center',
@@ -153,7 +184,7 @@ export class IconButton extends Component {
 
     const icon = (
       <View style={[baseStyle, {backgroundColor}, buttonStyle]} >
-        <Octicons style={[{backgroundColor: 'transparent'}, iconStyle]} name={name} color={color} />
+        <Octicons style={[iconStyles.get(size), iconStyle]} name={name} color={color} />
       </View>
     );
 
@@ -193,6 +224,7 @@ export class InitialsButton extends Component {
 
 export const Sizes = {
   SMALL: 'small',
+  MEDIUM: 'medium',
   LARGE: 'large'
 };
 

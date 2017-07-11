@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import {
-  StyleSheet,
   TouchableHighlight,
   View
 } from 'react-native';
@@ -184,7 +183,8 @@ export class Delegate extends Component {
 
   icons = (function (setView) {
     // Calculate icon widths based on height
-    const height = StyleSheet.flatten(styles.iconStyle).fontSize;
+    // Expose height from Buttons maybe?
+    const height = 32;
     const plusWidth = height * 24 / 32;
     const zapWidth = height * 20 / 32;
     const listOrderedWidth = height * 24 / 32;
@@ -193,21 +193,21 @@ export class Delegate extends Component {
       add: (
         <IconButton
           name='plus'
-          iconStyle={[styles.iconStyle, {width: plusWidth}]}
+          iconStyle={[styles.icon, {width: plusWidth}]}
           buttonStyle={styles.buttonStyle}
           onPress={setView(ADD)} />
       ),
       rank: (
         <IconButton
           name='list-ordered'
-          iconStyle={[styles.iconStyle, {width: listOrderedWidth}]}
+          iconStyle={[styles.icon, {width: listOrderedWidth}]}
           buttonStyle={styles.buttonStyle}
           onPress={setView(RANK)} />
       ),
       activate: (
         <IconButton
           name='zap'
-          iconStyle={[styles.iconStyle, {width: zapWidth}]}
+          iconStyle={[styles.icon, {width: zapWidth}]}
           buttonStyle={styles.buttonStyle}
           onPress={setView(ACTIVATE)} />
       )
