@@ -72,7 +72,7 @@ function findInfluencerConnectionCombo (connections) {
 
 const Relations = {
   extractFromConnections: connections => connections.reduce(
-    (agg, c) => agg.concat(c.friends, c.author ? [c.author] : []),
+    (agg, conn) => agg.concat(conn.friends, conn.author ? [conn.author] : []),
     []
   ),
   opinionMerger: relations => opinion => {
@@ -121,8 +121,7 @@ type State = {
   promptIdx: number,
   selectedOpinion: any,
   showFriendDrawer: boolean,
-  showAuthorDrawer: boolean,
-  showBrowseDrawer: boolean
+  showAuthorDrawer: boolean
 };
 
 export class Topic extends Component<void, Props, State> {
@@ -154,8 +153,7 @@ export class Topic extends Component<void, Props, State> {
       promptIdx: 0,
       selectedOpinion: null,
       showFriendDrawer: false,
-      showAuthorDrawer: false,
-      showBrowseDrawer: false
+      showAuthorDrawer: false
     };
 
     this.syncState(topicId, this.state.userId);
@@ -245,6 +243,7 @@ export class Topic extends Component<void, Props, State> {
   fetchSelectedOpinion = opinionId => {
     return Api.opinion(opinionId)
       .then(response => response.json())
+      .then(Relations.opinionMerger(this.state.allRelations))
       .catch(error => {
         console.error('failed to retrieve opinion with id: ' + opinionId, error);
         throw error;
@@ -301,12 +300,6 @@ export class Topic extends Component<void, Props, State> {
     });
   }
 
-  toggleBrowseDrawer = () => {
-    this.animateStateChange({
-      showBrowseDrawer: !this.state.showBrowseDrawer
-    });
-  }
-
   showBrowseAllOpinions = () => {
     this.animateStateChange(Object.assign(
       {
@@ -323,8 +316,7 @@ export class Topic extends Component<void, Props, State> {
     this.fetchSelectedOpinion(opinionId)
       .then(selectedOpinion => {
         this.setState({
-          selectedOpinion,
-          showBrowseDrawer: false
+          selectedOpinion
         });
       });
   }
@@ -379,13 +371,7 @@ export class Topic extends Component<void, Props, State> {
         onPress={this.showBrowseAllOpinions} />
     );
 
-    const renderConnectionHeader = () => {
-      if (!this.state.selectedConnection || !this.state.selectedFriend) {
-        return [];
-      }
-
-      const friend = this.state.selectedFriend;
-      const {author, influence} = this.state.selectedConnection;
+    const Header = ({friend, author, opinion, userInfluence}) => {
       const drawerState =
         (this.state.showFriendDrawer && 'friend') ||
         (this.state.showAuthorDrawer && 'author') ||
@@ -396,9 +382,9 @@ export class Topic extends Component<void, Props, State> {
           state={drawerState}
           friend={friend}
           author={
-            author && Object.assign({influence}, author)
+            author && Object.assign({influence: opinion.influence}, author)
           }
-          influence={this.state.influence}
+          influence={userInfluence}
           toggleFriend={this.toggleFriendDrawer}
           toggleAuthor={this.toggleAuthorDrawer}
           choose={this.fetchSetTarget(this.state.topicId, this.state.userId)}
@@ -407,24 +393,24 @@ export class Topic extends Component<void, Props, State> {
       );
     };
 
-    const renderBrowsedHeader = () => {
-      if (!this.state.selectedOpinion) {
-        return [];
-      }
-
-      const {author, influence} = this.state.selectedOpinion;
-
+    const renderConnectionHeader = () => {
       return (
-        <Connection
-          state={this.state.showBrowseDrawer ? 'author' : 'closed'}
-          author={
-            author && Object.assign({influence}, author)
-          }
-          influence={this.state.influence}
-          toggleAuthor={this.toggleBrowseDrawer}
-          choose={this.fetchSetTarget(this.state.topicId, this.state.userId)}
-          clear={this.fetchClearTarget(this.state.topicId, this.state.userId)}
+        <Header
+          friend={this.state.selectedFriend}
+          author={this.state.selectedConnection && this.state.selectedConnection.author}
+          opinion={this.state.selectedConnection}
+          userInfluence={this.state.influence}
           />
+      );
+    };
+
+    const renderBrowsedHeader = () => {
+      return (
+        <Header
+          author={this.state.selectedOpinion && this.state.selectedOpinion.author}
+          opinion={this.state.selectedOpinion}
+          userInfluence={this.state.influence}
+        />
       );
     };
 
