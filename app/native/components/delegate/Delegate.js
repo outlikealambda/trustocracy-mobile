@@ -216,7 +216,7 @@ export class Delegate extends Component {
 
   renderHeader () {
     return (
-      <View style={[styles.row, {justifyContent: 'space-around'}]}>
+      <View style={[styles.row, styles.nav]}>
         {this.icons.add}
         {this.icons.activate}
         {this.icons.rank}
@@ -244,6 +244,7 @@ export class Delegate extends Component {
             <Add
               {...this.state}
               search={this.search}
+              delegateCount={this.state.active.length + this.state.inactive.length}
               />
           }
           { this.state.currentView === ACTIVATE &&

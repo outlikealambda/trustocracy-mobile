@@ -3,7 +3,8 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
   header: {
     fontSize: 20,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    color: '#444'
   },
   row: {
     flexDirection: 'row',
@@ -13,7 +14,12 @@ export const styles = StyleSheet.create({
   },
   headerRow: {
     alignItems: 'center',
-    marginVertical: 16
+    paddingVertical: 16,
+    paddingLeft: 32,
+    backgroundColor: '#efefef',
+    borderTopWidth: 2,
+    borderColor: '#ccc',
+    marginBottom: 16
   },
   textInput: {
     paddingHorizontal: 8,
@@ -21,7 +27,8 @@ export const styles = StyleSheet.create({
     height: 40,
     borderColor: '#ddd',
     borderWidth: 1,
-    flex: 1
+    flex: 1,
+    marginVertical: 8
   },
   column: {
     flex: 1,
@@ -34,8 +41,11 @@ export const styles = StyleSheet.create({
     flex: 0
   },
   iconStyle: {
-    color: '#222',
+    color: '#efefef',
     fontSize: 32
+  },
+  buttonStyle: {
+    backgroundColor: '#555'
   },
   bigNumber: {
     marginHorizontal: 8,
@@ -43,8 +53,8 @@ export const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold'
   },
-  buttonStyle: {
-    borderWidth: 2,
-    borderColor: '#222'
+  nav: {
+    paddingVertical: 4,
+    justifyContent: 'space-around'
   }
 });

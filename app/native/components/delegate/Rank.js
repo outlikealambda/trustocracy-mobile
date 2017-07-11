@@ -37,7 +37,7 @@ export class Rank extends Component {
       <View style={{flex: 1}}>
         <View style={{flex: 2, justifyContent: 'flex-start'}}>
           <View style={[styles.row, styles.headerRow]}>
-            <Text style={styles.header}>Rank your delegates</Text>
+            <Text style={styles.header}>Rank delegates</Text>
           </View>
           {active.map(this.renderFriend(active.length))}
         </View>

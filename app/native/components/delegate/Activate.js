@@ -34,7 +34,7 @@ export class Activate extends Component {
     return (
       <View>
         <View style={[styles.row, styles.headerRow]}>
-          <Text style={styles.header}>Activate new delegates</Text>
+          <Text style={styles.header}>Activate delegates</Text>
         </View>
         <View>
           {inactive.map(this.renderInactive)}

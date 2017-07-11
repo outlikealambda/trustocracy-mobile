@@ -33,12 +33,12 @@ export class Add extends Component {
   updateInput = inputEmail => this.setState({ inputEmail })
 
   render () {
-    const {recentlyAdded, recentlyFailed} = this.props;
+    const {recentlyAdded, recentlyFailed, delegateCount} = this.props;
 
     return (
       <View>
         <View style={[styles.row, styles.headerRow]}>
-          <Text style={styles.header}>Add to your pool of friends</Text>
+          <Text style={styles.header}>Add {delegateCount > 0 ? 'another' : 'a'} delegate</Text>
         </View>
         <View style={[styles.row]}>
           <Text style={{marginLeft: 8, color: '#666'}}>Search by email</Text>
@@ -55,33 +55,37 @@ export class Add extends Component {
             onSubmitEditing={event => this.findAndClear(event.nativeEvent.text)}
             />
         </View>
-        <View style={[styles.row]}>
-          {recentlyAdded.map(this.renderRecentlyAdded)}
-        </View>
-        <View style={[styles.row]}>
-          {recentlyFailed.map(this.renderRecentlyFailed)}
-        </View>
+        {recentlyAdded.map(this.renderRecentlyAdded)}
+        {recentlyFailed.map(this.renderRecentlyFailed)}
       </View>
     );
   }
 
   renderRecentlyAdded = email => {
     return (
-      <Text
-        style={{color: 'green'}}
-        key={email}>
-        Successfully added {email}
-      </Text>
+      <View
+        key={email}
+        style={styles.row}>
+        <Text
+          style={{color: 'green'}}
+          key={email}>
+          Success! We found {email}
+        </Text>
+      </View>
     );
   }
 
   renderRecentlyFailed = email => {
     return (
-      <Text
-        style={{color: 'darkorange'}}
-        key={email}>
-        Could not locate {email}
-      </Text>
+      <View
+        key={email}
+        style={styles.row}>
+        <Text
+          style={{color: 'darkorange'}}
+          key={email}>
+          Sorry, we could not locate anyone with the registered email: {email}
+        </Text>
+      </View>
     );
   }
 }
