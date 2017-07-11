@@ -26,6 +26,27 @@ const iconStyles = {
   }
 };
 
+const button = {
+  small: {
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  medium: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  large: {
+    width: 60,
+    height: 60,
+    alignItems: 'center',
+    justifyContent: 'center'
+  }
+};
+
 const buttonStyles = {
   getStyle (shape = 'circle', size = Sizes.LARGE) {
     size = normalizeSize(size);
@@ -41,56 +62,14 @@ const buttonStyles = {
     }
   },
   circle: StyleSheet.create({
-    small: {
-      width: 28,
-      height: 28,
-      borderRadius: 14,
-      alignItems: 'center',
-      justifyContent: 'center',
-      margin: 8
-    },
-    medium: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      alignItems: 'center',
-      justifyContent: 'center',
-      margin: 8
-    },
-    large: {
-      width: 60,
-      height: 60,
-      borderRadius: 30,
-      alignItems: 'center',
-      justifyContent: 'center',
-      margin: 8
-    }
+    small: Object.assign({borderRadius: 14}, button.small),
+    medium: Object.assign({borderRadius: 22}, button.medium),
+    large: Object.assign({borderRadius: 30}, button.large)
   }),
   square: StyleSheet.create({
-    large: {
-      width: 60,
-      height: 60,
-      borderRadius: 2,
-      alignItems: 'center',
-      justifyContent: 'center',
-      margin: 8
-    },
-    medium: {
-      width: 44,
-      height: 44,
-      borderRadius: 2,
-      alignItems: 'center',
-      justifyContent: 'center',
-      margin: 8
-    },
-    small: {
-      width: 28,
-      height: 28,
-      borderRadius: 2,
-      alignItems: 'center',
-      justifyContent: 'center',
-      margin: 8
-    }
+    small: Object.assign({borderRadius: 2}, button.small),
+    medium: Object.assign({borderRadius: 2}, button.medium),
+    large: Object.assign({borderRadius: 2}, button.large)
   })
 };
 

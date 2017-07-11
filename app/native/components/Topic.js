@@ -41,12 +41,11 @@ function influencerCircle (content, key) {
     <View
       key={key}
       style={{
-        width: 76,
-        height: 76,
-        borderRadius: 40,
+        borderWidth: 4,
+        borderRadius: 100,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'turquoise'
+        borderColor: 'turquoise'
       }}>
       {content}
     </View>
@@ -54,12 +53,21 @@ function influencerCircle (content, key) {
 }
 
 function renderPerson (person, color, pressAction, keyPrefix = 'p') {
+  const buttonStyle = person.isInfluencer
+    ? {
+      margin: 2
+    }
+    : {
+      margin: 6
+    };
+
   let trusteeView = (
     <InitialsButton
       shape={person.isRanked ? 'circle' : 'square'}
       onPress={pressAction}
       key={keyPrefix + person.id}
       backgroundColor={color}
+      buttonStyle={buttonStyle}
       initials={Persons.initials(person)} />
   );
 
@@ -73,7 +81,6 @@ function renderPerson (person, color, pressAction, keyPrefix = 'p') {
 function renderPersonWithInfluence (influence, person, color, pressAction, keyPrefix = 'p') {
   const horizontal = {
     outer: {
-      height: 76,
       flexDirection: 'row'
     }
   };
@@ -100,20 +107,19 @@ function renderInfluence (influence, style = {}, fontSize = 16) {
 
 function renderForNav ({dom, isSelected}) {
   const basicStyle = {
-    width: 76,
-    height: 84
+    paddingBottom: 4
   };
 
-  const style = isSelected
+  const selectedStyle = isSelected
     ? {
       borderBottomWidth: 4,
       borderBottomColor: 'orange'
     }
-    : {};
+    : { marginBottom: 4 };
 
   return (
     <View
-      style={[basicStyle, style]}>
+      style={[basicStyle, selectedStyle]}>
       {dom}
     </View>
   );
