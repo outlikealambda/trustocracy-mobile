@@ -5,10 +5,10 @@ import {
   View
 } from 'react-native';
 
-import { InitialsButton, RoundedButton, IconButton, Sizes } from '../Buttons.js';
+import { RoundedButton, IconButton, Sizes } from '../Buttons.js';
 
 import { styles } from './styles.js';
-import { Persons } from '../../utils.js';
+import * as Person from '../Person.js';
 import * as Colors from '../../colors.js';
 
 export class Rank extends Component {
@@ -100,10 +100,11 @@ export class Rank extends Component {
         <View>
           <View
             style={styles.row}>
-            <InitialsButton
-              shape='circle'
-              backgroundColor='#efefef'
-              initials={Persons.initials(friend)}
+            <Person.Button
+              person={Object.assign(
+                {color: '#efefef'},
+                friend
+              )}
               />
             <Text style={{flex: 1}}>{friend.name}</Text>
             <View style={{flex: 0}}>
