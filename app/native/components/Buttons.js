@@ -6,7 +6,7 @@ import React, { Component } from 'react';
 import {
   StyleSheet,
   Text,
-  TouchableHighlight,
+  TouchableOpacity,
   View
 } from 'react-native';
 import { Octicons } from '@expo/vector-icons';
@@ -55,7 +55,7 @@ const buttonStyles = {
       case 'circle':
         return this.circle[size];
       case 'square':
-        return this.circle[size];
+        return this.square[size];
       default:
         console.warn('unknown shape, defaulting to large circle');
         return this.circle.large;
@@ -107,11 +107,11 @@ const rectangularStyles = {
 };
 
 const wrapWithTouchable = (nativeComponent, onPress) => (
-  <TouchableHighlight
+  <TouchableOpacity
     onPress={onPress}
     style={{justifyContent: 'center', alignItems: 'center'}}>
     {nativeComponent}
-  </TouchableHighlight>
+  </TouchableOpacity>
 );
 
 /*

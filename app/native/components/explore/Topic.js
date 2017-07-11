@@ -70,6 +70,41 @@ function findInfluencerConnectionCombo (connections) {
   return {};
 }
 
+const Relations = {
+  extractFromConnections: connections => connections.reduce(
+    (agg, c) => agg.concat(c.friends, c.author ? [c.author] : []),
+    []
+  ),
+  opinionMerger: relations => opinion => {
+    const relatedPerson = relations.find(rel => rel.id === opinion.author.id);
+
+    return !relatedPerson ? opinion : Object.assign(opinion, {author: relatedPerson});
+  },
+  connection: {
+    setValue (connection, newValue) {
+      const author = connection.author && Object.assign(connection.author, newValue);
+      const friends = connection.friends.map(f => Object.assign(f, newValue));
+
+      return Object.assign(
+        {},
+        connection,
+        {
+          author,
+          friends
+        }
+      );
+    },
+    setColor (connection, color) {
+      return this.setValue(connection, {color});
+    },
+    setIsConnected (connection) {
+      return this.setValue(connection, {isConnected: !!connection.author});
+    }
+  }
+};
+
+// END STATELESS HELPER FUNCTIONS
+
 type Props = {
   id: string
 }
@@ -84,7 +119,6 @@ type State = {
   opinions: Array<any>,
   prompts: Array<any>,
   promptIdx: number,
-  selectedOpinionIdx: number,
   selectedOpinion: any,
   showFriendDrawer: boolean,
   showAuthorDrawer: boolean,
@@ -113,36 +147,28 @@ export class Topic extends Component<void, Props, State> {
       selectedConnection: null,
       selectedFriend: null,
       connections: [],
+      allRelations: [],
       title: '',
       isBrowse: false,
       opinions: [],
       promptIdx: 0,
-      selectedOpinionIdx: -1,
       selectedOpinion: null,
       showFriendDrawer: false,
       showAuthorDrawer: false,
       showBrowseDrawer: false
     };
 
-    this.fetchConnected(topicId, this.state.userId);
-    this.fetchInfluence(topicId, this.state.userId);
+    this.syncState(topicId, this.state.userId);
     this.fetchTopicTitle(topicId);
-    this.fetchOpinions(topicId);
   }
 
   fetchConnected = (topicId, userId) => {
     return Api.connected(topicId, userId)
       .then(response => response.json())
-      .then(connections => connections.map((connection, idx) => Object.assign(
-        connection,
-        {
-          color: trusteeColors[idx % trusteeColors.length]
-        }
-      )))
-      .then(connections => {
-        this.animateStateChange({ connections });
-        return connections;
-      })
+      .then(connections => connections.map((connection, idx) =>
+        Relations.connection.setColor(connection, trusteeColors[idx % trusteeColors.length])
+      ))
+      .then(connections => connections.map(connection => Relations.connection.setIsConnected(connection)))
       .catch(error => {
         console.error('fetch connected error', error);
         throw error;
@@ -152,11 +178,53 @@ export class Topic extends Component<void, Props, State> {
   fetchInfluence = (topicId, userId) => {
     return Api.influence(topicId, userId)
       .then(response => response.json())
-      .then(r => this.animateStateChange({ influence: r.influence }))
+      .then(r => r.influence)
       .catch(error => {
         console.error('fetch influence error', error);
         throw error;
       });
+  }
+
+  fetchOpinions = topicId => {
+    return Api.opinions(topicId)
+      .then(response => response.json())
+      .catch(error => {
+        console.error('fetch opinions error', error);
+        throw error;
+      });
+  }
+
+  // This is used when
+  // - An action occurs which could change influence, we need to sync up with the server
+  // - Initial screen load
+  syncState = (topicId, userId, targetId = null) => {
+    Promise.all([
+      this.fetchConnected(topicId, userId),
+      this.fetchInfluence(topicId, userId),
+      this.fetchOpinions(topicId)
+    ]).then(results => {
+      const [connections, influence, opinionsSansRelationships] = results;
+
+      const allRelations = Relations.extractFromConnections(connections);
+
+      const opinions = opinionsSansRelationships.map(Relations.opinionMerger(allRelations));
+
+      const selectedConnection = this.findSelectedConnection(connections, targetId);
+
+      // No guarantee of a valid selectedConnection here -- the user
+      // could have removed a manual target (non-friend) connection, which would
+      // leave no selectedConnection
+      const selectedFriend = selectedConnection && this.findSelectedFriend(selectedConnection);
+
+      this.animateStateChange({
+        allRelations,
+        connections,
+        influence,
+        opinions,
+        selectedConnection,
+        selectedFriend
+      });
+    });
   }
 
   fetchTopicTitle = topicId => {
@@ -166,16 +234,6 @@ export class Topic extends Component<void, Props, State> {
       .then(title => this.animateStateChange({ title }))
       .catch(error => {
         console.error('fetch topic title', error);
-        throw error;
-      });
-  }
-
-  fetchOpinions = topicId => {
-    return Api.opinions(topicId)
-      .then(response => response.json())
-      .then(opinions => this.animateStateChange({ opinions }))
-      .catch(error => {
-        console.error('fetch opinions error', error);
         throw error;
       });
   }
@@ -195,7 +253,7 @@ export class Topic extends Component<void, Props, State> {
 
   fetchSetTarget = (topicId, userId) => targetId => () => {
     return Api.target.set(topicId, userId, targetId)
-      .then(() => this.syncState(topicId, userId));
+      .then(() => this.syncState(topicId, userId, targetId));
   }
 
   fetchClearTarget = (topicId, userId) => () => {
@@ -203,32 +261,24 @@ export class Topic extends Component<void, Props, State> {
       .then(() => this.syncState(topicId, userId));
   }
 
-  // When an action occurs which could change influence, we need to sync
-  // up with the server
-  syncState = (topicId, userId) => {
-    Promise.all([
-      this.fetchConnected(topicId, userId),
-      this.fetchInfluence(topicId, userId),
-      this.fetchOpinions(topicId)
-    ]).then(results => {
-      const [connections] = results;
-      const selectedConnection = this.findSelectedConnection(connections);
-      const selectedFriend = this.findSelectedFriend(selectedConnection);
+  // targetId can either be a friend id or an author id?
+  findSelectedConnection = (connections, targetId) => {
+    targetId = targetId || (
+      // if no targetId (clear target was used) attempt to display same connection
+      this.state.selectedConnection && this.state.selectedConnection.author.id
+    );
 
-      this.animateStateChange({
-        selectedConnection,
-        selectedFriend
-      });
-    });
-  }
+    // If tar has disappeared (was direct to author, and then was changed)
+    // then return undefined
+    if (!targetId) {
+      return;
+    }
 
-  findSelectedConnection = (connections) => {
-    const authorId = this.state.selectedConnection &&
-      this.state.selectedConnection.author &&
-      this.state.selectedConnection.author.id ||
-      -1;
-
-    return connections.find(c => c.author.id === authorId);
+    // check for authors, then check for friends
+    return (
+      connections.find(c => c.author && c.author.id === targetId) ||
+      connections.find(c => c.friends.find(f => f.id === targetId))
+    );
   }
 
   findSelectedFriend = connection => {
@@ -274,7 +324,6 @@ export class Topic extends Component<void, Props, State> {
       .then(selectedOpinion => {
         this.setState({
           selectedOpinion,
-          opinionId,
           showBrowseDrawer: false
         });
       });
@@ -304,19 +353,12 @@ export class Topic extends Component<void, Props, State> {
 
   render () {
     const renderTrusteeGroup = connection => {
-      const color =
-        connection.opinion
-          ? connection.color
-          : 'lightgray';
-
       return (
         connection.friends
           .map(friend => ({
             dom: (
               <Person.Button
-                person={
-                  Object.assign({color}, friend)
-                }
+                person={friend}
                 pressAction={this.showConnectedOpinion(connection, friend)}
               />
             ),
@@ -333,6 +375,7 @@ export class Topic extends Component<void, Props, State> {
         key='book'
         backgroundColor='wheat'
         iconStyle={{fontSize: 27, height: 27, width: 27, marginRight: 1}}
+        buttonStyle={{margin: 6}}
         onPress={this.showBrowseAllOpinions} />
     );
 
@@ -342,7 +385,7 @@ export class Topic extends Component<void, Props, State> {
       }
 
       const friend = this.state.selectedFriend;
-      const {author, color: friendColor, influence} = this.state.selectedConnection;
+      const {author, influence} = this.state.selectedConnection;
       const drawerState =
         (this.state.showFriendDrawer && 'friend') ||
         (this.state.showAuthorDrawer && 'author') ||
@@ -351,9 +394,7 @@ export class Topic extends Component<void, Props, State> {
       return (
         <Connection
           state={drawerState}
-          friend={
-            friend && Object.assign({color: friendColor}, friend)
-          }
+          friend={friend}
           author={
             author && Object.assign({influence}, author)
           }
@@ -563,9 +604,7 @@ export class Topic extends Component<void, Props, State> {
                       paddingVertical: 8
                     }}>
                     <Person.Button
-                      person={
-                        Object.assign({color: '#ccc'}, opinion.author)
-                      }
+                      person={opinion.author}
                       pressAction={this.showBrowseSingleOpinion(opinion.id)}
                       influence={opinion.influence}
                       />

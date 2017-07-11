@@ -8,15 +8,20 @@ import Influence from './Influence.js';
 
 // Optional influence argument toggles influence badge
 export const Button = ({person, pressAction, influence}) => {
-  const {id, color, isInfluencer = false, isRanked = false} = person;
-  const key = id;
+  const {id: key, color, isInfluencer = false, isConnected = false, isRanked = false} = person;
+
+  const isRelated = person.relationships && person.relationships.length > 0;
+  const backgroundColor = isRelated ? color : '#ddd';
+  const opacity = isConnected ? 1 : 0.4;
 
   const buttonStyle = isInfluencer
     ? {
-      margin: 2
+      margin: 2,
+      opacity
     }
     : {
-      margin: 6
+      margin: 6,
+      opacity
     };
 
   let button =
@@ -24,7 +29,7 @@ export const Button = ({person, pressAction, influence}) => {
       shape={isRanked ? 'circle' : 'square'}
       onPress={pressAction}
       key={key}
-      backgroundColor={color}
+      backgroundColor={backgroundColor}
       buttonStyle={buttonStyle}
       initials={initials(person)} />;
 

@@ -30,7 +30,7 @@ export const Arrays = {
 export const Log = {
   promise: msg => {
     return v => {
-      console.log(msg, JSON.stringify(v, null, 2));
+      console.log(msg, v);
       return v;
     };
   }

@@ -153,12 +153,7 @@ export class Connection extends Component {
             { friend && author && <Octicons name='chevron-right' size={20} color='#999' /> }
             { author &&
               <Person.Button
-                person={Object.assign(
-                  {
-                    color: author.isRanked || author.isManual ? friend.color : '#ccc'
-                  },
-                  author
-                )}
+                person={author}
                 pressAction={toggleAuthor}
                 influence={author.influence}
                 />
