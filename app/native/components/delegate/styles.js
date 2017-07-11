@@ -6,7 +6,9 @@ export const styles = StyleSheet.create({
     fontWeight: 'bold'
   },
   row: {
-    marginVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 4,
     paddingHorizontal: 16
   },
   headerRow: {
@@ -17,10 +19,11 @@ export const styles = StyleSheet.create({
   },
   textInput: {
     paddingHorizontal: 8,
-    marginTop: 8,
+    marginHorizontal: 4,
     height: 40,
     borderColor: '#ddd',
-    borderWidth: 1
+    borderWidth: 1,
+    flex: 1
   },
   initialsRow: {
     flexDirection: 'row',

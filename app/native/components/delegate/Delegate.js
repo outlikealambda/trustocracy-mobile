@@ -6,6 +6,7 @@ import {
 import { Octicons } from '@expo/vector-icons';
 
 import { RoundedButton } from '../Buttons.js';
+import { Overview } from './Overview.js';
 import { Add } from './Add.js';
 import { Activate } from './Activate.js';
 import { Rank } from './Rank.js';
@@ -194,6 +195,15 @@ export class Delegate extends Component {
             onPress={this.setView(RANK)} />
         </View>
         <View style={{flex: 1}}>
+          { this.state.currentView === OVERVIEW &&
+            <Overview
+              activeCount={this.state.active.length}
+              inactiveCount={this.state.inactive.length}
+              goAdd={this.setView(ADD)}
+              goActivate={this.setView(ACTIVATE)}
+              goRank={this.setView(RANK)}
+              />
+          }
           { this.state.currentView === ADD &&
             <Add
               {...this.state}
