@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import Markdown from 'react-native-simple-markdown';
 import { Octicons } from '@expo/vector-icons';
-import { DelegateIcon } from './Delegate.js';
+import { DelegateIcon } from './delegate/Delegate.js';
 import { RoundedButton, InitialsButton, IconButton } from './Buttons.js';
 import { TopicInfo } from './TopicInfo.js';
 import * as Api from './api';

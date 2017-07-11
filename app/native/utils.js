@@ -10,19 +10,18 @@ export const Persons = {
 };
 
 export const Arrays = {
-  remove: (array, idxRem) =>
-    array.reduce((agg, elem, idx) => {
-      if (idx === idxRem) {
-        // skip element
-        return agg;
-      }
+  insert: (array, idxNew, item) => {
+    const copy = array.slice(array);
+    copy.splice(idxNew, 0, item);
 
-      agg.push(Object.assign({}, elem));
+    return copy;
+  },
 
-      return agg;
-    },
-    []
-  ),
+  remove: (array, idxRem) => {
+    const copy = array.slice(array);
+    copy.splice(idxRem, 1);
+    return copy;
+  },
 
   removeWhere: (array, hasCondition) =>
     array.reduce((agg, elem) => {
@@ -34,19 +33,6 @@ export const Arrays = {
 
       return agg;
     }, []
-  ),
-
-  insert: (array, idxNew, elemNew) =>
-    array.reduce((agg, elem, idx) => {
-      if (idx === idxNew) {
-        return agg.concat([elemNew, elem]);
-      }
-
-      agg.push(Object.assign({}, elem));
-
-      return agg;
-    },
-    []
   )
 };
 

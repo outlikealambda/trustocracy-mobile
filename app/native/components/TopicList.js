@@ -10,7 +10,7 @@ import {
   TouchableHighlight,
   View
 } from 'react-native';
-import { DelegateIcon } from './Delegate.js';
+import { DelegateIcon } from './delegate/Delegate.js';
 import * as Api from './api.js';
 import * as Metric from './Metric.js';
 
@@ -36,16 +36,14 @@ export class TopicList extends Component<void, Props, State> {
       headerRight: DelegateIcon(navigation.navigate)
     };
   }
+
   constructor (props: Props) {
     super(props);
     this.state = { topics: [] };
     Api.topics()
       .then(response => response.json())
       .then(this.fetchMetrics)
-      .then(topics => this.setState({ topics }))
-      .catch(error => {
-        console.error('error fetching topics', error);
-      });
+      .then(topics => this.setState({ topics }));
   }
 
   fetchMetrics = topics => {
@@ -87,14 +85,14 @@ export class TopicList extends Component<void, Props, State> {
   renderTopic = (topic, topicIdx) => {
     const { navigate } = this.props.navigation;
 
-    const navigationOptions = {
+    const navigationParameters = {
       id: topic.id,
       title: topic.text,
       prompts: topic.prompts
     };
 
     return (
-      <TouchableHighlight key={topic.id} onPress={() => navigate('topic', navigationOptions)}>
+      <TouchableHighlight key={topic.id} onPress={() => navigate('topic', navigationParameters)}>
         <View
           style={{
             borderTopWidth: 2,
