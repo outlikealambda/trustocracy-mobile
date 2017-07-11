@@ -11,13 +11,13 @@ import {
   View
 } from 'react-native';
 import Markdown from 'react-native-simple-markdown';
-import { Octicons } from '@expo/vector-icons';
-import { DelegateIcon } from './delegate/Delegate.js';
-import { RoundedButton, IconButton, Sizes } from './Buttons.js';
+import { DelegateIcon } from '../delegate/Delegate.js';
+import { IconButton, Sizes } from '../Buttons.js';
 import { TopicInfo } from './TopicInfo.js';
-import * as Api from './api';
-import * as Metric from './Metric.js';
-import * as Person from './Person.js';
+import { Connection } from './Connection.js';
+import * as Api from '../api';
+import * as Metric from '../Metric.js';
+import * as Person from '../Person.js';
 
 const trusteeColors = [
   'greenyellow',
@@ -31,10 +31,6 @@ const trusteeColors = [
 ];
 
 // STATELESS RENDER FUNCTIONS
-function Bold (props) {
-  return (<Text style={{fontWeight: 'bold'}}>{props.children}</Text>);
-}
-
 function renderForNav ({dom, isSelected}) {
   const basicStyle = {
     paddingBottom: 4
@@ -91,7 +87,8 @@ type State = {
   selectedOpinionIdx: number,
   selectedOpinion: any,
   showFriendDrawer: boolean,
-  showAuthorDrawer: boolean
+  showAuthorDrawer: boolean,
+  showBrowseDrawer: boolean
 };
 
 export class Topic extends Component<void, Props, State> {
@@ -123,7 +120,8 @@ export class Topic extends Component<void, Props, State> {
       selectedOpinionIdx: -1,
       selectedOpinion: null,
       showFriendDrawer: false,
-      showAuthorDrawer: false
+      showAuthorDrawer: false,
+      showBrowseDrawer: false
     };
 
     this.fetchConnected(topicId, this.state.userId);
@@ -195,12 +193,12 @@ export class Topic extends Component<void, Props, State> {
       });
   }
 
-  fetchSetTarget = (topicId, userId, targetId) => {
+  fetchSetTarget = (topicId, userId) => targetId => () => {
     return Api.target.set(topicId, userId, targetId)
       .then(() => this.syncState(topicId, userId));
   }
 
-  fetchClearTarget = (topicId, userId) => {
+  fetchClearTarget = (topicId, userId) => () => {
     return Api.target.clear(topicId, userId)
       .then(() => this.syncState(topicId, userId));
   }
@@ -253,6 +251,12 @@ export class Topic extends Component<void, Props, State> {
     });
   }
 
+  toggleBrowseDrawer = () => {
+    this.animateStateChange({
+      showBrowseDrawer: !this.state.showBrowseDrawer
+    });
+  }
+
   showBrowseAllOpinions = () => {
     this.animateStateChange(Object.assign(
       {
@@ -268,15 +272,16 @@ export class Topic extends Component<void, Props, State> {
   showBrowseSingleOpinion = opinionId => () => {
     this.fetchSelectedOpinion(opinionId)
       .then(selectedOpinion => {
-        this.animateStateChange({
+        this.setState({
           selectedOpinion,
-          opinionId
+          opinionId,
+          showBrowseDrawer: false
         });
       });
   }
 
   showConnectedOpinion = (selectedConnection, selectedFriend) => () => {
-    this.animateStateChange(Object.assign(
+    this.setState(Object.assign(
       {
         isBrowse: false,
         selectedOpinion: null,
@@ -338,16 +343,26 @@ export class Topic extends Component<void, Props, State> {
 
       const friend = this.state.selectedFriend;
       const {author, color: friendColor, influence} = this.state.selectedConnection;
+      const drawerState =
+        (this.state.showFriendDrawer && 'friend') ||
+        (this.state.showAuthorDrawer && 'author') ||
+        'closed';
 
       return (
-        <FriendAuthorConnection
+        <Connection
+          state={drawerState}
           friend={
             friend && Object.assign({color: friendColor}, friend)
           }
           author={
             author && Object.assign({influence}, author)
           }
-        />
+          influence={this.state.influence}
+          toggleFriend={this.toggleFriendDrawer}
+          toggleAuthor={this.toggleAuthorDrawer}
+          choose={this.fetchSetTarget(this.state.topicId, this.state.userId)}
+          clear={this.fetchClearTarget(this.state.topicId, this.state.userId)}
+          />
       );
     };
 
@@ -359,52 +374,16 @@ export class Topic extends Component<void, Props, State> {
       const {author, influence} = this.state.selectedOpinion;
 
       return (
-        <FriendAuthorConnection
+        <Connection
+          state={this.state.showBrowseDrawer ? 'author' : 'closed'}
           author={
-            Object.assign({influence}, author)
+            author && Object.assign({influence}, author)
           }
-        />
-      );
-    };
-
-    const FriendAuthorConnection = ({friend, author}) => {
-      return (
-        <View
-          style={{
-            flex: 1,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: 8
-          }}>
-          { friend &&
-            <Person.Button
-              person={friend}
-              pressAction={this.toggleFriendDrawer}
-            />
-          }
-          { friend && author && <View style={[styles.miniCircle]} /> }
-          { friend && author && <View style={[styles.miniCircle]} /> }
-          { friend && author && <View style={[styles.miniCircle]} /> }
-          { friend && author && <View style={[styles.miniCircle]} /> }
-          { friend && author && <View style={[styles.miniCircle]} /> }
-          { friend && author && <View style={[styles.miniCircle]} /> }
-          { friend && author && <View style={[styles.miniCircle]} /> }
-          { friend && author && <View style={[styles.miniCircle]} /> }
-          { friend && author && <Octicons name='chevron-right' size={20} color='#999' /> }
-          { author &&
-            <Person.Button
-              person={Object.assign(
-                {
-                  color: author.isRanked || author.isManual ? friend.color : '#ccc'
-                },
-                author
-              )}
-              pressAction={this.toggleAuthorDrawer}
-              influence={author.influence}
-              />
-          }
-        </View>
+          influence={this.state.influence}
+          toggleAuthor={this.toggleBrowseDrawer}
+          choose={this.fetchSetTarget(this.state.topicId, this.state.userId)}
+          clear={this.fetchClearTarget(this.state.topicId, this.state.userId)}
+          />
       );
     };
 
@@ -429,88 +408,6 @@ export class Topic extends Component<void, Props, State> {
             />
           }
           />
-      );
-    };
-
-    const renderDrawer = (person, influence) => {
-      if (!person) return [];
-
-      const setDelegate = () => this.fetchSetTarget(this.state.topicId, this.state.userId, person.id);
-      const clearDelegate = () => this.fetchClearTarget(this.state.topicId, this.state.userId);
-
-      if (person.isManual) {
-        return (
-          <View style={styles.drawer}>
-            <Text style={[styles.drawerRow, {backgroundColor: 'lightgreen', paddingVertical: 16}]}>
-              <Bold>{person.name}</Bold> is your delegate!{'\n'}
-              You have passed on <Bold>+{influence}pts</Bold> of influence
-            </Text>
-            <View style={[styles.drawerRow, styles.drawerTop, styles.drawerRowWrapper, {marginLeft: 0}]}>
-              <RoundedButton
-                text='Remove'
-                size='small'
-                onPress={clearDelegate}
-                buttonStyle={{backgroundColor: '#aaa', marginRight: 6}}
-              />
-              <Text style={{flex: 1}}>
-                <Bold>{person.name}</Bold> as my delegate
-              </Text>
-            </View>
-            <Text style={[styles.drawerRow, styles.drawerBottom, {fontSize: 12, fontStyle: 'italic'}]}>
-              {`This will redirect your influence to your top-ranked friend`}
-            </Text>
-          </View>
-        );
-      }
-
-      if (person.isInfluencer) {
-        return (
-          <View style={styles.drawer}>
-            <Text style={[styles.drawerRow, {backgroundColor: 'lightgreen', padding: 16}]} >
-              <Bold>{person.name}</Bold> is your default delegate!{'\n'}
-              You have passed on <Bold>+{influence}pts</Bold> of influence
-            </Text>
-          </View>
-        );
-      }
-
-      if (person.isRanked) {
-        return (
-          <View style={styles.drawer}>
-            <View style={[styles.drawerRow, styles.drawerTop, styles.drawerBottom, styles.drawerRowWrapper]}>
-              <RoundedButton
-                text={'Delegate'}
-                onPress={setDelegate}
-                buttonStyle={{backgroundColor: 'lightgreen', marginRight: 4}}
-              />
-              <Text style={{flex: 1}}>
-                <Bold>+{influence}pts</Bold> of influence to {person.name}
-              </Text>
-            </View>
-          </View>
-        );
-      }
-
-      // we're left with an unconnected author
-      return (
-        <View style={styles.drawer}>
-          <View style={[styles.drawerRow, styles.drawerRowWrapper, styles.drawerTop]}>
-            <RoundedButton
-              text={'Delegate Directly'}
-              onPress={setDelegate}
-              buttonStyle={{backgroundColor: 'lightgreen', marginRight: 4}}
-            />
-            <Text style={{flex: 1}}>to {person.name}</Text>
-          </View>
-          <Text style={[styles.drawerRow, styles.drawerBottom, {fontSize: 12, fontStyle: 'italic'}]}>
-            {
-              `Can you personally vouch for ${person.name}, or are you an expert` +
-              ` in this topic and able to confirm the claims in this article? If` +
-              ` not, consider delegating to a friend who knows more about this` +
-              ` topic`
-            }
-          </Text>
-        </View>
       );
     };
 
@@ -730,11 +627,7 @@ export class Topic extends Component<void, Props, State> {
 
         {/* BODY */}
         {/* mark as a row, so that it will fill horizontally */}
-        <View style={{flex: 0, flexDirection: 'row'}}>
-          {!this.state.isBrowse ? renderConnectionHeader() : renderBrowsedHeader() }
-        </View>
-        {this.state.showFriendDrawer ? renderDrawer(this.state.selectedFriend, this.state.influence) : []}
-        {this.state.showAuthorDrawer ? renderDrawer(this.state.selectedConnection ? this.state.selectedConnection.author : {}, this.state.influence) : []}
+        {!this.state.isBrowse ? renderConnectionHeader() : renderBrowsedHeader() }
         <View style={{flex: 1}}>
           { renderBody(this.state) }
         </View>
@@ -770,35 +663,6 @@ const styles = StyleSheet.create({
     marginRight: 20,
     marginTop: 20,
     marginBottom: 5
-  },
-  miniCircle: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#999'
-  },
-
-  // drawers
-  drawer: {
-    flex: 0,
-    alignSelf: 'stretch',
-    justifyContent: 'flex-start',
-    backgroundColor: '#ddd'
-  },
-  drawerTop: {
-    paddingTop: 12
-  },
-  drawerBottom: {
-    paddingBottom: 12
-  },
-  drawerRow: {
-    paddingHorizontal: 16,
-    paddingVertical: 6
-  },
-  drawerRowWrapper: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'center'
   },
 
   // prompts

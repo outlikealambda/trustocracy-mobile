@@ -4,7 +4,7 @@ import {
   Text,
   View
 } from 'react-native';
-import Influence from './Influence.js';
+import Influence from '../Influence.js';
 
 export class TopicInfo extends Component {
   render () {

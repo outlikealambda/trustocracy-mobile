@@ -3,5 +3,5 @@
  */
 
 export { App } from './App';
-export { Topic } from './Topic';
+export { Topic } from './explore/Topic';
 export { TopicList } from './TopicList';

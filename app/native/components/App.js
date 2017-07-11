@@ -1,4 +1,4 @@
-import { Topic } from './Topic.js';
+import { Topic } from './explore/Topic.js';
 import { TopicList } from './TopicList.js';
 import { Delegate } from './delegate/Delegate.js';
 import { StackNavigator } from 'react-navigation';
