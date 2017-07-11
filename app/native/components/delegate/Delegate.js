@@ -1,16 +1,18 @@
 import React, { Component } from 'react';
 import {
+  StyleSheet,
   TouchableHighlight,
   View
 } from 'react-native';
 import { Octicons } from '@expo/vector-icons';
 
-import { RoundedButton } from '../Buttons.js';
+import { IconButton } from '../Buttons.js';
 import { Overview } from './Overview.js';
 import { Add } from './Add.js';
 import { Activate } from './Activate.js';
 import { Rank } from './Rank.js';
 
+import { styles } from './styles.js';
 import * as Api from '../api.js';
 import { Arrays } from '../../utils.js';
 
@@ -180,28 +182,62 @@ export class Delegate extends Component {
       });
   }
 
+  icons = (function (setView) {
+    // Calculate icon widths based on height
+    const height = StyleSheet.flatten(styles.iconStyle).fontSize;
+    const plusWidth = height * 24 / 32;
+    const zapWidth = height * 20 / 32;
+    const listOrderedWidth = height * 24 / 32;
+
+    return {
+      add: (
+        <IconButton
+          name='plus'
+          iconStyle={[styles.iconStyle, {width: plusWidth}]}
+          buttonStyle={styles.buttonStyle}
+          onPress={setView(ADD)} />
+      ),
+      rank: (
+        <IconButton
+          name='list-ordered'
+          iconStyle={[styles.iconStyle, {width: listOrderedWidth}]}
+          buttonStyle={styles.buttonStyle}
+          onPress={setView(RANK)} />
+      ),
+      activate: (
+        <IconButton
+          name='zap'
+          iconStyle={[styles.iconStyle, {width: zapWidth}]}
+          buttonStyle={styles.buttonStyle}
+          onPress={setView(ACTIVATE)} />
+      )
+    };
+  }(this.setView))
+
+  renderHeader () {
+    return (
+      <View style={[styles.row, {justifyContent: 'space-around'}]}>
+        {this.icons.add}
+        {this.icons.activate}
+        {this.icons.rank}
+      </View>
+    );
+  }
+
   render () {
     return (
-      <View style={{flex: 1}}>
-        <View>
-          <RoundedButton
-            text='Add'
-            onPress={this.setView(ADD)} />
-          <RoundedButton
-            text='Activate'
-            onPress={this.setView(ACTIVATE)} />
-          <RoundedButton
-            text='Rank'
-            onPress={this.setView(RANK)} />
-        </View>
+      <View style={{flex: 1, backgroundColor: '#fff'}}>
+        { this.state.currentView !== OVERVIEW &&
+          this.renderHeader()
+        }
         <View style={{flex: 1}}>
           { this.state.currentView === OVERVIEW &&
             <Overview
               activeCount={this.state.active.length}
               inactiveCount={this.state.inactive.length}
-              goAdd={this.setView(ADD)}
-              goActivate={this.setView(ACTIVATE)}
-              goRank={this.setView(RANK)}
+              add={this.icons.add}
+              activate={this.icons.activate}
+              rank={this.icons.rank}
               />
           }
           { this.state.currentView === ADD &&

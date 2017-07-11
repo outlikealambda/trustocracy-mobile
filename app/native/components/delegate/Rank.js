@@ -66,6 +66,30 @@ export class Rank extends Component {
   moveDown = idx => () => this.props.move(idx, idx + 1)
   deactivate = idx => () => this.props.move(idx)
 
+  iconUp = idx => (
+    <IconButton
+      isSmall='true'
+      name='arrow-up'
+      iconStyle={{fontSize: 16, height: 16, width: 10, color: 'white'}}
+      buttonStyle={{marginVertical: 2}}
+      shape='square'
+      backgroundColor={Colors.electricBlue}
+      onPress={this.moveUp(idx)}
+      />
+  )
+
+  iconDown = idx => (
+    <IconButton
+      isSmall='true'
+      name='arrow-down'
+      iconStyle={{fontSize: 16, height: 16, width: 10, color: 'white'}}
+      buttonStyle={{marginVertical: 2}}
+      shape='square'
+      backgroundColor={Colors.orange}
+      onPress={this.moveDown(idx)}
+      />
+  )
+
   renderFriend = friendCount => (friend, idx) => {
     const expanded = this.state.toggled[friend.id];
 
@@ -75,7 +99,7 @@ export class Rank extends Component {
         onPress={this.toggle(friend.id)}>
         <View>
           <View
-            style={styles.initialsRow}>
+            style={styles.row}>
             <InitialsButton
               shape='circle'
               backgroundColor='#efefef'
@@ -83,35 +107,15 @@ export class Rank extends Component {
               />
             <Text style={{flex: 1}}>{friend.name}</Text>
             <View style={{flex: 0}}>
-              { idx < 1 ? []
-                : <IconButton
-                  isSmall='true'
-                  name='arrow-up'
-                  iconStyle={{fontSize: 16, height: 16, width: 10, color: 'white'}}
-                  buttonStyle={{marginVertical: 2}}
-                  shape='square'
-                  backgroundColor={Colors.lightGreen}
-                  onPress={this.moveUp(idx)}
-                  />
-              }
-              { idx === friendCount - 1 ? []
-                : <IconButton
-                  isSmall='true'
-                  name='arrow-down'
-                  iconStyle={{fontSize: 16, height: 16, width: 10, color: 'white'}}
-                  buttonStyle={{marginVertical: 2}}
-                  shape='square'
-                  backgroundColor={Colors.lightRed}
-                  onPress={this.moveDown(idx)}
-                  />
-              }
+              { idx < 1 ? [] : this.iconUp(idx) }
+              { idx === friendCount - 1 ? [] : this.iconDown(idx) }
             </View>
           </View>
           { !expanded
             ? []
             : (
               <View style={[
-                styles.initialsRow,
+                styles.row,
                 {
                   backgroundColor: '#efefef',
                   paddingHorizontal: 16,

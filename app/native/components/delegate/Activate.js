@@ -62,7 +62,7 @@ export class Activate extends Component {
     return friend => (
       <View
         key={friend.id}
-        style={[styles.initialsRow, {marginLeft: 16}]}>
+        style={[styles.row, {marginLeft: 16}]}>
         <Text>{messageBuilder(friend)}</Text>
       </View>
     );
@@ -93,7 +93,7 @@ export class Activate extends Component {
         key={friend.id}
         onPress={() => this.toggle(friend.id)}>
         <View>
-          <View style={styles.initialsRow}>
+          <View style={styles.row}>
             <InitialsButton
               shape='circle'
               backgroundColor='#efefef'
@@ -113,7 +113,7 @@ export class Activate extends Component {
           { !expanded
             ? []
             : (
-              <View style={[styles.initialsRow, {backgroundColor: '#efefef', paddingHorizontal: 16, paddingVertical: 8}]}>
+              <View style={[styles.row, {backgroundColor: '#efefef', paddingHorizontal: 16, paddingVertical: 8}]}>
                 <RoundedButton
                   buttonStyle={{backgroundColor: 'lightyellow', marginRight: 16}}
                   text='Remove'

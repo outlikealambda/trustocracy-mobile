@@ -15,20 +15,13 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: 16
   },
-  inputRow: {
-  },
   textInput: {
     paddingHorizontal: 8,
-    marginHorizontal: 4,
+    marginHorizontal: 8,
     height: 40,
     borderColor: '#ddd',
     borderWidth: 1,
     flex: 1
-  },
-  initialsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 4
   },
   column: {
     flex: 1,
@@ -39,5 +32,19 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-around',
     marginBottom: 16,
     flex: 0
+  },
+  iconStyle: {
+    color: '#222',
+    fontSize: 32
+  },
+  bigNumber: {
+    marginHorizontal: 8,
+    color: 'green',
+    fontSize: 24,
+    fontWeight: 'bold'
+  },
+  buttonStyle: {
+    borderWidth: 2,
+    borderColor: '#222'
   }
 });

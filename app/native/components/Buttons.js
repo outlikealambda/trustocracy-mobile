@@ -12,7 +12,7 @@ import {
 import { Octicons } from '@expo/vector-icons';
 
 const buttonStyles = {
-  getStyle (shape, isSmall) {
+  getStyle (shape = 'circle', isSmall) {
     switch (shape.toLowerCase()) {
       case 'circle':
         return isSmall ? this.circle.small : this.circle.regular;
@@ -127,9 +127,7 @@ export class RoundedButton extends Component {
 /*
   type IconProps = {
     backgroundColor: string,
-    name: string,
-    size: number,
-    style: Object<any>
+    name: string
   };
 */
 

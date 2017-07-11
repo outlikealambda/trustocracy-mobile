@@ -1,45 +1,38 @@
 import React, { Component } from 'react';
 import {
   Text,
-  TouchableHighlight,
   View
 } from 'react-native';
 
-import { InitialsButton, RoundedButton, IconButton } from '../Buttons.js';
-
 import { styles } from './styles.js';
-import { Persons } from '../../utils.js';
-import * as Colors from '../../colors.js';
 
 export class Overview extends Component {
   render () {
-    const {inactiveCount, activeCount, goAdd, goActivate, goRank} = this.props;
+    const {activeCount, inactiveCount, add, activate, rank} = this.props;
 
     return (
-      <View style={{flex: 1}}>
-        <View style={styles.row}>
-          <Text>You have {inactiveCount} inactive delegates</Text>
-        </View>
-        <View style={styles.row}>
-          <RoundedButton
-            text='Add'
-            onPress={goAdd} />
-          <Text>more delegates</Text>
-        </View>
-        <View style={styles.row}>
-          <RoundedButton
-            text='Activate'
-            onPress={goActivate} />
-          <Text>delegates</Text>
-        </View>
-        <View style={styles.row}>
-          <Text>You have {activeCount} active delegates</Text>
-        </View>
-        <View style={styles.row}>
-          <RoundedButton
-            text='Rank'
-            onPress={goRank} />
+      <View style={{flex: 1, marginLeft: 32}}>
+        <View style={[styles.row, {marginTop: 32}]}>
+          <Text>You have</Text>
+          <Text style={styles.bigNumber}>{activeCount}</Text>
           <Text>active delegates</Text>
+        </View>
+        <View style={styles.row}>
+          {rank}
+          <Text>Rank active delegates</Text>
+        </View>
+        <View style={[styles.row, {marginTop: 32}]}>
+          <Text>You have</Text>
+          <Text style={styles.bigNumber}>{inactiveCount}</Text>
+          <Text>inactive delegates</Text>
+        </View>
+        <View style={styles.row}>
+          {add}
+          <Text>Add more delegates</Text>
+        </View>
+        <View style={styles.row}>
+          {activate}
+          <Text>Activate delegates</Text>
         </View>
       </View>
     );

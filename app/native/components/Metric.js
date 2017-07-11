@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 
 import { Svg } from 'expo';
+import * as Colors from '../colors.js';
 
 import * as D3Shape from 'd3-shape';
 import * as D3Scale from 'd3-scale';
@@ -107,7 +108,7 @@ const renderScalarLabels = (renderingOptions, prompt) => {
 
 const histogramColorSelector = D3Scale.scaleLinear()
   .domain([0, 1])
-  .range(['#FF9430', '#59D5FF']);
+  .range([Colors.orange, Colors.electricBlue]);
 
 const renderHistogram = (renderingOptions, data) => {
   const width = renderingOptions.width || 320;
