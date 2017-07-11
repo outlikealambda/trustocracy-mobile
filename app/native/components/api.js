@@ -1,5 +1,5 @@
 
-const api = 'http://192.168.0.103:3714/api';
+const api = 'http://localhost:3714/api';
 
 const fetch = (path, opts = {}) => global.fetch(`${api}/${path}`, opts);
 
@@ -33,8 +33,10 @@ export const target = {
   )
 };
 
-export const friends = {
-  get: userId => fetch(`user/${userId}/friends`),
+export const delegate = {
+  getInactive: userId => fetch(`user/${userId}/pool`),
+
+  getActive: userId => fetch(`user/${userId}/friends`),
 
   rank: (userId, delegates) => fetch(
     `user/${userId}/delegates`,
@@ -46,13 +48,6 @@ export const friends = {
       })
     }
   ),
-
-  // TODO
-  demote: () => Promise.resolve({status: 200})
-};
-
-export const pool = {
-  get: userId => fetch(`user/${userId}/pool`),
 
   add: (userId, inputEmail) => fetch(
     `user/${userId}/pool`,
@@ -70,6 +65,7 @@ export const pool = {
     { method: 'DELETE' }
   ),
 
-  // TODO
-  promote: () => Promise.resolve({status: 200})
+  activate: () => Promise.resolve({status: 200}),
+
+  deactivate: () => Promise.resolve({status: 200})
 };
