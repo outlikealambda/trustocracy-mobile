@@ -53,10 +53,10 @@ class ScalarSummary extends Component {
           renderScalarPrompt(this.props, this.props.prompt)
         }
         {
-          renderHistogram(this.props, this.props.summaryData)
+          renderScalarLabels(this.props, this.props.prompt)
         }
         {
-          renderScalarLabels(this.props, this.props.prompt)
+          renderHistogram(this.props, this.props.summaryData)
         }
       </View>
     );
@@ -105,6 +105,10 @@ const renderScalarLabels = (renderingOptions, prompt) => {
   );
 };
 
+const histogramColorSelector = D3Scale.scaleLinear()
+  .domain([0, 1])
+  .range(['#FF9430', '#59D5FF']);
+
 const renderHistogram = (renderingOptions, data) => {
   const width = renderingOptions.width || 320;
   const height = renderingOptions.height || 64;
@@ -114,7 +118,7 @@ const renderHistogram = (renderingOptions, data) => {
   const xScale = D3Scale
     .scaleBand()
     .rangeRound([0, width])
-    .padding(0.2)
+    .padding(0.25)
     .domain(data);
 
   const yScale = D3Scale
@@ -126,14 +130,16 @@ const renderHistogram = (renderingOptions, data) => {
     <Svg width={width} height={height}>
       <Svg.G>
         {
-          data.map((bar, idx) => (
+          data.map((bar, idx, {length}) => (
             <Svg.Rect
               key={idx}
               x={xScale(bar)}
               y={yScale(bar) / 2}
+              rx={4}
+              ry={4}
               width={xScale.bandwidth()}
               height={height - yScale(bar)}
-              fill={'#444'}
+              fill={histogramColorSelector(idx / (length - 1))}
               />
           ))
         }
