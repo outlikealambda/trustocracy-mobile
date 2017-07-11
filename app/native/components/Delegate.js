@@ -109,9 +109,9 @@ class Add extends Component {
   }
 }
 
-class Pool extends Component {
+class Activate extends Component {
   static navigationOptions = {
-    tabBarLabel: 'Pool'
+    tabBarLabel: 'Activate'
   }
 
   animateStateChange = modifiedState => {
@@ -288,9 +288,9 @@ class Pool extends Component {
   }
 }
 
-class Active extends Component {
+class Rank extends Component {
   static navigationOptions = {
-    tabBarLabel: 'Active'
+    tabBarLabel: 'Rank'
   }
 
   constructor (props) {
@@ -479,8 +479,8 @@ class Active extends Component {
 
 export const Delegate = TabNavigator({
   add: { screen: Add },
-  pool: { screen: Pool },
-  active: { screen: Active }
+  pool: { screen: Activate },
+  active: { screen: Rank }
 }, {
   swipeEnabled: true,
   lazy: true,
