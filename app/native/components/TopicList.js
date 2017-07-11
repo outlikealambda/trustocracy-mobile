@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { DelegateIcon } from './Delegate.js';
 import * as Api from './api.js';
-import * as Prompt from './Prompt.js';
+import * as Metric from './Metric.js';
 
 type Topic = {
   id: string,
@@ -41,14 +41,14 @@ export class TopicList extends Component<void, Props, State> {
     this.state = { topics: [] };
     Api.topics()
       .then(response => response.json())
-      .then(this.fetchPrompts)
+      .then(this.fetchMetrics)
       .then(topics => this.setState({ topics }))
       .catch(error => {
         console.error('error fetching topics', error);
       });
   }
 
-  fetchPrompts = topics => {
+  fetchMetrics = topics => {
     return Promise.all(topics.map(topic =>
       Api.prompts(topic.id)
         .then(response => response.json())
@@ -56,12 +56,12 @@ export class TopicList extends Component<void, Props, State> {
     ));
   }
 
-  renderPrompt = (prompt, idx, array) => {
+  renderMetric = (prompt, idx, array) => {
     const {id: key, options} = prompt;
     const values = [];
     const isLast = (idx === array.length - 1);
 
-    if (Prompt.isMultipleChoice(prompt)) {
+    if (Metric.isMultipleChoice(prompt)) {
       for (let i = 0; i < options.length; i++) {
         values.push(Math.random());
       }
@@ -79,7 +79,7 @@ export class TopicList extends Component<void, Props, State> {
           borderBottomWidth: isLast ? 0 : 1,
           borderBottomColor: '#eee'
         }}>
-        <Prompt.Summary prompt={prompt} summaryData={values} />
+        <Metric.Summary prompt={prompt} summaryData={values} />
       </View>
     );
   }
@@ -110,7 +110,7 @@ export class TopicList extends Component<void, Props, State> {
               {topic.text}
             </Text>
           </View>
-          {topic.prompts.map(this.renderPrompt)}
+          {topic.prompts.map(this.renderMetric)}
         </View>
       </TouchableHighlight>
     );

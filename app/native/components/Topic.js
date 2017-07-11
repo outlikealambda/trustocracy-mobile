@@ -18,7 +18,7 @@ import { RoundedButton, InitialsButton, IconButton } from './Buttons.js';
 import { TopicInfo } from './TopicInfo.js';
 import * as Api from './api';
 import { Persons } from '../utils.js';
-import * as Prompt from './Prompt.js';
+import * as Metric from './Metric.js';
 
 const trusteeColors = [
   'greenyellow',
@@ -647,7 +647,7 @@ export class Topic extends Component<void, Props, State> {
       const {selected, value} = answer;
 
       return (
-        Prompt.isScalar(prompt)
+        Metric.isScalar(prompt)
         ? renderScalarAnswer(value)
         : (
           <View
