@@ -8,7 +8,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TouchableHighlight,
   View
 } from 'react-native';
 import Markdown from 'react-native-simple-markdown';
@@ -19,7 +18,6 @@ import { TopicInfo } from './TopicInfo.js';
 import * as Api from './api';
 import * as Metric from './Metric.js';
 import * as Person from './Person.js';
-import Influence from './Influence.js';
 
 const trusteeColors = [
   'greenyellow',
@@ -35,32 +33,6 @@ const trusteeColors = [
 // STATELESS RENDER FUNCTIONS
 function Bold (props) {
   return (<Text style={{fontWeight: 'bold'}}>{props.children}</Text>);
-}
-
-function renderPersonWithInfluence (influence, person, color, pressAction, keyPrefix = 'p') {
-  const horizontal = {
-    outer: {
-      flexDirection: 'row'
-    }
-  };
-
-  return (
-    <View
-      key={keyPrefix + person.id}
-      style={horizontal.outer}>
-      <Person.Button
-        person={
-          Object.assign({color}, person)
-        }
-        pressAction={pressAction}
-        keyPrefix={keyPrefix}
-      />
-      <Influence
-        influence={influence}
-        style={{marginLeft: -10}}
-        />
-    </View>
-  );
 }
 
 function renderForNav ({dom, isSelected}) {
@@ -80,21 +52,6 @@ function renderForNav ({dom, isSelected}) {
       style={[basicStyle, selectedStyle]}>
       {dom}
     </View>
-  );
-}
-
-function renderOpinionSelector (opinionInfo, pressAction) {
-  const {influence, author} = opinionInfo;
-
-  return (
-    <TouchableHighlight
-      onPress={pressAction}>
-      <View style={{width: 76}}>
-        {
-          renderPersonWithInfluence(influence, author, '#ccc')
-        }
-      </View>
-    </TouchableHighlight>
   );
 }
 
@@ -436,12 +393,17 @@ export class Topic extends Component<void, Props, State> {
           { friend && author && <View style={[styles.miniCircle]} /> }
           { friend && author && <Octicons name='chevron-right' size={20} color='#999' /> }
           { author &&
-            renderPersonWithInfluence(
-              author.influence,
-              author,
-              author.isRanked || author.isManual ? friend.color : '#ccc',
-              this.toggleAuthorDrawer
-            )}
+            <Person.Button
+              person={Object.assign(
+                {
+                  color: author.isRanked || author.isManual ? friend.color : '#ccc'
+                },
+                author
+              )}
+              pressAction={this.toggleAuthorDrawer}
+              influence={author.influence}
+              />
+          }
         </View>
       );
     };
@@ -703,9 +665,13 @@ export class Topic extends Component<void, Props, State> {
                       paddingHorizontal: 8,
                       paddingVertical: 8
                     }}>
-                    {
-                      renderOpinionSelector(opinion, this.showBrowseSingleOpinion(opinion.id))
-                    }
+                    <Person.Button
+                      person={
+                        Object.assign({color: '#ccc'}, opinion.author)
+                      }
+                      pressAction={this.showBrowseSingleOpinion(opinion.id)}
+                      influence={opinion.influence}
+                      />
                     <View
                       style={[styles.answers, {paddingRight: 48}]}>
                       {
