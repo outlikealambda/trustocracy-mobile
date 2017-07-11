@@ -5,14 +5,13 @@
   "dependencies": {
     "d3-scale": "^1.0.6",
     "d3-shape": "^1.2.0",
-    "expo": "17.0.0",
-    "react": "16.0.0-alpha.6",
-    "react-native": "https://github.com/expo/react-native/archive/sdk-17.0.0.tar.gz",
+    "expo": "18.0.0",
+    "react": "16.0.0-alpha.12",
+    "react-native": "https://github.com/expo/react-native/archive/sdk-18.0.0.tar.gz",
     "react-native-simple-markdown": "^1.0.60-rc.3",
     "react-navigation": "^1.0.0-beta.11"
   },
   "main": "main.js",
-
   "semistandard": {
     "parser": "babel-eslint",
     "plugins": [
