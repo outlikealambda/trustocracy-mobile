@@ -194,6 +194,22 @@ export class Topic extends Component<void, Props, State> {
     this.fetchTopicTitle(topicId);
   }
 
+  isTopicInfo = () => {
+    return (
+      !this.state.isBrowse &&
+      !this.state.visibleFriend &&
+      !this.state.visibleAuthor
+    );
+  }
+
+  isNoConnectedOpinionToFriend = () => {
+    return (
+      !this.state.isBrowse &&
+      this.state.visibleFriend &&
+      !this.state.visibleOpinion
+    );
+  }
+
   fetchConnected = (topicId, userId) => {
     return Api.connected(topicId, userId)
       .then(response => response.json())
@@ -656,15 +672,10 @@ export class Topic extends Component<void, Props, State> {
       );
     };
 
-    const renderOpinionText = (opinion, defaultText = '') => (
+    const renderOpinionText = (opinionText) => (
       <ScrollView>
-        <View style={styles.instructions}>
-          <Markdown>
-            { opinion
-              ? opinion.text
-              : defaultText
-            }
-          </Markdown>
+        <View style={styles.bodyOfText}>
+          <Markdown>{opinionText}</Markdown>
         </View>
       </ScrollView>
     );
@@ -672,13 +683,22 @@ export class Topic extends Component<void, Props, State> {
     const renderBody = state => {
       if (state.isBrowse) {
         return state.visibleOpinion
-          ? renderOpinionText(state.visibleOpinion)
+          ? renderOpinionText(state.visibleOpinion.text)
           : renderBrowseOpinions(state.opinions, state.prompts, state.promptIdx, this.updatePrompt);
-      } else {
-        return state.visibleOpinion
-          ? renderOpinionText(state.visibleOpinion)
-          : renderTopicInfo(state.influence, state.connections);
       }
+
+      if (this.isTopicInfo()) {
+        return renderTopicInfo(state.influence, state.connections);
+      }
+
+      if (this.isNoConnectedOpinionToFriend()) {
+        const message =
+          `${state.visibleFriend.name} is not connected to any opinions`;
+
+        return renderOpinionText(message);
+      }
+
+      return renderOpinionText(state.visibleOpinion.text);
     };
 
     return (
@@ -735,10 +755,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 8
   },
-  instructions: {
+  bodyOfText: {
     marginLeft: 20,
     marginRight: 20,
-    marginTop: 20,
     marginBottom: 5
   },
 
