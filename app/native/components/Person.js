@@ -7,7 +7,7 @@ import { InitialsButton } from './Buttons.js';
 import Influence from './Influence.js';
 
 // Optional influence argument toggles influence badge
-export const Button = ({person, pressAction, influence}) => {
+export const Button = ({person, pressAction, influence, size}) => {
   const {id: key, color, isInfluencer = false, isConnected = false, isRanked = false} = person;
 
   const isRelated = person.relationships && person.relationships.length > 0;
@@ -29,6 +29,7 @@ export const Button = ({person, pressAction, influence}) => {
       shape={isRanked ? 'circle' : 'square'}
       onPress={pressAction}
       key={key}
+      size={size}
       backgroundColor={backgroundColor}
       buttonStyle={buttonStyle}
       initials={initials(person)} />;

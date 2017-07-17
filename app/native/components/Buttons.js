@@ -47,6 +47,12 @@ const button = {
   }
 };
 
+const initialsFont = {
+  small: 12,
+  medium: 18,
+  large: 24
+};
+
 const buttonStyles = {
   getStyle (shape = 'circle', size = Sizes.LARGE) {
     size = normalizeSize(size);
@@ -187,7 +193,7 @@ export class InitialsButton extends Component {
     const onPress = this.props.onPress;
     const baseStyle = buttonStyles.getStyle(this.props.shape, size);
     const buttonStyle = this.props.buttonStyle || {};
-    const fontSize = size === Sizes.SMALL ? 12 : 24;
+    const fontSize = initialsFont[normalizeSize(this.props.size || Sizes.LARGE)];
 
     const button = (
       <View style={[baseStyle, {backgroundColor}, buttonStyle]}>
