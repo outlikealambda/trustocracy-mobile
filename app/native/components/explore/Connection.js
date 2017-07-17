@@ -128,7 +128,13 @@ const Drawer = ({person, influence, choose, clear}) => {
 
 export class Connection extends Component {
   render () {
-    const {state, friend, author, influence, toggleFriend, toggleAuthor, choose, clear} = this.props;
+    const {state, friend, influence, toggleFriend, toggleAuthor, choose, clear} = this.props;
+
+    // If author is same as friend, set to null so as not to display twice
+    const author =
+      friend && this.props.author && friend.id === this.props.author.id
+      ? null
+      : this.props.author;
 
     return (
       <View style={{flex: 0}}>
