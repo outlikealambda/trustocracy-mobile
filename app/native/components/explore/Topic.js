@@ -477,6 +477,7 @@ export class Topic extends Component<void, Props, State> {
                 {color: 'pink'},
                 activeInfluencer
               )}
+              size='medium'
               pressAction={this.showOpinion(activeInfluencer, activeConnection.author, activeConnection.opinion)}
             />
           }

@@ -11,19 +11,17 @@ export class TopicInfo extends Component {
     return (
       <View style={styles.container}>
         <View style={styles.row}>
-          <InfoText>You wield</InfoText>
-          <View style={styles.inlineComponent}>
+          <View style={styles.leftComponent}>
             <Influence
               influence={this.props.influence}
               style={{paddingVertical: 4}}
               fontSize={20} />
           </View>
-          <InfoText>influence</InfoText>
+          <InfoText>points allocated</InfoText>
         </View>
         <View style={styles.row}>
-          <InfoText>You have given</InfoText>
-          <View style={styles.inlineComponent}>{this.props.delegate}</View>
-          <InfoText>your influence</InfoText>
+          <View style={styles.leftComponent}>{this.props.delegate}</View>
+          <InfoText>wields your points</InfoText>
         </View>
       </View>
     );
@@ -41,18 +39,22 @@ class InfoText extends Component {
 }
 
 const styles = StyleSheet.create({
-  inlineComponent: {
-    marginHorizontal: 8
+  leftComponent: {
+    marginHorizontal: 16,
+    width: 48,
+    alignItems: 'center'
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 8
+    marginVertical: 8,
+    flexWrap: 'wrap'
   },
   container: {
     flex: 1,
-    alignItems: 'center',
-    paddingTop: 32
+    alignItems: 'flex-start',
+    paddingTop: 32,
+    paddingHorizontal: 16
   },
   text: {
     fontSize: 16
