@@ -1,26 +1,25 @@
 import React, { Component } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View
-} from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import Influence from '../Influence.js';
 
 export class TopicInfo extends Component {
-  render () {
+  render() {
     return (
       <View style={styles.container}>
         <View style={styles.row}>
           <View style={styles.leftComponent}>
             <Influence
               influence={this.props.influence}
-              style={{paddingVertical: 4}}
-              fontSize={20} />
+              style={{ paddingVertical: 4 }}
+              fontSize={20}
+            />
           </View>
           <InfoText>points allocated</InfoText>
         </View>
         <View style={styles.row}>
-          <View style={styles.leftComponent}>{this.props.delegate}</View>
+          <View style={styles.leftComponent}>
+            {this.props.delegate}
+          </View>
           <InfoText>wields your points</InfoText>
         </View>
       </View>
@@ -29,7 +28,7 @@ export class TopicInfo extends Component {
 }
 
 class InfoText extends Component {
-  render () {
+  render() {
     return (
       <Text style={styles.text}>
         {this.props.children}

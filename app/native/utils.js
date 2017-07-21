@@ -21,10 +21,10 @@ export const Arrays = {
       agg.push(Object.assign({}, elem));
 
       return agg;
-    }, []
-  ),
+    }, []),
 
-  range: (len, mapFn = () => {}) => Array.from(new Array(len), (x, idx) => mapFn(idx))
+  range: (len, mapFn = () => {}) =>
+    Array.from(new Array(len), (x, idx) => mapFn(idx))
 };
 
 export const Log = {

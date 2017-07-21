@@ -1,14 +1,18 @@
 import React from 'react';
-import {
-  View
-} from 'react-native';
+import { View } from 'react-native';
 
 import { InitialsButton } from './Buttons.js';
 import Influence from './Influence.js';
 
 // Optional influence argument toggles influence badge
-export const Button = ({person, pressAction, influence, size}) => {
-  const {id: key, color, isInfluencer = false, isConnected = false, isRanked = false} = person;
+export const Button = ({ person, pressAction, influence, size }) => {
+  const {
+    id: key,
+    color,
+    isInfluencer = false,
+    isConnected = false,
+    isRanked = false
+  } = person;
 
   const isRelated = person.relationships && person.relationships.length > 0;
   const backgroundColor = isRelated ? color : '#ddd';
@@ -16,15 +20,15 @@ export const Button = ({person, pressAction, influence, size}) => {
 
   const buttonStyle = isInfluencer
     ? {
-      margin: 2,
-      opacity
-    }
+        margin: 2,
+        opacity
+      }
     : {
-      margin: 6,
-      opacity
-    };
+        margin: 6,
+        opacity
+      };
 
-  let button =
+  let button = (
     <InitialsButton
       shape={isRanked ? 'circle' : 'square'}
       onPress={pressAction}
@@ -32,7 +36,9 @@ export const Button = ({person, pressAction, influence, size}) => {
       size={size}
       backgroundColor={backgroundColor}
       buttonStyle={buttonStyle}
-      initials={initials(person)} />;
+      initials={initials(person)}
+    />
+  );
 
   if (isInfluencer) {
     button = markAsInfluencer(button, key);
@@ -45,7 +51,7 @@ export const Button = ({person, pressAction, influence, size}) => {
   return button;
 };
 
-function markAsInfluencer (content, key) {
+function markAsInfluencer(content, key) {
   return (
     <View
       key={key}
@@ -55,13 +61,14 @@ function markAsInfluencer (content, key) {
         alignItems: 'center',
         justifyContent: 'center',
         borderColor: 'turquoise'
-      }}>
+      }}
+    >
       {content}
     </View>
   );
 }
 
-function addInfluenceBadge (personButton, influence, key) {
+function addInfluenceBadge(personButton, influence, key) {
   const horizontal = {
     outer: {
       flexDirection: 'row'
@@ -69,19 +76,14 @@ function addInfluenceBadge (personButton, influence, key) {
   };
 
   return (
-    <View
-      key={key}
-      style={horizontal.outer}>
+    <View key={key} style={horizontal.outer}>
       {personButton}
-      <Influence
-        influence={influence}
-        style={{marginLeft: -10}}
-        />
+      <Influence influence={influence} style={{ marginLeft: -10 }} />
     </View>
   );
 }
-  // super fragile...
-function initials (friend) {
+// super fragile...
+function initials(friend) {
   if (friend) {
     const { name } = friend;
     return name[0] + name.split(' ')[1][0];

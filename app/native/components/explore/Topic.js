@@ -31,21 +31,20 @@ const trusteeColors = [
 ];
 
 // STATELESS RENDER FUNCTIONS
-function renderForNav ({dom, isSelected}) {
+function renderForNav({ dom, isSelected }) {
   const basicStyle = {
     paddingBottom: 4
   };
 
   const selectedStyle = isSelected
     ? {
-      borderBottomWidth: 4,
-      borderBottomColor: 'orange'
-    }
+        borderBottomWidth: 4,
+        borderBottomColor: 'orange'
+      }
     : { marginBottom: 4 };
 
   return (
-    <View
-      style={[basicStyle, selectedStyle]}>
+    <View style={[basicStyle, selectedStyle]}>
       {dom}
     </View>
   );
@@ -55,7 +54,7 @@ function renderForNav ({dom, isSelected}) {
 
 // STATELESS HELPER FUNCTIONS
 
-function findInfluencerConnectionCombo (connections) {
+function findInfluencerConnectionCombo(connections) {
   for (let i = 0; i < connections.length; i++) {
     for (let j = 0; j < connections[i].friends.length; j++) {
       if (connections[i].friends[j].isInfluencer) {
@@ -71,69 +70,72 @@ function findInfluencerConnectionCombo (connections) {
 }
 
 const Relations = {
-  extractFromConnections: connections => connections.reduce(
-    (agg, conn) => agg.concat(conn.friends, conn.author ? [conn.author] : []),
-    []
-  ),
+  extractFromConnections: connections =>
+    connections.reduce(
+      (agg, conn) => agg.concat(conn.friends, conn.author ? [conn.author] : []),
+      []
+    ),
   opinionMerger: relations => opinion => {
     const relatedPerson = relations.find(rel => rel.id === opinion.author.id);
 
-    return !relatedPerson ? opinion : Object.assign(opinion, {author: relatedPerson});
+    return !relatedPerson
+      ? opinion
+      : Object.assign(opinion, { author: relatedPerson });
   },
   connection: {
-    setValue (connection, newValue) {
-      const author = connection.author && Object.assign(connection.author, newValue);
+    setValue(connection, newValue) {
+      const author =
+        connection.author && Object.assign(connection.author, newValue);
       const friends = connection.friends.map(f => Object.assign(f, newValue));
 
-      return Object.assign(
-        {},
-        connection,
-        {
-          author,
-          friends
-        }
-      );
+      return Object.assign({}, connection, {
+        author,
+        friends
+      });
     },
-    setColor (connection, color) {
-      return this.setValue(connection, {color});
+    setColor(connection, color) {
+      return this.setValue(connection, { color });
     },
-    setIsConnected (connection) {
-      return this.setValue(connection, {isConnected: !!connection.author});
+    setIsConnected(connection) {
+      return this.setValue(connection, { isConnected: !!connection.author });
     }
   }
 };
 
 const Connections = {
-  setColors (connections) {
+  setColors(connections) {
     return connections.map((connection, idx) =>
-      Relations.connection.setColor(connection, trusteeColors[idx % trusteeColors.length])
+      Relations.connection.setColor(
+        connection,
+        trusteeColors[idx % trusteeColors.length]
+      )
     );
   },
 
-  setIsConnected (connections) {
-    return connections.map(connection => Relations.connection.setIsConnected(connection));
+  setIsConnected(connections) {
+    return connections.map(connection =>
+      Relations.connection.setIsConnected(connection)
+    );
   },
 
   // Just moves influence onto Opinion for now
-  normalize (connection) {
-    const opinion = connection.opinion && Object.assign(
-      {},
-      connection.opinion,
-      {
+  normalize(connection) {
+    const opinion =
+      connection.opinion &&
+      Object.assign({}, connection.opinion, {
         influence: connection.influence
-      }
-    );
+      });
 
     return Object.assign(
       {},
       connection,
-      {influence: null},
+      { influence: null },
       {
         opinion
       }
     );
   },
-  normalizeAll (connections) {
+  normalizeAll(connections) {
     return connections.map(this.normalize);
   }
 };
@@ -142,7 +144,7 @@ const Connections = {
 
 type Props = {
   id: string
-}
+};
 
 type State = {
   topicId: number,
@@ -150,7 +152,7 @@ type State = {
   influence: number,
   connections: Array<any>,
   title: string,
-  isBrowse : boolean,
+  isBrowse: boolean,
   opinions: Array<any>,
   prompts: Array<any>,
   promptIdx: number,
@@ -159,14 +161,14 @@ type State = {
 };
 
 export class Topic extends Component<void, Props, State> {
-  state: State
+  state: State;
 
   static navigationOptions = ({ navigation }) => ({
     title: navigation.state.params.title,
     headerRight: DelegateIcon(navigation.navigate)
-  })
+  });
 
-  constructor (props: Props) {
+  constructor(props: Props) {
     super(props);
 
     const topicId = this.props.navigation.state.params.id;
@@ -200,7 +202,7 @@ export class Topic extends Component<void, Props, State> {
       !this.state.visibleFriend &&
       !this.state.visibleAuthor
     );
-  }
+  };
 
   isNoConnectedOpinionToFriend = () => {
     return (
@@ -208,7 +210,7 @@ export class Topic extends Component<void, Props, State> {
       this.state.visibleFriend &&
       !this.state.visibleOpinion
     );
-  }
+  };
 
   fetchConnected = (topicId, userId) => {
     return Api.connected(topicId, userId)
@@ -220,7 +222,7 @@ export class Topic extends Component<void, Props, State> {
         console.error('fetch connected error', error);
         throw error;
       });
-  }
+  };
 
   fetchInfluence = (topicId, userId) => {
     return Api.influence(topicId, userId)
@@ -230,7 +232,7 @@ export class Topic extends Component<void, Props, State> {
         console.error('fetch influence error', error);
         throw error;
       });
-  }
+  };
 
   fetchOpinions = topicId => {
     return Api.opinions(topicId)
@@ -239,7 +241,7 @@ export class Topic extends Component<void, Props, State> {
         console.error('fetch opinions error', error);
         throw error;
       });
-  }
+  };
 
   // This is used when
   // - An action occurs which could change influence, we need to sync up with the server
@@ -253,22 +255,30 @@ export class Topic extends Component<void, Props, State> {
       const [connections, influence, opinionsSansRelationships] = results;
 
       const allRelations = Relations.extractFromConnections(connections);
-      const opinions = opinionsSansRelationships.map(Relations.opinionMerger(allRelations));
+      const opinions = opinionsSansRelationships.map(
+        Relations.opinionMerger(allRelations)
+      );
 
       // TODO: visibleState doesn't need to be evaluated on initial screen load
-      const visibleState = this.evaluateVisibleState(connections, opinions, targetId);
+      const visibleState = this.evaluateVisibleState(
+        connections,
+        opinions,
+        targetId
+      );
 
-      this.animateStateChange(Object.assign(
-        {
-          allRelations,
-          connections,
-          influence,
-          opinions
-        },
-        visibleState
-      ));
+      this.animateStateChange(
+        Object.assign(
+          {
+            allRelations,
+            connections,
+            influence,
+            opinions
+          },
+          visibleState
+        )
+      );
     });
-  }
+  };
 
   fetchTopicTitle = topicId => {
     return Api.topicTitle(topicId)
@@ -279,42 +289,54 @@ export class Topic extends Component<void, Props, State> {
         console.error('fetch topic title', error);
         throw error;
       });
-  }
+  };
 
   updatePrompt = promptIdx => {
-    this.animateStateChange({promptIdx});
-  }
+    this.animateStateChange({ promptIdx });
+  };
 
   fetchSelectedOpinion = opinionId => {
     return Api.opinion(opinionId)
       .then(response => response.json())
       .then(Relations.opinionMerger(this.state.allRelations))
       .catch(error => {
-        console.error('failed to retrieve opinion with id: ' + opinionId, error);
+        console.error(
+          'failed to retrieve opinion with id: ' + opinionId,
+          error
+        );
         throw error;
       });
-  }
+  };
 
   fetchSetTarget = (topicId, userId) => targetId => () => {
-    return Api.target.set(topicId, userId, targetId)
+    return Api.target
+      .set(topicId, userId, targetId)
       .then(() => this.syncState(topicId, userId, targetId));
-  }
+  };
 
   fetchClearTarget = (topicId, userId) => () => {
-    return Api.target.clear(topicId, userId)
-      .then(() => this.syncState(topicId, userId, this.state.visibleFriend && this.state.visibleFriend.id));
-  }
+    return Api.target
+      .clear(topicId, userId)
+      .then(() =>
+        this.syncState(
+          topicId,
+          userId,
+          this.state.visibleFriend && this.state.visibleFriend.id
+        )
+      );
+  };
 
   evaluateVisibleState = (connections, opinions, targetId) => {
     // if no targetId, try use previous visible friend id
-    targetId = targetId || (this.state.visibleFriend && this.state.visibleFriend.id);
+    targetId =
+      targetId || (this.state.visibleFriend && this.state.visibleFriend.id);
 
     // check connections: for loop == .find + .map
     for (let i = 0; i < connections.length; i++) {
       for (let j = 0; j < connections[i].friends.length; j++) {
         let friend = connections[i].friends[j];
 
-          // friend.id match: set friend, opinion and author
+        // friend.id match: set friend, opinion and author
         if (friend.id === targetId) {
           return {
             visibleFriend: friend,
@@ -340,7 +362,9 @@ export class Topic extends Component<void, Props, State> {
       }
     }
 
-    const opinionMetadata = opinions.find(opinion => opinion.author.id === targetId);
+    const opinionMetadata = opinions.find(
+      opinion => opinion.author.id === targetId
+    );
 
     // opinion.author.id match: set friend = null, opinion and author
     if (opinionMetadata) {
@@ -350,7 +374,7 @@ export class Topic extends Component<void, Props, State> {
       // the opinion text as is (because we don't get back the text when
       // fetching all the opinions via the api)
       // We could also just fetch this specific opinion again here?
-      const {author, influence} = opinionMetadata;
+      const { author, influence } = opinionMetadata;
       const opinion = this.state.visibleOpinion;
 
       opinion.influence = influence;
@@ -371,90 +395,99 @@ export class Topic extends Component<void, Props, State> {
       showFriendDrawer: null,
       showAuthorDrawer: null
     };
-  }
+  };
 
   toggleFriendDrawer = () => {
     this.animateStateChange({
       showAuthorDrawer: false,
       showFriendDrawer: !this.state.showFriendDrawer
     });
-  }
+  };
 
   toggleAuthorDrawer = () => {
     this.animateStateChange({
       showFriendDrawer: false,
       showAuthorDrawer: !this.state.showAuthorDrawer
     });
-  }
+  };
 
   showBrowseAllOpinions = () => {
-    this.animateStateChange(Object.assign(
-      {
-        isBrowse: true,
-        visibleFriend: null,
-        visibleAuthor: null,
-        visibleOpinion: null
-      },
-      defaultState.hiddenDrawers
-    ));
-  }
+    this.animateStateChange(
+      Object.assign(
+        {
+          isBrowse: true,
+          visibleFriend: null,
+          visibleAuthor: null,
+          visibleOpinion: null
+        },
+        defaultState.hiddenDrawers
+      )
+    );
+  };
 
   showBrowsedOpinion = opinionId => () => {
-    this.fetchSelectedOpinion(opinionId)
-      .then(opinion => this.showOpinion(null, opinion.author, opinion)());
-  }
+    this.fetchSelectedOpinion(opinionId).then(opinion =>
+      this.showOpinion(null, opinion.author, opinion)()
+    );
+  };
 
   showOpinion = (visibleFriend, visibleAuthor, visibleOpinion) => () => {
-    this.setState(Object.assign(
-      {
-        isBrowse: false,
-        visibleFriend,
-        visibleAuthor,
-        visibleOpinion
-      },
-      defaultState.hiddenDrawers
-    ));
-  }
+    this.setState(
+      Object.assign(
+        {
+          isBrowse: false,
+          visibleFriend,
+          visibleAuthor,
+          visibleOpinion
+        },
+        defaultState.hiddenDrawers
+      )
+    );
+  };
 
   animateStateChange = (modifiedState, callback = () => {}) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
 
     this.setState(modifiedState, callback);
+  };
+
+  isSelectedFriend(person) {
+    return (
+      this.state.visibleFriend && this.state.visibleFriend.id === person.id
+    );
   }
 
-  isSelectedFriend (person) {
-    return this.state.visibleFriend && this.state.visibleFriend.id === person.id;
-  }
-
-  render () {
+  render() {
     const renderTrusteeGroup = connection => {
-      return (
-        connection.friends
-          .map(friend => ({
-            dom: (
-              <Person.Button
-                person={friend}
-                pressAction={this.showOpinion(friend, connection.author, connection.opinion)}
-              />
-            ),
-            isSelected: this.isSelectedFriend(friend)
-          }))
-          .map(renderForNav)
-      );
+      return connection.friends
+        .map(friend => ({
+          dom: (
+            <Person.Button
+              person={friend}
+              pressAction={this.showOpinion(
+                friend,
+                connection.author,
+                connection.opinion
+              )}
+            />
+          ),
+          isSelected: this.isSelectedFriend(friend)
+        }))
+        .map(renderForNav);
     };
 
-    const renderBook = () => (
+    const renderBook = () =>
       <IconButton
-        shape='circle'
-        name='book'
-        key='book'
-        backgroundColor='wheat'
-        iconStyle={{fontSize: 27, height: 27, width: 27, marginRight: 1}}
-        buttonStyle={{margin: 6}}
-        onPress={this.showBrowseAllOpinions} />
-    );
+        shape="circle"
+        name="book"
+        key="book"
+        backgroundColor="wheat"
+        iconStyle={{ fontSize: 27, height: 27, width: 27, marginRight: 1 }}
+        buttonStyle={{ margin: 6 }}
+        onPress={this.showBrowseAllOpinions}
+      />;
 
-    const Header = ({friend, author, opinion, userInfluence}) => {
+    const Header = ({ friend, author, opinion, userInfluence }) => {
       const drawerState =
         (this.state.showFriendDrawer && 'friend') ||
         (this.state.showAuthorDrawer && 'author') ||
@@ -465,14 +498,14 @@ export class Topic extends Component<void, Props, State> {
           state={drawerState}
           friend={friend}
           author={
-            author && Object.assign({influence: opinion.influence}, author)
+            author && Object.assign({ influence: opinion.influence }, author)
           }
           influence={userInfluence}
           toggleFriend={this.toggleFriendDrawer}
           toggleAuthor={this.toggleAuthorDrawer}
           choose={this.fetchSetTarget(this.state.topicId, this.state.userId)}
           clear={this.fetchClearTarget(this.state.topicId, this.state.userId)}
-          />
+        />
       );
     };
 
@@ -482,22 +515,23 @@ export class Topic extends Component<void, Props, State> {
       }
 
       const found = findInfluencerConnectionCombo(connections);
-      const {friend: activeInfluencer, connection: activeConnection} = found;
+      const { friend: activeInfluencer, connection: activeConnection } = found;
 
       return (
         <TopicInfo
           influence={influence}
           delegate={
             <Person.Button
-              person={Object.assign(
-                {color: 'pink'},
-                activeInfluencer
+              person={Object.assign({ color: 'pink' }, activeInfluencer)}
+              size="medium"
+              pressAction={this.showOpinion(
+                activeInfluencer,
+                activeConnection.author,
+                activeConnection.opinion
               )}
-              size='medium'
-              pressAction={this.showOpinion(activeInfluencer, activeConnection.author, activeConnection.opinion)}
             />
           }
-          />
+        />
       );
     };
 
@@ -535,32 +569,32 @@ export class Topic extends Component<void, Props, State> {
               position: 'relative',
               flex: 1
             }
-          ]}>
+          ]}
+        >
           <View style={style} />
-          <View style={{
-            position: 'absolute',
-            left: '49%',
-            width: '2%',
-            height: 28,
-            backgroundColor: '#ccc'
-          }} />
+          <View
+            style={{
+              position: 'absolute',
+              left: '49%',
+              width: '2%',
+              height: 28,
+              backgroundColor: '#ccc'
+            }}
+          />
         </View>
       );
     };
 
     const renderAnswers = (answer, prompt) => {
-      const {selected, value} = answer;
+      const { selected, value } = answer;
 
-      return (
-        Metric.isScalar(prompt)
+      return Metric.isScalar(prompt)
         ? renderScalarAnswer(value)
-        : (
-          <View
-            style={[styles.multipleChoiceAnswer, answerTile]}>
-            <Text>{prompt.options[selected].text}</Text>
-          </View>
-        )
-      );
+        : <View style={[styles.multipleChoiceAnswer, answerTile]}>
+            <Text>
+              {prompt.options[selected].text}
+            </Text>
+          </View>;
     };
 
     const smallIcon = {
@@ -574,29 +608,29 @@ export class Topic extends Component<void, Props, State> {
         ? renderDisabledChevron(leftRight)
         : renderEnabledChevron(leftRight, updateFn);
 
-    const renderDisabledChevron = leftRight => (
+    const renderDisabledChevron = leftRight =>
       <IconButton
         size={Sizes.SMALL}
-        shape='circle'
+        shape="circle"
         name={'chevron-' + leftRight}
         key={leftRight}
         iconStyle={smallIcon}
-        color='#ccc'
-        backgroundColor='#efefef'
-        onPress={() => {}} />
-    );
+        color="#ccc"
+        backgroundColor="#efefef"
+        onPress={() => {}}
+      />;
 
-    const renderEnabledChevron = (leftRight, updateFn) => (
+    const renderEnabledChevron = (leftRight, updateFn) =>
       <IconButton
         size={Sizes.SMALL}
-        shape='circle'
+        shape="circle"
         name={'chevron-' + leftRight}
         key={leftRight}
         iconStyle={smallIcon}
-        color='#444'
-        backgroundColor='#ddd'
-        onPress={updateFn} />
-    );
+        color="#444"
+        backgroundColor="#ddd"
+        onPress={updateFn}
+      />;
 
     const renderPrompt = (prompts, promptIdx, updateFn) => {
       const prompt = prompts[promptIdx];
@@ -606,7 +640,7 @@ export class Topic extends Component<void, Props, State> {
       return (
         // prompts row
         <View
-          key='prompt'
+          key="prompt"
           style={{
             flexDirection: 'row',
             alignItems: 'center',
@@ -615,76 +649,82 @@ export class Topic extends Component<void, Props, State> {
             marginVertical: 16,
             minHeight: 80,
             flex: 1
-          }}>
-          {
-            renderChevron(isFirst, 'left', () => updateFn(promptIdx - 1))
-          }
+          }}
+        >
+          {renderChevron(isFirst, 'left', () => updateFn(promptIdx - 1))}
           <Text
             style={{
               flex: 1,
               fontSize: 18,
               textAlign: 'center',
               paddingHorizontal: 8
-            }}>
+            }}
+          >
             {prompt.text}
           </Text>
-          {
-            renderChevron(isLast, 'right', () => updateFn(promptIdx + 1))
-          }
+          {renderChevron(isLast, 'right', () => updateFn(promptIdx + 1))}
         </View>
       );
     };
 
-    const renderBrowseOpinions = (opinions, prompts, promptIdx, updatePromptFn) => {
+    const renderBrowseOpinions = (
+      opinions,
+      prompts,
+      promptIdx,
+      updatePromptFn
+    ) => {
       return (
         <ScrollView>
-          <View style={{paddingVertical: 12}}>
+          <View style={{ paddingVertical: 12 }}>
             {renderPrompt(prompts, promptIdx, updatePromptFn)}
-            {
-              opinions.map(
-                opinion => (
-                  <View
-                    key={opinion.id}
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      flex: 1,
-                      paddingHorizontal: 8,
-                      paddingVertical: 8
-                    }}>
-                    <Person.Button
-                      person={opinion.author}
-                      pressAction={this.showBrowsedOpinion(opinion.id)}
-                      influence={opinion.influence}
-                      />
-                    <View
-                      style={[styles.answers, {paddingRight: 48}]}>
-                      {
-                        renderAnswers(opinion.answers[promptIdx], prompts[promptIdx])
-                      }
-                    </View>
-                  </View>
-                )
-              )
-            }
+            {opinions.map(opinion =>
+              <View
+                key={opinion.id}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  flex: 1,
+                  paddingHorizontal: 8,
+                  paddingVertical: 8
+                }}
+              >
+                <Person.Button
+                  person={opinion.author}
+                  pressAction={this.showBrowsedOpinion(opinion.id)}
+                  influence={opinion.influence}
+                />
+                <View style={[styles.answers, { paddingRight: 48 }]}>
+                  {renderAnswers(
+                    opinion.answers[promptIdx],
+                    prompts[promptIdx]
+                  )}
+                </View>
+              </View>
+            )}
           </View>
         </ScrollView>
       );
     };
 
-    const renderOpinionText = (opinionText) => (
+    const renderOpinionText = opinionText =>
       <ScrollView>
         <View style={styles.bodyOfText}>
-          <Markdown>{opinionText}</Markdown>
+          <Markdown>
+            {opinionText}
+          </Markdown>
         </View>
-      </ScrollView>
-    );
+      </ScrollView>;
 
     const renderBody = state => {
       if (state.isBrowse) {
         return state.visibleOpinion
           ? renderOpinionText(state.visibleOpinion.text)
-          : renderBrowseOpinions(state.opinions, state.prompts, state.promptIdx, this.updatePrompt);
+          : renderBrowseOpinions(
+              state.opinions,
+              state.prompts,
+              state.promptIdx,
+              this.updatePrompt
+            );
       }
 
       if (this.isTopicInfo()) {
@@ -692,8 +732,8 @@ export class Topic extends Component<void, Props, State> {
       }
 
       if (this.isNoConnectedOpinionToFriend()) {
-        const message =
-          `${state.visibleFriend.name} is not connected to any opinions`;
+        const message = `${state.visibleFriend
+          .name} is not connected to any opinions`;
 
         return renderOpinionText(message);
       }
@@ -703,17 +743,16 @@ export class Topic extends Component<void, Props, State> {
 
     return (
       <View style={styles.container}>
-
         {/* NAVIGATION */}
-        <View
-          style={styles.selectorIconRow}>
-          { /* ScrollView needs a height; either inherited or set, and even
+        <View style={styles.selectorIconRow}>
+          {/* ScrollView needs a height; either inherited or set, and even
                if it's horizontal */}
-          <ScrollView
-            horizontal
-            contentContainerStyle={styles.scrollInterior}>
-            { this.state.connections.map(renderTrusteeGroup) }
-            { renderForNav({dom: renderBook(), isSelected: this.state.isBrowse}) }
+          <ScrollView horizontal contentContainerStyle={styles.scrollInterior}>
+            {this.state.connections.map(renderTrusteeGroup)}
+            {renderForNav({
+              dom: renderBook(),
+              isSelected: this.state.isBrowse
+            })}
           </ScrollView>
         </View>
 
@@ -724,9 +763,9 @@ export class Topic extends Component<void, Props, State> {
           author={this.state.visibleAuthor}
           opinion={this.state.visibleOpinion}
           userInfluence={this.state.influence}
-          />
-        <View style={{flex: 1}}>
-          { renderBody(this.state) }
+        />
+        <View style={{ flex: 1 }}>
+          {renderBody(this.state)}
         </View>
       </View>
     );
@@ -769,6 +808,5 @@ const styles = StyleSheet.create({
   scalarAnswer: {
     // width: 80
   },
-  multipleChoiceAnswer: {
-  }
+  multipleChoiceAnswer: {}
 });

@@ -17,5 +17,8 @@
     "plugins": [
       "flowtype"
     ]
+  },
+  "devDependencies": {
+    "prettier": "^1.5.3"
   }
 }

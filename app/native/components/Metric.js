@@ -1,10 +1,6 @@
 import React, { Component } from 'react';
 
-import {
-  StyleSheet,
-  Text,
-  View
-} from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Svg } from 'expo';
 import * as Colors from '../colors.js';
@@ -17,19 +13,15 @@ export const isScalar = prompt => prompt.type === 'SCALAR';
 export const isMultipleChoice = prompt => prompt.type === 'MULTIPLE_CHOICE';
 
 export class Summary extends Component {
-  render () {
+  render() {
     const prompt = this.props.prompt;
 
     if (isScalar(prompt)) {
-      return (
-        <ScalarSummary {...this.props} />
-      );
+      return <ScalarSummary {...this.props} />;
     }
 
     if (isMultipleChoice(prompt)) {
-      return (
-        <MultipleChoiceSummary {...this.props} />
-      );
+      return <MultipleChoiceSummary {...this.props} />;
     }
   }
 }
@@ -45,20 +37,12 @@ export class Summary extends Component {
  */
 
 class ScalarSummary extends Component {
-
-  render () {
+  render() {
     return (
-      <View
-        style={[styles.scalarContainer, this.props.viewStyle]}>
-        {
-          renderScalarPrompt(this.props, this.props.prompt)
-        }
-        {
-          renderScalarLabels(this.props, this.props.prompt)
-        }
-        {
-          renderHistogram(this.props, this.props.summaryData)
-        }
+      <View style={[styles.scalarContainer, this.props.viewStyle]}>
+        {renderScalarPrompt(this.props, this.props.prompt)}
+        {renderScalarLabels(this.props, this.props.prompt)}
+        {renderHistogram(this.props, this.props.summaryData)}
       </View>
     );
   }
@@ -67,8 +51,7 @@ class ScalarSummary extends Component {
 const renderScalarPrompt = (renderingOptions, prompt) => {
   return (
     <View>
-      <Text
-        style={styles.scalarPrompt}>
+      <Text style={styles.scalarPrompt}>
         {prompt.text}
       </Text>
     </View>
@@ -84,13 +67,15 @@ const renderScalarLabels = (renderingOptions, prompt) => {
         flexDirection: 'row',
         alignItems: 'flex-start',
         justifyContent: 'flex-start'
-      }}>
+      }}
+    >
       <View
         style={{
           flexDirection: 'row',
           justifyContent: 'space-between',
           flex: 1
-        }}>
+        }}
+      >
         <View>
           <Text style={styles.labelText}>
             {prompt.options[0].text}
@@ -116,34 +101,30 @@ const renderHistogram = (renderingOptions, data) => {
 
   const maxData = Math.max(...data);
 
-  const xScale = D3Scale
-    .scaleBand()
+  const xScale = D3Scale.scaleBand()
     .rangeRound([0, width])
     .padding(0.25)
     .domain(data);
 
-  const yScale = D3Scale
-    .scaleLinear()
+  const yScale = D3Scale.scaleLinear()
     .rangeRound([height, 0])
     .domain([0, maxData]);
 
   return (
     <Svg width={width} height={height}>
       <Svg.G>
-        {
-          data.map((bar, idx, {length}) => (
-            <Svg.Rect
-              key={idx}
-              x={xScale(bar)}
-              y={yScale(bar) / 2}
-              rx={4}
-              ry={4}
-              width={xScale.bandwidth()}
-              height={height - yScale(bar)}
-              fill={histogramColorSelector(idx / (length - 1))}
-              />
-          ))
-        }
+        {data.map((bar, idx, { length }) =>
+          <Svg.Rect
+            key={idx}
+            x={xScale(bar)}
+            y={yScale(bar) / 2}
+            rx={4}
+            ry={4}
+            width={xScale.bandwidth()}
+            height={height - yScale(bar)}
+            fill={histogramColorSelector(idx / (length - 1))}
+          />
+        )}
       </Svg.G>
     </Svg>
   );
@@ -164,27 +145,17 @@ const renderHistogram = (renderingOptions, data) => {
  */
 
 class MultipleChoiceSummary extends Component {
-  render () {
+  render() {
     return (
-      <View
-        style={[styles.multipleChoiceContainer, this.props.viewStyle]}>
-        {
-          renderPie(this.props, this.props.summaryData)
-        }
-        {
-          renderPiePrompt(this.props, this.props.prompt)
-        }
+      <View style={[styles.multipleChoiceContainer, this.props.viewStyle]}>
+        {renderPie(this.props, this.props.summaryData)}
+        {renderPiePrompt(this.props, this.props.prompt)}
       </View>
     );
   }
 }
 
-const pieColors = [
-  '#52BE80',
-  '#5499C7',
-  '#AF7AC5',
-  '#F4D03F'
-];
+const pieColors = ['#52BE80', '#5499C7', '#AF7AC5', '#F4D03F'];
 
 const getPieColor = idx => pieColors[idx % pieColors.length];
 
@@ -197,8 +168,10 @@ const defaultPieOptions = {
 };
 
 const renderPie = (renderingOptions, data) => {
-  const innerRadius = renderingOptions.innerRadius || defaultPieOptions.innerRadius;
-  const outerRadius = renderingOptions.outerRadius || defaultPieOptions.outerRadius;
+  const innerRadius =
+    renderingOptions.innerRadius || defaultPieOptions.innerRadius;
+  const outerRadius =
+    renderingOptions.outerRadius || defaultPieOptions.outerRadius;
   const padAngle = renderingOptions.padAngle || defaultPieOptions.padAngle;
   const width = renderingOptions.width || defaultPieOptions.width;
   const height = renderingOptions.height || defaultPieOptions.height;
@@ -206,17 +179,11 @@ const renderPie = (renderingOptions, data) => {
   return (
     <Svg width={width} height={height}>
       <Svg.G x={width / 2} y={height / 2}>
-        {
-          D3Shape.pie().padAngle(padAngle)(data)
-            .map(D3Shape.arc().innerRadius(innerRadius).outerRadius(outerRadius))
-            .map((arc, idx) => (
-              <Svg.Path
-                d={arc}
-                key={idx}
-                fill={getPieColor(idx)}
-                />
-            ))
-        }
+        {D3Shape.pie().padAngle(padAngle)(data)
+          .map(D3Shape.arc().innerRadius(innerRadius).outerRadius(outerRadius))
+          .map((arc, idx) =>
+            <Svg.Path d={arc} key={idx} fill={getPieColor(idx)} />
+          )}
       </Svg.G>
     </Svg>
   );
@@ -227,20 +194,22 @@ const renderPiePrompt = (renderingOptions, prompt) => {
   const optionStyle = renderingOptions.textStyle || {};
 
   return (
-    <View
-      style={styles.piePrompt}>
-      <Text style={[styles.piePromptHeader, headerStyle]}>{prompt.text}</Text>
-      {prompt.options.map(option => (
+    <View style={styles.piePrompt}>
+      <Text style={[styles.piePromptHeader, headerStyle]}>
+        {prompt.text}
+      </Text>
+      {prompt.options.map(option =>
         <Text
           key={option.sortOrder}
           style={[
             styles.piePromptOption,
-            {color: getPieColor(option.sortOrder)},
+            { color: getPieColor(option.sortOrder) },
             optionStyle
-          ]}>
+          ]}
+        >
           {option.text}
         </Text>
-      ))}
+      )}
     </View>
   );
 };
