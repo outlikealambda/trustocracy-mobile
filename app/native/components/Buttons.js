@@ -44,8 +44,8 @@ const button = {
 
 const initialsFont = {
   small: 12,
-  medium: 18,
-  large: 24
+  medium: 16,
+  large: 20
 };
 
 const buttonStyles = {
