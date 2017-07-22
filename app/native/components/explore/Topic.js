@@ -788,8 +788,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5FCFF'
   },
   selectorIconRow: {
-    marginTop: 12,
-    height: 84
+    paddingTop: 12,
+    height: 84,
+    backgroundColor: '#eee'
   },
   scrollInterior: {
     alignItems: 'center',
