@@ -55,5 +55,8 @@ export const styles = StyleSheet.create({
   nav: {
     paddingVertical: 4,
     justifyContent: 'space-around'
+  },
+  overviewButton: {
+    marginRight: 8
   }
 });

@@ -17,7 +17,9 @@ export class Overview extends Component {
           <Text>active delegates</Text>
         </View>
         <View style={styles.row}>
-          {rank}
+          <View style={styles.overviewButton}>
+            {rank}
+          </View>
           <Text>Rank active delegates</Text>
         </View>
         <View style={[styles.row, { marginTop: 32 }]}>
@@ -28,11 +30,15 @@ export class Overview extends Component {
           <Text>inactive delegates</Text>
         </View>
         <View style={styles.row}>
-          {add}
+          <View style={styles.overviewButton}>
+            {add}
+          </View>
           <Text>Add more delegates</Text>
         </View>
         <View style={styles.row}>
-          {activate}
+          <View style={styles.overviewButton}>
+            {activate}
+          </View>
           <Text>Activate delegates</Text>
         </View>
       </View>
