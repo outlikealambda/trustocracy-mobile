@@ -33,6 +33,7 @@ const trusteeColors = [
 // STATELESS RENDER FUNCTIONS
 function renderForNav({ dom, isSelected }) {
   const basicStyle = {
+    marginHorizontal: 4,
     paddingBottom: 4
   };
 

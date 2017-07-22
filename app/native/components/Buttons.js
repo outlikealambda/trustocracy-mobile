@@ -29,14 +29,14 @@ const button = {
     justifyContent: 'center'
   },
   medium: {
-    width: 44,
-    height: 44,
+    width: 38,
+    height: 38,
     alignItems: 'center',
     justifyContent: 'center'
   },
   large: {
-    width: 60,
-    height: 60,
+    width: 48,
+    height: 48,
     alignItems: 'center',
     justifyContent: 'center'
   }
