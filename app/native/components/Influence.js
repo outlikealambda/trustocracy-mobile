@@ -18,6 +18,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#ccc',
     marginVertical: 16,
+    paddingVertical: 4,
     paddingHorizontal: 8
   }
 });

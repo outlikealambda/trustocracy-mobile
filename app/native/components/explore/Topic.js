@@ -178,7 +178,7 @@ export class Topic extends Component<void, Props, State> {
     this.state = {
       topicId,
       prompts,
-      userId: 2,
+      userId: 682,
       influence: 0,
       connections: [],
       allRelations: [],

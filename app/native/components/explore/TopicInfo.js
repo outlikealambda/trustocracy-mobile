@@ -10,8 +10,7 @@ export class TopicInfo extends Component {
           <View style={styles.leftComponent}>
             <Influence
               influence={this.props.influence}
-              style={{ paddingVertical: 4 }}
-              fontSize={20}
+              style={styles.influence}
             />
           </View>
           <InfoText>points allocated</InfoText>
@@ -38,24 +37,29 @@ class InfoText extends Component {
 }
 
 const styles = StyleSheet.create({
+  influence: {
+    marginVertical: 4
+  },
   leftComponent: {
-    marginHorizontal: 16,
-    width: 48,
+    marginRight: 8,
+    minWidth: 48,
     alignItems: 'center'
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexWrap: 'wrap',
     marginVertical: 8,
-    flexWrap: 'wrap'
+    paddingLeft: 16
   },
   container: {
     flex: 1,
     alignItems: 'flex-start',
-    paddingTop: 32,
+    paddingTop: 8,
     paddingHorizontal: 16
   },
   text: {
+    flex: 1,
     fontSize: 16
   }
 });
