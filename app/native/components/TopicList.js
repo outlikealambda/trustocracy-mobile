@@ -30,7 +30,7 @@ type State = {
 export class TopicList extends Component<void, Props, State> {
   state: State;
 
-  static navigationOptions = ({ navigation, screenProps }) => {
+  static navigationOptions = ({ navigation }) => {
     return {
       title: 'Topics',
       headerRight: DelegateIcon(navigation.navigate)
@@ -85,7 +85,7 @@ export class TopicList extends Component<void, Props, State> {
     );
   };
 
-  renderTopic = (topic, topicIdx) => {
+  renderTopic = topic => {
     const { navigate } = this.props.navigation;
 
     const navigationParameters = {

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import PropTypes from 'prop-types';
 import Influence from '../Influence.js';
 
 export class TopicInfo extends Component {
@@ -26,6 +27,11 @@ export class TopicInfo extends Component {
   }
 }
 
+TopicInfo.propTypes = {
+  influence: PropTypes.number.isRequired,
+  delegate: PropTypes.object
+};
+
 class InfoText extends Component {
   render() {
     return (
@@ -35,6 +41,10 @@ class InfoText extends Component {
     );
   }
 }
+
+InfoText.propTypes = {
+  children: PropTypes.string
+};
 
 const styles = StyleSheet.create({
   influence: {

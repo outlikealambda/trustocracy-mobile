@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Text, TouchableHighlight, View } from 'react-native';
+import PropTypes from 'prop-types';
 
 import { RoundedButton, IconButton, Sizes } from '../Buttons.js';
 
@@ -131,3 +132,11 @@ export class Rank extends Component {
     );
   };
 }
+
+Rank.propTypes = {
+  activeState: PropTypes.string.isRequired,
+  active: PropTypes.array.isRequired,
+  move: PropTypes.func.isRequired,
+  reset: PropTypes.func.isRequired,
+  save: PropTypes.func.isRequired
+};

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { LayoutAnimation, Text, TextInput, View } from 'react-native';
+import PropTypes from 'prop-types';
 
 import { styles } from './styles.js';
 
@@ -77,3 +78,10 @@ export class Add extends Component {
     );
   };
 }
+
+Add.propTypes = {
+  recentlyAdded: PropTypes.array.isRequired,
+  recentlyFailed: PropTypes.array.isRequired,
+  delegateCount: PropTypes.number.isRequired,
+  search: PropTypes.func.isRequired
+};

@@ -10,6 +10,8 @@ import {
   Text,
   View
 } from 'react-native';
+import PropTypes from 'prop-types';
+
 import Markdown from 'react-native-simple-markdown';
 import { DelegateIcon } from '../delegate/Delegate.js';
 import { IconButton, Sizes } from '../Buttons.js';
@@ -31,13 +33,15 @@ const trusteeColors = [
 ];
 
 // STATELESS RENDER FUNCTIONS
-function renderForNav({ dom, isSelected }) {
+const NavWrapper = props => {
   const basicStyle = {
     marginHorizontal: 4,
     paddingBottom: 4
   };
 
-  const selectedStyle = isSelected
+  // console.log(props);
+
+  const selectedStyle = props.isSelected
     ? {
         borderBottomWidth: 4,
         borderBottomColor: 'orange'
@@ -46,10 +50,15 @@ function renderForNav({ dom, isSelected }) {
 
   return (
     <View style={[basicStyle, selectedStyle]}>
-      {dom}
+      {props.children}
     </View>
   );
-}
+};
+
+NavWrapper.propTypes = {
+  isSelected: PropTypes.bool.isRequired,
+  children: PropTypes.node.isRequired
+};
 
 // END STATELESS RENDER FUNCTIONS
 
@@ -67,7 +76,7 @@ function findInfluencerConnectionCombo(connections) {
     }
   }
 
-  return {};
+  return null;
 }
 
 const Relations = {
@@ -220,6 +229,7 @@ export class Topic extends Component<void, Props, State> {
       .then(connections => Connections.setColors(connections))
       .then(connections => Connections.setIsConnected(connections))
       .catch(error => {
+        // eslint-disable-next-line no-console
         console.error('fetch connected error', error);
         throw error;
       });
@@ -230,6 +240,7 @@ export class Topic extends Component<void, Props, State> {
       .then(response => response.json())
       .then(r => r.influence)
       .catch(error => {
+        // eslint-disable-next-line no-console
         console.error('fetch influence error', error);
         throw error;
       });
@@ -239,6 +250,7 @@ export class Topic extends Component<void, Props, State> {
     return Api.opinions(topicId)
       .then(response => response.json())
       .catch(error => {
+        // eslint-disable-next-line no-console
         console.error('fetch opinions error', error);
         throw error;
       });
@@ -287,6 +299,7 @@ export class Topic extends Component<void, Props, State> {
       .then(topicInfo => topicInfo.text)
       .then(title => this.animateStateChange({ title }))
       .catch(error => {
+        // eslint-disable-next-line no-console
         console.error('fetch topic title', error);
         throw error;
       });
@@ -301,6 +314,7 @@ export class Topic extends Component<void, Props, State> {
       .then(response => response.json())
       .then(Relations.opinionMerger(this.state.allRelations))
       .catch(error => {
+        // eslint-disable-next-line no-console
         console.error(
           'failed to retrieve opinion with id: ' + opinionId,
           error
@@ -454,27 +468,24 @@ export class Topic extends Component<void, Props, State> {
 
   isSelectedFriend(person) {
     return (
-      this.state.visibleFriend && this.state.visibleFriend.id === person.id
+      !!this.state.visibleFriend && this.state.visibleFriend.id === person.id
     );
   }
 
   render() {
     const renderTrusteeGroup = connection => {
-      return connection.friends
-        .map(friend => ({
-          dom: (
-            <Person.Button
-              person={friend}
-              pressAction={this.showOpinion(
-                friend,
-                connection.author,
-                connection.opinion
-              )}
-            />
-          ),
-          isSelected: this.isSelectedFriend(friend)
-        }))
-        .map(renderForNav);
+      return connection.friends.map((friend, idx) =>
+        <NavWrapper key={idx} isSelected={this.isSelectedFriend(friend)}>
+          <Person.Button
+            person={friend}
+            pressAction={this.showOpinion(
+              friend,
+              connection.author,
+              connection.opinion
+            )}
+          />
+        </NavWrapper>
+      );
     };
 
     const renderBook = () =>
@@ -515,25 +526,29 @@ export class Topic extends Component<void, Props, State> {
         return null;
       }
 
-      const found = findInfluencerConnectionCombo(connections);
-      const { friend: activeInfluencer, connection: activeConnection } = found;
+      let delegate = null;
 
-      return (
-        <TopicInfo
-          influence={influence}
-          delegate={
-            <Person.Button
-              person={Object.assign({ color: 'pink' }, activeInfluencer)}
-              size="medium"
-              pressAction={this.showOpinion(
-                activeInfluencer,
-                activeConnection.author,
-                activeConnection.opinion
-              )}
-            />
-          }
-        />
-      );
+      const found = findInfluencerConnectionCombo(connections);
+      if (found) {
+        const {
+          friend: activeInfluencer,
+          connection: activeConnection
+        } = found;
+
+        delegate = (
+          <Person.Button
+            person={Object.assign({ color: 'pink' }, activeInfluencer)}
+            size="medium"
+            pressAction={this.showOpinion(
+              activeInfluencer,
+              activeConnection && activeConnection.author,
+              activeConnection && activeConnection.opinion
+            )}
+          />
+        );
+      }
+
+      return <TopicInfo influence={influence} delegate={delegate} />;
     };
 
     const answerTile = {
@@ -750,10 +765,9 @@ export class Topic extends Component<void, Props, State> {
                if it's horizontal */}
           <ScrollView horizontal contentContainerStyle={styles.scrollInterior}>
             {this.state.connections.map(renderTrusteeGroup)}
-            {renderForNav({
-              dom: renderBook(),
-              isSelected: this.state.isBrowse
-            })}
+            <NavWrapper isSelected={this.state.isBrowse}>
+              {renderBook()}
+            </NavWrapper>
           </ScrollView>
         </View>
 
@@ -772,6 +786,10 @@ export class Topic extends Component<void, Props, State> {
     );
   }
 }
+
+Topic.propTypes = {
+  navigation: PropTypes.object.isRequired
+};
 
 const defaultState = {
   hiddenDrawers: {

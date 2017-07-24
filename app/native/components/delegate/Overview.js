@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Text, View } from 'react-native';
+import PropTypes from 'prop-types';
 
 import { styles } from './styles.js';
 
@@ -45,3 +46,11 @@ export class Overview extends Component {
     );
   }
 }
+
+Overview.propTypes = {
+  activeCount: PropTypes.number.isRequired,
+  inactiveCount: PropTypes.number.isRequired,
+  add: PropTypes.func.isRequired,
+  activate: PropTypes.func.isRequired,
+  rank: PropTypes.func.isRequired
+};

@@ -6,6 +6,7 @@
     "d3-scale": "^1.0.6",
     "d3-shape": "^1.2.0",
     "expo": "18.0.0",
+    "prop-types": "^15.5.10",
     "react": "16.0.0-alpha.12",
     "react-native": "https://github.com/expo/react-native/archive/sdk-18.0.0.tar.gz",
     "react-native-simple-markdown": "^1.0.60-rc.3",
@@ -19,6 +20,11 @@
     ]
   },
   "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-eslint": "^7.2.3",
+    "babel-preset-flow": "^6.23.0",
+    "eslint": "^4.3.0",
+    "eslint-plugin-react": "^7.1.0",
     "prettier": "^1.5.3"
   }
 }

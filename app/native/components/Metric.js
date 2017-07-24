@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-
 import { StyleSheet, Text, View } from 'react-native';
+import PropTypes from 'prop-types';
 
 import { Svg } from 'expo';
 import * as Colors from '../colors.js';
@@ -26,6 +26,10 @@ export class Summary extends Component {
   }
 }
 
+Summary.propTypes = {
+  prompt: PropTypes.object.isRequired
+};
+
 /**
   type ScalarProps = {
     width,
@@ -40,25 +44,44 @@ class ScalarSummary extends Component {
   render() {
     return (
       <View style={[styles.scalarContainer, this.props.viewStyle]}>
-        {renderScalarPrompt(this.props, this.props.prompt)}
-        {renderScalarLabels(this.props, this.props.prompt)}
-        {renderHistogram(this.props, this.props.summaryData)}
+        <ScalarPrompt text={this.props.prompt.text} />
+        <ScalarLabels
+          left={this.props.prompt.options[0].text}
+          right={this.props.prompt.options[0].text}
+        />
+        <Histogram
+          width={this.props.width}
+          height={this.props.height}
+          data={this.props.summaryData}
+        />
       </View>
     );
   }
 }
 
-const renderScalarPrompt = (renderingOptions, prompt) => {
+ScalarSummary.propTypes = {
+  viewStyle: PropTypes.object,
+  prompt: PropTypes.object.isRequired,
+  width: PropTypes.number,
+  height: PropTypes.number,
+  summaryData: PropTypes.array.isRequired
+};
+
+const ScalarPrompt = ({ text }) => {
   return (
     <View>
       <Text style={styles.scalarPrompt}>
-        {prompt.text}
+        {text}
       </Text>
     </View>
   );
 };
 
-const renderScalarLabels = (renderingOptions, prompt) => {
+ScalarPrompt.propTypes = {
+  text: PropTypes.string.isRequired
+};
+
+const ScalarLabels = ({ left, right }) => {
   return (
     <View
       style={{
@@ -78,12 +101,12 @@ const renderScalarLabels = (renderingOptions, prompt) => {
       >
         <View>
           <Text style={styles.labelText}>
-            {prompt.options[0].text}
+            {left}
           </Text>
         </View>
         <View>
           <Text style={styles.labelText}>
-            {prompt.options[1].text}
+            {right}
           </Text>
         </View>
       </View>
@@ -91,14 +114,16 @@ const renderScalarLabels = (renderingOptions, prompt) => {
   );
 };
 
+ScalarLabels.propTypes = {
+  left: PropTypes.string.isRequired,
+  right: PropTypes.string.isRequired
+};
+
 const histogramColorSelector = D3Scale.scaleLinear()
   .domain([0, 1])
   .range([Colors.orange, Colors.electricBlue]);
 
-const renderHistogram = (renderingOptions, data) => {
-  const width = renderingOptions.width || 320;
-  const height = renderingOptions.height || 64;
-
+const Histogram = ({ width = 320, height = 64, data }) => {
   const maxData = Math.max(...data);
 
   const xScale = D3Scale.scaleBand()
@@ -130,6 +155,12 @@ const renderHistogram = (renderingOptions, data) => {
   );
 };
 
+Histogram.propTypes = {
+  width: PropTypes.number,
+  height: PropTypes.number,
+  data: PropTypes.array.isRequired
+};
+
 /**
   type MultipleChoiceProps = {
     innerRadius,
@@ -148,12 +179,23 @@ class MultipleChoiceSummary extends Component {
   render() {
     return (
       <View style={[styles.multipleChoiceContainer, this.props.viewStyle]}>
-        {renderPie(this.props, this.props.summaryData)}
-        {renderPiePrompt(this.props, this.props.prompt)}
+        <Pie {...this.props} data={this.props.summaryData} />
+        <PiePrompt
+          text={this.props.prompt.text}
+          options={this.props.prompt.options}
+          headerStyle={this.props.prompt.headerStyle}
+          textStyle={this.props.prompt.textStyle}
+        />
       </View>
     );
   }
 }
+
+MultipleChoiceSummary.propTypes = {
+  viewStyle: PropTypes.object,
+  summaryData: PropTypes.array.isRequired,
+  prompt: PropTypes.object
+};
 
 const pieColors = ['#52BE80', '#5499C7', '#AF7AC5', '#F4D03F'];
 
@@ -167,15 +209,14 @@ const defaultPieOptions = {
   height: 100
 };
 
-const renderPie = (renderingOptions, data) => {
-  const innerRadius =
-    renderingOptions.innerRadius || defaultPieOptions.innerRadius;
-  const outerRadius =
-    renderingOptions.outerRadius || defaultPieOptions.outerRadius;
-  const padAngle = renderingOptions.padAngle || defaultPieOptions.padAngle;
-  const width = renderingOptions.width || defaultPieOptions.width;
-  const height = renderingOptions.height || defaultPieOptions.height;
-
+const Pie = ({
+  innerRadius = defaultPieOptions.innerRadius,
+  outerRadius = defaultPieOptions.outerRadius,
+  padAngle = defaultPieOptions.padAngle,
+  width = defaultPieOptions.width,
+  height = defaultPieOptions.height,
+  data
+}) => {
   return (
     <Svg width={width} height={height}>
       <Svg.G x={width / 2} y={height / 2}>
@@ -189,22 +230,28 @@ const renderPie = (renderingOptions, data) => {
   );
 };
 
-const renderPiePrompt = (renderingOptions, prompt) => {
-  const headerStyle = renderingOptions.headerStyle || {};
-  const optionStyle = renderingOptions.textStyle || {};
+Pie.propTypes = {
+  innerRadius: PropTypes.number,
+  outerRadius: PropTypes.number,
+  padAngle: PropTypes.number,
+  width: PropTypes.number,
+  height: PropTypes.number,
+  data: PropTypes.array.isRequired
+};
 
+const PiePrompt = ({ text, options, headerStyle = {}, textStyle = {} }) => {
   return (
     <View style={styles.piePrompt}>
       <Text style={[styles.piePromptHeader, headerStyle]}>
-        {prompt.text}
+        {text}
       </Text>
-      {prompt.options.map(option =>
+      {options.map(option =>
         <Text
           key={option.sortOrder}
           style={[
             styles.piePromptOption,
             { color: getPieColor(option.sortOrder) },
-            optionStyle
+            textStyle
           ]}
         >
           {option.text}
@@ -212,6 +259,13 @@ const renderPiePrompt = (renderingOptions, prompt) => {
       )}
     </View>
   );
+};
+
+PiePrompt.propTypes = {
+  text: PropTypes.string.isRequired,
+  options: PropTypes.array.isRequired,
+  headerStyle: PropTypes.object,
+  textStyle: PropTypes.object
 };
 
 const styles = StyleSheet.create({
@@ -234,10 +288,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     flex: 1
   },
-  piePromptHeader: {
-    marginBottom: 4,
-    fontSize: 16
-  },
+  piePromptHeader: { marginBottom: 4, fontSize: 16 },
   piePromptOption: {
     marginLeft: 4,
     marginTop: 2,

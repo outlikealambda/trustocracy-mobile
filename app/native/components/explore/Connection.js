@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import PropTypes from 'prop-types';
+
 import * as Person from '../Person.js';
 import { RoundedButton } from '../Buttons.js';
 
@@ -7,12 +9,16 @@ import { Octicons } from '@expo/vector-icons';
 
 import { Arrays } from '../../utils.js';
 
-const BoldText = props => {
+const BoldText = ({ children }) => {
   return (
     <Text style={{ fontWeight: 'bold' }}>
-      {props.children}
+      {children}
     </Text>
   );
+};
+
+BoldText.propTypes = {
+  children: PropTypes.string.isRequired
 };
 
 const Chosen = ({ name, influence, clear }) =>
@@ -55,6 +61,12 @@ const Chosen = ({ name, influence, clear }) =>
     </Text>
   </View>;
 
+Chosen.propTypes = {
+  name: PropTypes.string.isRequired,
+  influence: PropTypes.number.isRequired,
+  clear: PropTypes.func.isRequired
+};
+
 const DefaultIsActive = ({ name, influence }) =>
   <View style={styles.drawer}>
     <Text
@@ -64,6 +76,11 @@ const DefaultIsActive = ({ name, influence }) =>
       You have passed on <BoldText>+{influence}pts</BoldText> of influence
     </Text>
   </View>;
+
+DefaultIsActive.propTypes = {
+  name: PropTypes.string.isRequired,
+  influence: PropTypes.number.isRequired
+};
 
 const ChooseFriend = ({ name, influence, choose }) =>
   <View style={styles.drawer}>
@@ -86,7 +103,13 @@ const ChooseFriend = ({ name, influence, choose }) =>
     </View>
   </View>;
 
-const ChooseAuthor = ({ name, influence, choose }) =>
+ChooseFriend.propTypes = {
+  name: PropTypes.string.isRequired,
+  influence: PropTypes.number.isRequired,
+  choose: PropTypes.func.isRequired
+};
+
+const ChooseAuthor = ({ name, choose }) =>
   <View style={styles.drawer}>
     <View style={[styles.drawerRow, styles.drawerRowWrapper, styles.drawerTop]}>
       <RoundedButton
@@ -112,6 +135,11 @@ const ChooseAuthor = ({ name, influence, choose }) =>
     </Text>
   </View>;
 
+ChooseAuthor.propTypes = {
+  name: PropTypes.string.isRequired,
+  choose: PropTypes.func.isRequired
+};
+
 const Drawer = ({ person, influence, choose, clear }) => {
   const chooseThisPerson = choose(person.id);
 
@@ -136,19 +164,20 @@ const Drawer = ({ person, influence, choose, clear }) => {
   }
 
   // Person is a non-friend author
-  return (
-    <ChooseAuthor
-      name={person.name}
-      influence={influence}
-      choose={chooseThisPerson}
-    />
-  );
+  return <ChooseAuthor name={person.name} choose={chooseThisPerson} />;
+};
+
+Drawer.propTypes = {
+  person: PropTypes.object.isRequired,
+  influence: PropTypes.number.isRequired,
+  choose: PropTypes.func.isRequired,
+  clear: PropTypes.func.isRequired
 };
 
 export class Connection extends Component {
   render() {
     const {
-      state,
+      state: drawerState,
       friend,
       influence,
       toggleFriend,
@@ -193,9 +222,9 @@ export class Connection extends Component {
               />}
           </View>
         </View>
-        {isOpen(state) &&
+        {isOpen(drawerState) &&
           <Drawer
-            person={getDrawerPerson(state, friend, author)}
+            person={getDrawerPerson(drawerState, friend, author)}
             influence={influence}
             clear={clear}
             choose={choose}
@@ -205,8 +234,19 @@ export class Connection extends Component {
   }
 }
 
-const getDrawerPerson = (state, friend, author) => {
-  switch (state) {
+Connection.propTypes = {
+  state: PropTypes.string,
+  friend: PropTypes.object,
+  author: PropTypes.object,
+  toggleFriend: PropTypes.func.isRequired,
+  toggleAuthor: PropTypes.func.isRequired,
+  influence: PropTypes.number.isRequired,
+  choose: PropTypes.func.isRequired,
+  clear: PropTypes.func.isRequired
+};
+
+const getDrawerPerson = (drawerState, friend, author) => {
+  switch (drawerState) {
     case 'friend':
       return friend;
     case 'author':
@@ -216,7 +256,8 @@ const getDrawerPerson = (state, friend, author) => {
   }
 };
 
-const isOpen = state => state === 'friend' || state === 'author';
+const isOpen = drawerState =>
+  drawerState === 'friend' || drawerState === 'author';
 
 const styles = StyleSheet.create({
   miniCircle: {

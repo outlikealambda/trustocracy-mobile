@@ -58,7 +58,8 @@ const buttonStyles = {
       case 'square':
         return this.square[size];
       default:
-        console.warn('unknown shape, defaulting to large circle');
+        // eslint-disable-next-line no-console
+        console.error('unknown shape, defaulting to large circle');
         return this.circle.large;
     }
   },

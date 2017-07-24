@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { TouchableHighlight, View } from 'react-native';
+import PropTypes from 'prop-types';
 import { Octicons } from '@expo/vector-icons';
 
 import { IconButton } from '../Buttons.js';
@@ -78,7 +79,7 @@ export class Delegate extends Component {
 
     const { active, userId } = this.state;
 
-    Api.delegate.rank(userId, active).then(res =>
+    Api.delegate.rank(userId, active).then(() =>
       this.setState({
         lastActiveSaved: active,
         activeState: 'clean'
@@ -270,3 +271,7 @@ export const DelegateIcon = navigate =>
   <TouchableHighlight onPress={() => navigate('delegate')}>
     <Octicons name="organization" size={32} style={{ marginRight: 12 }} />
   </TouchableHighlight>;
+
+DelegateIcon.propTypes = {
+  navigate: PropTypes.func.isRequired
+};

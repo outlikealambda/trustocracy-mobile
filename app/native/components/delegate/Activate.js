@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Text, TouchableHighlight, View } from 'react-native';
+import PropTypes from 'prop-types';
 
 import { RoundedButton, IconButton, Sizes } from '../Buttons.js';
 
@@ -39,7 +40,7 @@ export class Activate extends Component {
     );
   }
 
-  renderInactive = (friend, idx) => {
+  renderInactive = friend => {
     switch (friend.status) {
       case 'activating':
         return this.renderActivating(friend);
@@ -130,3 +131,9 @@ export class Activate extends Component {
     );
   };
 }
+
+Activate.propTypes = {
+  activate: PropTypes.func.isRequired,
+  remove: PropTypes.func.isRequired,
+  inactive: PropTypes.array.isRequired
+};

@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import PropTypes from 'prop-types';
 
 export default function Influence({ influence, style = {}, fontSize = 16 }) {
   return (
@@ -10,6 +11,13 @@ export default function Influence({ influence, style = {}, fontSize = 16 }) {
     </View>
   );
 }
+
+Influence.propTypes = {
+  influence: PropTypes.number.isRequired,
+  // style: PropTypes.obje
+  style: PropTypes.oneOfType([PropTypes.object, PropTypes.number]),
+  fontSize: PropTypes.number
+};
 
 const styles = StyleSheet.create({
   influence: {
