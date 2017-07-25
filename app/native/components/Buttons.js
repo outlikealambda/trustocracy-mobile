@@ -6,9 +6,24 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Octicons } from '@expo/vector-icons';
 
+export const Sizes = {
+  SMALL: 'small',
+  MEDIUM: 'medium',
+  LARGE: 'large'
+};
+
+export type SizeType = 'small' | 'medium' | 'large';
+
+export const Shapes = {
+  SQUARE: 'square',
+  CIRCLE: 'circle'
+};
+
+export type ShapeType = 'square' | 'circle';
+
 const iconStyles = {
-  get(size = Sizes.LARGE) {
-    return this[normalizeSize(size)];
+  get(size: SizeType) {
+    return this[size];
   },
   large: {
     fontSize: 32
@@ -49,35 +64,23 @@ const initialsFont = {
 };
 
 const buttonStyles = {
-  getStyle(shape = 'circle', size = Sizes.LARGE) {
-    size = normalizeSize(size);
-
-    switch (shape.toLowerCase()) {
-      case 'circle':
-        return this.circle[size];
-      case 'square':
-        return this.square[size];
-      default:
-        // eslint-disable-next-line no-console
-        console.error('unknown shape, defaulting to large circle');
-        return this.circle.large;
-    }
+  getStyle(shape: ShapeType, size: SizeType) {
+    return this[shape][size];
   },
   circle: StyleSheet.create({
-    small: Object.assign({ borderRadius: 14 }, button.small),
-    medium: Object.assign({ borderRadius: 22 }, button.medium),
-    large: Object.assign({ borderRadius: 30 }, button.large)
+    small: Object.assign({}, { borderRadius: 14 }, button.small),
+    medium: Object.assign({}, { borderRadius: 22 }, button.medium),
+    large: Object.assign({}, { borderRadius: 30 }, button.large)
   }),
   square: StyleSheet.create({
-    small: Object.assign({ borderRadius: 2 }, button.small),
-    medium: Object.assign({ borderRadius: 2 }, button.medium),
-    large: Object.assign({ borderRadius: 2 }, button.large)
+    small: Object.assign({}, { borderRadius: 2 }, button.small),
+    medium: Object.assign({}, { borderRadius: 2 }, button.medium),
+    large: Object.assign({}, { borderRadius: 2 }, button.large)
   })
 };
 
 const rectangularStyles = {
-  get: function(size = Sizes.LARGE) {
-    size = normalizeSize(size);
+  get: function(size: SizeType) {
     return this[size];
   },
   large: StyleSheet.create({
@@ -91,6 +94,19 @@ const rectangularStyles = {
       fontWeight: 'bold',
       marginVertical: 8,
       marginHorizontal: 12
+    }
+  }),
+  medium: StyleSheet.create({
+    container: {
+      justifyContent: 'center',
+      height: 40,
+      borderRadius: 20
+    },
+    text: {
+      fontSize: 15,
+      fontWeight: 'bold',
+      marginVertical: 6,
+      marginHorizontal: 10
     }
   }),
   small: StyleSheet.create({
@@ -116,52 +132,82 @@ const wrapWithTouchable = (nativeComponent, onPress) =>
     {nativeComponent}
   </TouchableOpacity>;
 
-/*
-  type RoundedProps = {
-    text: string,
-    size: string,
-    style: Object<any>,
-    onPress: Function
-  };
-*/
+type RoundedProps = {
+  text: string,
+  size: SizeType,
+  buttonStyle: Object,
+  onPress: ?Function
+};
 
-export class RoundedButton extends Component {
+type DefaultRoundedProps = {
+  buttonStyle: Object,
+  size: SizeType
+};
+
+export class RoundedButton extends Component<
+  DefaultRoundedProps,
+  RoundedProps,
+  void
+> {
+  static defaultProps = {
+    buttonStyle: {},
+    size: Sizes.LARGE
+  };
+
   render() {
-    const text = this.props.text;
-    const onPress = this.props.onPress;
-    const size = this.props.size;
-    const style = rectangularStyles.get(size);
-    const buttonStyle = this.props.buttonStyle || {};
+    const style = rectangularStyles.get(this.props.size);
 
     const button = (
-      <View style={[style.container, buttonStyle]}>
+      <View style={[style.container, this.props.buttonStyle]}>
         <Text style={style.text}>
-          {text}
+          {this.props.text}
         </Text>
       </View>
     );
 
-    return onPress ? wrapWithTouchable(button, onPress) : button;
+    return this.props.onPress
+      ? wrapWithTouchable(button, this.props.onPress)
+      : button;
   }
 }
 
-/*
-  type IconProps = {
-    backgroundColor: string,
-    name: string
-  };
-*/
+type DefaultIconProps = {
+  shape: ShapeType,
+  size: SizeType,
+  iconStyle: Object,
+  color: string,
+  buttonStyle: Object
+};
 
-export class IconButton extends Component {
+type IconProps = {
+  backgroundColor: string,
+  name: string,
+  color: string,
+  shape: ShapeType,
+  size: SizeType,
+  buttonStyle: Object,
+  iconStyle: Object,
+  onPress: ?Function
+};
+
+export class IconButton extends Component<DefaultIconProps, IconProps, void> {
+  static defaultProps = {
+    size: Sizes.LARGE,
+    shape: Shapes.CIRCLE,
+    iconStyle: {},
+    color: 'black',
+    buttonStyle: {}
+  };
+
   render() {
     const backgroundColor = this.props.backgroundColor;
     const name = this.props.name;
-    const color = this.props.color || 'black';
+    const color = this.props.color;
     const size = this.props.size;
-    const iconStyle = this.props.iconStyle || {};
+    const iconStyle = this.props.iconStyle;
     const onPress = this.props.onPress;
     const baseStyle = buttonStyles.getStyle(this.props.shape, size);
-    const buttonStyle = this.props.buttonStyle || {};
+    const buttonStyle = this.props.buttonStyle;
 
     const icon = (
       <View style={[baseStyle, { backgroundColor }, buttonStyle]}>
@@ -177,28 +223,44 @@ export class IconButton extends Component {
   }
 }
 
-/*
-  type InitialsProps = {
-    backgroundColor: string,
-    initials: string,
-    circleStyle: Object<any>
-  };
-*/
+type DefaultInitialsProps = {
+  shape: ShapeType,
+  size: SizeType,
+  buttonStyle: Object
+};
 
-export class InitialsButton extends Component {
+type InitialsProps = {
+  backgroundColor: ?string,
+  initials: string,
+  shape: ShapeType,
+  size: SizeType,
+  buttonStyle: Object,
+  onPress: ?Function
+};
+
+export class InitialsButton extends Component<
+  DefaultInitialsProps,
+  InitialsProps,
+  void
+> {
+  static defaultProps = {
+    shape: Shapes.CIRCLE,
+    size: Sizes.LARGE,
+    buttonStyle: {}
+  };
+
   render() {
     const backgroundColor = this.props.backgroundColor;
     const initials = this.props.initials;
-    const size = normalizeSize(this.props.size || Sizes.LARGE);
+    const size = this.props.size;
     const onPress = this.props.onPress;
     const baseStyle = buttonStyles.getStyle(this.props.shape, size);
-    const buttonStyle = this.props.buttonStyle || {};
-    const fontSize =
-      initialsFont[normalizeSize(this.props.size || Sizes.LARGE)];
+    const buttonStyle = this.props.buttonStyle;
+    const fontSize = initialsFont[size];
 
     const button = (
       <View style={[baseStyle, { backgroundColor }, buttonStyle]}>
-        <Text style={{ fontSize, fontWeight: 'bold', color: '#444' }}>
+        <Text style={{ fontSize, color: '#444' }}>
           {initials}
         </Text>
       </View>
@@ -206,21 +268,4 @@ export class InitialsButton extends Component {
 
     return onPress ? wrapWithTouchable(button, onPress) : button;
   }
-}
-
-export const Sizes = {
-  SMALL: 'small',
-  MEDIUM: 'medium',
-  LARGE: 'large'
-};
-
-function normalizeSize(size) {
-  const enumerated = Object.values(Sizes).find(s => s === size);
-
-  if (!enumerated) {
-    console.warn('unknown size', size);
-    return Sizes.LARGE;
-  }
-
-  return enumerated;
 }

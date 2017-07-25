@@ -15,12 +15,14 @@ import * as Api from './api.js';
 import * as Metric from './Metric.js';
 
 type Topic = {
-  id: string,
-  text: string
+  id: number,
+  text: string,
+  title: string,
+  prompts: Array<any>
 };
 
 type Props = {
-  navigation: Object<any>
+  navigation: Object
 };
 
 type State = {
@@ -42,98 +44,97 @@ export class TopicList extends Component<void, Props, State> {
     this.state = { topics: [] };
     Api.topics()
       .then(response => response.json())
-      .then(this.fetchMetrics)
+      .then(fetchMetrics)
       .then(topics => this.setState({ topics }));
   }
-
-  fetchMetrics = topics => {
-    return Promise.all(
-      topics.map(topic =>
-        Api.prompts(topic.id)
-          .then(response => response.json())
-          .then(prompts => Object.assign({}, topic, { prompts }))
-      )
-    );
-  };
-
-  renderMetric = (prompt, idx, array) => {
-    const { id: key, options } = prompt;
-    const values = [];
-    const isLast = idx === array.length - 1;
-
-    if (Metric.isMultipleChoice(prompt)) {
-      for (let i = 0; i < options.length; i++) {
-        values.push(Math.random());
-      }
-    } else {
-      for (let i = 0; i < 10; i++) {
-        values.push(Math.random());
-      }
-    }
-
-    return (
-      <View
-        key={key}
-        style={{
-          flex: 1,
-          borderBottomWidth: isLast ? 0 : 1,
-          borderBottomColor: '#eee'
-        }}
-      >
-        <Metric.Summary prompt={prompt} summaryData={values} />
-      </View>
-    );
-  };
-
-  renderTopic = topic => {
-    const { navigate } = this.props.navigation;
-
-    const navigationParameters = {
-      id: topic.id,
-      title: topic.text,
-      prompts: topic.prompts
-    };
-
-    return (
-      <TouchableHighlight
-        key={topic.id}
-        onPress={() => navigate('topic', navigationParameters)}
-      >
-        <View
-          style={{
-            borderTopWidth: 2,
-            borderTopColor: '#ccc'
-          }}
-        >
-          <View
-            style={{
-              paddingHorizontal: 32,
-              paddingVertical: 16,
-              backgroundColor: '#eee'
-            }}
-          >
-            <Text style={{ fontSize: 20, color: '#444', fontWeight: 'bold' }}>
-              {topic.text}
-            </Text>
-          </View>
-          {topic.prompts.map(this.renderMetric)}
-        </View>
-      </TouchableHighlight>
-    );
-  };
 
   render() {
     return (
       <View style={styles.container}>
         <View style={{ flex: 1, alignSelf: 'stretch' }}>
           <ScrollView>
-            {this.state.topics.map(this.renderTopic)}
+            {this.state.topics.map(topic =>
+              SingleTopic(topic, this.props.navigation)
+            )}
           </ScrollView>
         </View>
       </View>
     );
   }
 }
+const fetchMetrics = topics => {
+  return Promise.all(
+    topics.map(topic =>
+      Api.prompts(topic.id)
+        .then(response => response.json())
+        .then(prompts => Object.assign({}, topic, { prompts }))
+    )
+  );
+};
+
+const SingleTopic = (props: Topic, { navigate }) => {
+  const navigationParameters = {
+    id: props.id,
+    title: props.title,
+    prompts: props.prompts
+  };
+
+  return (
+    <TouchableHighlight
+      key={props.id}
+      onPress={() => navigate('topic', navigationParameters)}
+    >
+      <View
+        style={{
+          borderTopWidth: 2,
+          borderTopColor: '#ccc'
+        }}
+      >
+        <View
+          style={{
+            paddingHorizontal: 32,
+            paddingVertical: 16,
+            backgroundColor: '#eee'
+          }}
+        >
+          <Text style={{ fontSize: 20, color: '#444', fontWeight: 'bold' }}>
+            {props.text}
+          </Text>
+        </View>
+        {props.prompts.map(MetricWithFakeValues)}
+      </View>
+    </TouchableHighlight>
+  );
+};
+
+const MetricWithFakeValues = (prompt, idx, array) => {
+  const { id: key, options } = prompt;
+  const values = [];
+  const isLast = idx === array.length - 1;
+
+  if (Metric.isMultipleChoice(prompt)) {
+    for (let i = 0; i < options.length; i++) {
+      values.push(Math.random());
+    }
+  } else {
+    for (let i = 0; i < 10; i++) {
+      values.push(Math.random());
+    }
+  }
+
+  return (
+    <View
+      key={key}
+      style={{
+        flex: 1,
+        borderBottomWidth: isLast ? 0 : 1,
+        borderBottomColor: '#eee'
+      }}
+    >
+      <Metric.Summary prompt={prompt} summaryData={values} />
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {

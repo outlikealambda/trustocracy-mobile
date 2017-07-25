@@ -1,6 +1,3 @@
-/**
- * @flow
- */
 import Expo from 'expo';
 import { App } from './app/native/components';
 
