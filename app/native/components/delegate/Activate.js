@@ -1,6 +1,8 @@
+/**
+ * @flow
+ */
 import React, { Component } from 'react';
 import { Text, TouchableHighlight, View } from 'react-native';
-import PropTypes from 'prop-types';
 
 import { RoundedButton, IconButton, Sizes } from '../Buttons.js';
 
@@ -23,16 +25,34 @@ export type StatusType =
   | 'removed'
   | 'atrest';
 
-export class Activate extends Component {
-  constructor(props) {
-    super(props);
+type State = {
+  toggled: Object
+};
+
+type Props = {
+  inactive: Array<any>,
+  remove: Function,
+  activate: Function
+};
+
+type InactiveFriend = {
+  id: number,
+  name: string,
+  status: StatusType
+};
+
+export class Activate extends Component<void, Props, State> {
+  state: State;
+
+  constructor() {
+    super();
 
     this.state = {
       toggled: {}
     };
   }
 
-  toggle = friendId => {
+  toggle = (friendId: number) => {
     const { toggled } = this.state;
 
     toggled[friendId] = !toggled[friendId];
@@ -55,7 +75,7 @@ export class Activate extends Component {
     );
   }
 
-  renderInactive = (friend: { status: StatusType }): React.Element<*> => {
+  renderInactive = (friend: InactiveFriend) => {
     switch (friend.status) {
       case Status.ACTIVATING:
         return this.renderActivating(friend);
@@ -66,32 +86,22 @@ export class Activate extends Component {
       case Status.REMOVED:
         return this.renderRemoved(friend);
       case Status.AT_REST:
+      default:
         return this.renderPooled(friend);
     }
   };
 
-  renderMessage = messageBuilder => {
-    return friend =>
-      <View key={friend.id} style={[styles.row, { marginLeft: 16 }]}>
-        <Text>
-          {messageBuilder(friend)}
-        </Text>
-      </View>;
-  };
+  renderActivating = Message(({ name }) => `Activating ${name}`);
 
-  renderActivating = this.renderMessage(({ name }) => `Activating ${name}`);
+  renderActivated = Message(({ name }) => `${name} is now an Active Delegate`);
 
-  renderActivated = this.renderMessage(
-    ({ name }) => `${name} is now an Active Delegate`
-  );
+  renderRemoving = Message(({ name }) => `Removing ${name}`);
 
-  renderRemoving = this.renderMessage(({ name }) => `Removing ${name}`);
-
-  renderRemoved = this.renderMessage(
+  renderRemoved = Message(
     ({ name }) => `${name} has been removed from the pool`
   );
 
-  renderPooled = friend => {
+  renderPooled = (friend: InactiveFriend) => {
     const { remove, activate } = this.props;
     const expanded = this.state.toggled[friend.id];
 
@@ -117,38 +127,44 @@ export class Activate extends Component {
               onPress={() => activate(friend.id)}
             />
           </View>
-          {!expanded
-            ? []
-            : <View
-                style={[
-                  styles.row,
-                  {
-                    backgroundColor: '#efefef',
-                    paddingHorizontal: 16,
-                    paddingVertical: 8
-                  }
-                ]}
-              >
-                <RoundedButton
-                  buttonStyle={{
-                    backgroundColor: 'lightyellow',
-                    marginRight: 16
-                  }}
-                  text="Remove"
-                  onPress={() => remove(friend.id)}
-                />
-                <Text>
-                  {friend.name} from the pool
-                </Text>
-              </View>}
+          {expanded &&
+            <View
+              style={[
+                styles.row,
+                {
+                  backgroundColor: '#efefef',
+                  paddingHorizontal: 16,
+                  paddingVertical: 8
+                }
+              ]}
+            >
+              <RoundedButton
+                buttonStyle={{
+                  backgroundColor: 'lightyellow',
+                  marginRight: 16
+                }}
+                text="Remove"
+                onPress={() => remove(friend.id)}
+              />
+              <Text>
+                {friend.name} from the pool
+              </Text>
+            </View>}
         </View>
       </TouchableHighlight>
     );
   };
 }
 
-Activate.propTypes = {
-  activate: PropTypes.func.isRequired,
-  remove: PropTypes.func.isRequired,
-  inactive: PropTypes.array.isRequired
+const Message = messageBuilder => {
+  // eslint wants names for all components, so we save to a const and then
+  // return the const
+  const wrapper = (friend: InactiveFriend) =>
+    <View key={friend.id} style={[styles.row, { marginLeft: 16 }]}>
+      <Text>
+        {messageBuilder(friend)}
+      </Text>
+    </View>;
+
+  return wrapper;
 };
