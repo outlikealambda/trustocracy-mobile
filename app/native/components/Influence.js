@@ -16,7 +16,7 @@ type DefaultInfluenceProps = {
   fontSize: number
 };
 
-export class Influence extends Component<
+export default class Influence extends Component<
   DefaultInfluenceProps,
   InfluenceProps,
   void
