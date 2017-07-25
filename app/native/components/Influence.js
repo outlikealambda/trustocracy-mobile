@@ -1,23 +1,42 @@
-import React from 'react';
+/**
+ * @flow
+ */
+
+import React, { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import PropTypes from 'prop-types';
 
-export default function Influence({ influence, style = {}, fontSize = 16 }) {
-  return (
-    <View style={[styles.influence, style]}>
-      <Text style={{ fontSize }}>
-        {influence}
-      </Text>
-    </View>
-  );
-}
-
-Influence.propTypes = {
-  influence: PropTypes.number.isRequired,
-  // style: PropTypes.obje
-  style: PropTypes.oneOfType([PropTypes.object, PropTypes.number]),
-  fontSize: PropTypes.number
+type InfluenceProps = {
+  influence: number,
+  style: Object,
+  fontSize: number
 };
+
+type DefaultInfluenceProps = {
+  style: Object,
+  fontSize: number
+};
+
+export class Influence extends Component<
+  DefaultInfluenceProps,
+  InfluenceProps,
+  void
+> {
+  static defaultProps = {
+    style: {},
+    fontSize: 16
+  };
+
+  render() {
+    const fontSize = this.props.fontSize;
+    return (
+      <View style={[styles.influence, this.props.style]}>
+        <Text style={{ fontSize }}>
+          {this.props.influence}
+        </Text>
+      </View>
+    );
+  }
+}
 
 const styles = StyleSheet.create({
   influence: {
