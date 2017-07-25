@@ -136,7 +136,7 @@ type RoundedProps = {
   text: string,
   size: SizeType,
   buttonStyle: Object,
-  onPress: ?Function
+  onPress?: Function
 };
 
 type DefaultRoundedProps = {
@@ -174,20 +174,20 @@ export class RoundedButton extends Component<
 type DefaultIconProps = {
   shape: ShapeType,
   size: SizeType,
-  iconStyle: Object,
+  iconStyle: Object | Array<Object>,
   color: string,
   buttonStyle: Object
 };
 
 type IconProps = {
-  backgroundColor: string,
   name: string,
   color: string,
   shape: ShapeType,
   size: SizeType,
   buttonStyle: Object,
-  iconStyle: Object,
-  onPress: ?Function
+  iconStyle: Object | Array<Object>,
+  backgroundColor?: string,
+  onPress?: Function
 };
 
 export class IconButton extends Component<DefaultIconProps, IconProps, void> {
@@ -230,12 +230,12 @@ type DefaultInitialsProps = {
 };
 
 type InitialsProps = {
-  backgroundColor: ?string,
   initials: string,
   shape: ShapeType,
   size: SizeType,
   buttonStyle: Object,
-  onPress: ?Function
+  backgroundColor?: string,
+  onPress?: Function
 };
 
 export class InitialsButton extends Component<
