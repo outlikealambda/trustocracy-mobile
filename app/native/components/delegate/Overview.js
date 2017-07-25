@@ -1,10 +1,20 @@
+/**
+ * @flow
+ */
 import React, { Component } from 'react';
 import { Text, View } from 'react-native';
-import PropTypes from 'prop-types';
 
 import { styles } from './styles.js';
 
-export class Overview extends Component {
+type OverviewProps = {
+  activeCount: number,
+  inactiveCount: number,
+  add: Function,
+  activate: Function,
+  rank: Function
+};
+
+export class Overview extends Component<void, OverviewProps, void> {
   render() {
     const { activeCount, inactiveCount, add, activate, rank } = this.props;
 
@@ -46,11 +56,3 @@ export class Overview extends Component {
     );
   }
 }
-
-Overview.propTypes = {
-  activeCount: PropTypes.number.isRequired,
-  inactiveCount: PropTypes.number.isRequired,
-  add: PropTypes.func.isRequired,
-  activate: PropTypes.func.isRequired,
-  rank: PropTypes.func.isRequired
-};
