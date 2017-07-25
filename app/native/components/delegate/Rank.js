@@ -1,3 +1,6 @@
+/**
+ * @flow
+ */
 import React, { Component } from 'react';
 import { Text, TouchableHighlight, View } from 'react-native';
 import PropTypes from 'prop-types';
@@ -16,16 +19,30 @@ export const Status = {
 
 export type StatusType = 'clean' | 'dirty' | 'saving';
 
-export class Rank extends Component {
-  constructor(props) {
-    super(props);
+type State = {
+  toggled: Object
+};
+
+type Props = {
+  activeState: StatusType,
+  active: Array<any>,
+  move: Function,
+  save: Function,
+  reset: Function
+};
+
+export class Rank extends Component<void, Props, State> {
+  state: State;
+
+  constructor() {
+    super();
 
     this.state = {
       toggled: {}
     };
   }
 
-  toggle = toggledIdx => () => {
+  toggle = (toggledIdx: number) => () => {
     const { toggled } = this.state;
 
     toggled[toggledIdx] = !toggled[toggledIdx];
@@ -33,10 +50,8 @@ export class Rank extends Component {
     this.setState({ toggled });
   };
 
-  isDirty = () => this.props.activeState === 'dirty';
-
   render() {
-    const { active, save, reset } = this.props;
+    const { activeState, active, save, reset } = this.props;
 
     return (
       <View style={{ flex: 1 }}>
@@ -46,7 +61,7 @@ export class Rank extends Component {
           </View>
           {active.map(this.renderFriend(active.length))}
         </View>
-        {!this.isDirty()
+        {!isDirty(activeState)
           ? []
           : <View style={styles.saveResetRow}>
               <RoundedButton
@@ -70,11 +85,11 @@ export class Rank extends Component {
     );
   }
 
-  moveUp = idx => () => this.props.move(idx, idx - 1);
-  moveDown = idx => () => this.props.move(idx, idx + 1);
-  deactivate = idx => () => this.props.move(idx);
+  moveUp = (idx: number) => () => this.props.move(idx, idx - 1);
+  moveDown = (idx: number) => () => this.props.move(idx, idx + 1);
+  deactivate = (idx: number) => () => this.props.move(idx);
 
-  iconUp = idx =>
+  iconUp = (idx: number) =>
     <IconButton
       size={Sizes.SMALL}
       name="arrow-up"
@@ -85,7 +100,7 @@ export class Rank extends Component {
       onPress={this.moveUp(idx)}
     />;
 
-  iconDown = idx =>
+  iconDown = (idx: number) =>
     <IconButton
       size={Sizes.SMALL}
       name="arrow-down"
@@ -96,7 +111,7 @@ export class Rank extends Component {
       onPress={this.moveDown(idx)}
     />;
 
-  renderFriend = friendCount => (friend, idx) => {
+  renderFriend = (friendCount: number) => (friend: Object, idx: number) => {
     const expanded = this.state.toggled[friend.id];
 
     return (
@@ -110,8 +125,8 @@ export class Rank extends Component {
               {friend.name}
             </Text>
             <View style={{ flex: 0 }}>
-              {idx < 1 ? [] : this.iconUp(idx)}
-              {idx === friendCount - 1 ? [] : this.iconDown(idx)}
+              {idx >= 1 && this.iconUp(idx)}
+              {idx !== friendCount - 1 && this.iconDown(idx)}
             </View>
           </View>
           {!expanded
@@ -140,6 +155,8 @@ export class Rank extends Component {
     );
   };
 }
+
+const isDirty = activeState => activeState === Status.DIRTY;
 
 Rank.propTypes = {
   activeState: PropTypes.string.isRequired,
