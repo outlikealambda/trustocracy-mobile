@@ -8,6 +8,14 @@ import { styles } from './styles.js';
 import * as Person from '../Person.js';
 import * as Colors from '../../colors.js';
 
+export const Status = {
+  CLEAN: 'clean',
+  DIRTY: 'dirty',
+  SAVING: 'saving'
+};
+
+export type StatusType = 'clean' | 'dirty' | 'saving';
+
 export class Rank extends Component {
   constructor(props) {
     super(props);

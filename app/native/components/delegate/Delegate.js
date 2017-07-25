@@ -10,7 +10,8 @@ import { IconButton } from '../Buttons.js';
 import { Overview } from './Overview.js';
 import { Add } from './Add.js';
 import { Activate } from './Activate.js';
-import { Rank } from './Rank.js';
+import { Rank, Status as RankStatus } from './Rank.js';
+import type { StatusType as RankStatusType } from './Rank.js';
 
 import { styles } from './styles.js';
 import * as Api from '../api.js';
@@ -40,7 +41,7 @@ type State = {
   recentlyFailed: Array<string>,
   active: Array<Person>,
   lastActiveSaved: Array<Person>,
-  activeState: string,
+  activeState: RankStatusType,
   inactive: Array<Person>
 };
 
@@ -57,7 +58,7 @@ export class Delegate extends Component<void, void, State> {
       recentlyFailed: [],
       active: [],
       lastActiveSaved: [],
-      activeState: 'clean',
+      activeState: RankStatus.CLEAN,
       inactive: []
     };
 
@@ -86,7 +87,7 @@ export class Delegate extends Component<void, void, State> {
         this.setState({
           active,
           lastActiveSaved: active,
-          activeState: 'clean'
+          activeState: RankStatus.CLEAN
         });
       });
   };
@@ -96,19 +97,19 @@ export class Delegate extends Component<void, void, State> {
 
     this.setState({
       active: lastActiveSaved,
-      activeState: 'clean'
+      activeState: RankStatus.CLEAN
     });
   };
 
   saveActive = () => {
-    this.setState({ activeState: 'saving' });
+    this.setState({ activeState: RankStatus.SAVING });
 
     const { active, userId } = this.state;
 
     Api.delegate.rank(userId, active).then(() =>
       this.setState({
         lastActiveSaved: active,
-        activeState: 'clean'
+        activeState: RankStatus.CLEAN
       })
     );
   };
@@ -124,7 +125,7 @@ export class Delegate extends Component<void, void, State> {
     }
 
     this.setState({
-      activeState: 'dirty',
+      activeState: RankStatus.DIRTY,
       active: updated
     });
   };
