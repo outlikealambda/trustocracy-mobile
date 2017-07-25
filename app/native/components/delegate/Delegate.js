@@ -1,3 +1,6 @@
+/**
+ * @flow
+ */
 import React, { Component } from 'react';
 import { TouchableHighlight, View } from 'react-native';
 import PropTypes from 'prop-types';
@@ -15,17 +18,40 @@ import { Arrays } from '../../utils.js';
 
 const USER_ID = 682;
 
-const OVERVIEW = 'overview';
-const ADD = 'add';
-const ACTIVATE = 'activate';
-const RANK = 'rank';
+const DelegateView = {
+  OVERVIEW: 'overview',
+  ADD: 'add',
+  ACTIVATE: 'activate',
+  RANK: 'rank'
+};
 
-export class Delegate extends Component {
-  constructor(props) {
-    super(props);
+type DelegateViewType = 'overview' | 'add' | 'activate' | 'rank';
+
+type Person = {
+  id: number,
+  name: string,
+  status?: ?string
+};
+
+type State = {
+  currentView: DelegateViewType,
+  userId: number,
+  recentlyAdded: Array<string>,
+  recentlyFailed: Array<string>,
+  active: Array<Person>,
+  lastActiveSaved: Array<Person>,
+  activeState: string,
+  inactive: Array<Person>
+};
+
+export class Delegate extends Component<void, void, State> {
+  state: State;
+
+  constructor() {
+    super();
 
     this.state = {
-      currentView: OVERVIEW,
+      currentView: DelegateView.OVERVIEW,
       userId: USER_ID,
       recentlyAdded: [],
       recentlyFailed: [],
@@ -39,7 +65,7 @@ export class Delegate extends Component {
     this.fetchInactive(USER_ID);
   }
 
-  fetchInactive = userId => {
+  fetchInactive = (userId: number) => {
     Api.delegate
       .getInactive(userId)
       .then(response => response.json())
@@ -48,7 +74,7 @@ export class Delegate extends Component {
       });
   };
 
-  fetchActive = userId => {
+  fetchActive = (userId: number) => {
     Api.delegate
       .getActive(userId)
       .then(response => response.json())
@@ -87,7 +113,7 @@ export class Delegate extends Component {
     );
   };
 
-  moveActive = (idxFrom, idxTo) => {
+  moveActive = (idxFrom: number, idxTo?: number) => {
     const { active } = this.state;
 
     let updated = Arrays.remove(active, idxFrom);
@@ -103,9 +129,10 @@ export class Delegate extends Component {
     });
   };
 
-  setView = view => () => this.setState({ currentView: view });
+  setView = (view: DelegateViewType) => () =>
+    this.setState({ currentView: view });
 
-  setInactiveStatus = newStatus => inactiveId => {
+  setInactiveStatus = (newStatus: ?string) => (inactiveId: number) => {
     const inactive = this.state.inactive.map(f =>
       Object.assign({}, f, {
         status: f.id === inactiveId ? newStatus : f.status
@@ -125,7 +152,7 @@ export class Delegate extends Component {
     }
   };
 
-  activate = inactiveId => {
+  activate = (inactiveId: number) => {
     this.inactive.status.activating(inactiveId);
 
     Api.delegate.activate(this.state.userId, inactiveId).then(result => {
@@ -138,7 +165,7 @@ export class Delegate extends Component {
     });
   };
 
-  remove = inactiveId => {
+  remove = (inactiveId: number) => {
     this.inactive.status.removing(inactiveId);
 
     Api.delegate.remove(this.state.userId, inactiveId).then(result => {
@@ -151,7 +178,7 @@ export class Delegate extends Component {
     });
   };
 
-  deleteInactive = (inactiveId, delay = 0) => {
+  deleteInactive = (inactiveId: number, delay: number = 0) => {
     const deleteIt = () =>
       this.setState({
         inactive: Arrays.removeWhere(
@@ -167,7 +194,7 @@ export class Delegate extends Component {
     }
   };
 
-  search = email => {
+  search = (email: string) => {
     return Api.delegate.add(this.state.userId, email).then(response => {
       if (response.status !== 200) {
         this.setState({
@@ -195,7 +222,7 @@ export class Delegate extends Component {
           name="plus"
           iconStyle={[styles.icon, { width: plusWidth }]}
           buttonStyle={styles.buttonStyle}
-          onPress={setView(ADD)}
+          onPress={setView(DelegateView.ADD)}
         />
       ),
       rank: (
@@ -203,7 +230,7 @@ export class Delegate extends Component {
           name="list-ordered"
           iconStyle={[styles.icon, { width: listOrderedWidth }]}
           buttonStyle={styles.buttonStyle}
-          onPress={setView(RANK)}
+          onPress={setView(DelegateView.RANK)}
         />
       ),
       activate: (
@@ -211,7 +238,7 @@ export class Delegate extends Component {
           name="zap"
           iconStyle={[styles.icon, { width: zapWidth }]}
           buttonStyle={styles.buttonStyle}
-          onPress={setView(ACTIVATE)}
+          onPress={setView(DelegateView.ACTIVATE)}
         />
       )
     };
@@ -230,9 +257,10 @@ export class Delegate extends Component {
   render() {
     return (
       <View style={{ flex: 1, backgroundColor: '#fff' }}>
-        {this.state.currentView !== OVERVIEW && this.renderHeader()}
+        {this.state.currentView !== DelegateView.OVERVIEW &&
+          this.renderHeader()}
         <View style={{ flex: 1 }}>
-          {this.state.currentView === OVERVIEW &&
+          {this.state.currentView === DelegateView.OVERVIEW &&
             <Overview
               activeCount={this.state.active.length}
               inactiveCount={this.state.inactive.length}
@@ -240,7 +268,7 @@ export class Delegate extends Component {
               activate={this.icons.activate}
               rank={this.icons.rank}
             />}
-          {this.state.currentView === ADD &&
+          {this.state.currentView === DelegateView.ADD &&
             <Add
               {...this.state}
               search={this.search}
@@ -248,13 +276,13 @@ export class Delegate extends Component {
                 this.state.active.length + this.state.inactive.length
               }
             />}
-          {this.state.currentView === ACTIVATE &&
+          {this.state.currentView === DelegateView.ACTIVATE &&
             <Activate
               {...this.state}
               activate={this.activate}
               remove={this.remove}
             />}
-          {this.state.currentView === RANK &&
+          {this.state.currentView === DelegateView.RANK &&
             <Rank
               {...this.state}
               save={this.saveActive}
@@ -267,7 +295,7 @@ export class Delegate extends Component {
   }
 }
 
-export const DelegateIcon = navigate =>
+export const DelegateIcon = (navigate: Function) =>
   <TouchableHighlight onPress={() => navigate('delegate')}>
     <Octicons name="organization" size={32} style={{ marginRight: 12 }} />
   </TouchableHighlight>;

@@ -9,9 +9,9 @@ import { styles } from './styles.js';
 type OverviewProps = {
   activeCount: number,
   inactiveCount: number,
-  add: Function,
-  activate: Function,
-  rank: Function
+  add: React.Element<*>,
+  activate: React.Element<*>,
+  rank: React.Element<*>
 };
 
 export class Overview extends Component<void, OverviewProps, void> {
