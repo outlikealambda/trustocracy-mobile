@@ -9,7 +9,8 @@ import { Octicons } from '@expo/vector-icons';
 import { IconButton } from '../Buttons.js';
 import { Overview } from './Overview.js';
 import { Add } from './Add.js';
-import { Activate } from './Activate.js';
+import { Activate, Status as ActivateStatus } from './Activate.js';
+import type { StatusType as ActivateStatusType } from './Activate.js';
 import { Rank, Status as RankStatus } from './Rank.js';
 import type { StatusType as RankStatusType } from './Rank.js';
 
@@ -31,7 +32,7 @@ type DelegateViewType = 'overview' | 'add' | 'activate' | 'rank';
 type Person = {
   id: number,
   name: string,
-  status?: ?string
+  status?: ActivateStatusType
 };
 
 type State = {
@@ -133,7 +134,9 @@ export class Delegate extends Component<void, void, State> {
   setView = (view: DelegateViewType) => () =>
     this.setState({ currentView: view });
 
-  setInactiveStatus = (newStatus: ?string) => (inactiveId: number) => {
+  setInactiveStatus = (newStatus: ActivateStatusType) => (
+    inactiveId: number
+  ) => {
     const inactive = this.state.inactive.map(f =>
       Object.assign({}, f, {
         status: f.id === inactiveId ? newStatus : f.status
@@ -145,11 +148,11 @@ export class Delegate extends Component<void, void, State> {
 
   inactive = {
     status: {
-      clear: this.setInactiveStatus(null),
-      activating: this.setInactiveStatus('activating'),
-      activated: this.setInactiveStatus('activated'),
-      removing: this.setInactiveStatus('removing'),
-      removed: this.setInactiveStatus('removed')
+      clear: this.setInactiveStatus(ActivateStatus.AT_REST),
+      activating: this.setInactiveStatus(ActivateStatus.ACTIVATING),
+      activated: this.setInactiveStatus(ActivateStatus.ACTIVATED),
+      removing: this.setInactiveStatus(ActivateStatus.REMOVING),
+      removed: this.setInactiveStatus(ActivateStatus.REMOVED)
     }
   };
 

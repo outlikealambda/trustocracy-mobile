@@ -8,6 +8,21 @@ import { styles } from './styles.js';
 import * as Person from '../Person.js';
 import * as Colors from '../../colors.js';
 
+export const Status = {
+  AT_REST: 'atrest',
+  ACTIVATING: 'activating',
+  ACTIVATED: 'activated',
+  REMOVING: 'removing',
+  REMOVED: 'removed'
+};
+
+export type StatusType =
+  | 'activating'
+  | 'activated'
+  | 'removing'
+  | 'removed'
+  | 'atrest';
+
 export class Activate extends Component {
   constructor(props) {
     super(props);
@@ -40,17 +55,17 @@ export class Activate extends Component {
     );
   }
 
-  renderInactive = friend => {
+  renderInactive = (friend: { status: StatusType }): React.Element<*> => {
     switch (friend.status) {
-      case 'activating':
+      case Status.ACTIVATING:
         return this.renderActivating(friend);
-      case 'activated':
+      case Status.ACTIVATED:
         return this.renderActivated(friend);
-      case 'removing':
+      case Status.REMOVING:
         return this.renderRemoving(friend);
-      case 'removed':
+      case Status.REMOVED:
         return this.renderRemoved(friend);
-      default:
+      case Status.AT_REST:
         return this.renderPooled(friend);
     }
   };
