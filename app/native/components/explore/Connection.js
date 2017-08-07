@@ -9,16 +9,16 @@ import { Octicons } from '@expo/vector-icons';
 
 import { Arrays } from '../../utils.js';
 
-const BoldText = ({ children }) => {
+type BoldProps = {
+  children: string
+};
+
+const BoldText = ({ children }: BoldProps): Element<Text> => {
   return (
     <Text style={{ fontWeight: 'bold' }}>
       {children}
     </Text>
   );
-};
-
-BoldText.propTypes = {
-  children: PropTypes.string.isRequired
 };
 
 const Chosen = ({ name, influence, clear }) =>
@@ -30,7 +30,7 @@ const Chosen = ({ name, influence, clear }) =>
       ]}
     >
       <BoldText>{name}</BoldText> is your delegate!{'\n'}
-      You have passed on <BoldText>+{influence}pts</BoldText> of influence
+      You have passed on <BoldText>+{influence} pts</BoldText> of influence
     </Text>
     <View
       style={[
@@ -73,7 +73,7 @@ const DefaultIsActive = ({ name, influence }) =>
       style={[styles.drawerRow, { backgroundColor: 'lightgreen', padding: 16 }]}
     >
       <BoldText>{name}</BoldText> is your default delegate!{'\n'}
-      You have passed on <BoldText>+{influence}pts</BoldText> of influence
+      You have passed on <BoldText>+{influence} pts</BoldText> of influence
     </Text>
   </View>;
 
@@ -98,7 +98,7 @@ const ChooseFriend = ({ name, influence, choose }) =>
         buttonStyle={{ backgroundColor: 'lightgreen', marginRight: 4 }}
       />
       <Text style={{ flex: 1 }}>
-        <BoldText>+{influence}pts</BoldText> of influence to {name}
+        <BoldText>+{influence} pts</BoldText> of influence to {name}
       </Text>
     </View>
   </View>;
