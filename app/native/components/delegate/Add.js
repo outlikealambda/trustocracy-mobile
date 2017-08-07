@@ -1,31 +1,35 @@
+/**
+ * @flow
+ */
+
 import React, { Component } from 'react';
-import { LayoutAnimation, Text, TextInput, View } from 'react-native';
+import { Text, TextInput, View } from 'react-native';
 import PropTypes from 'prop-types';
 
 import { styles } from './styles.js';
 
+type State = {
+  inputEmail: string
+};
+
 export class Add extends Component {
-  constructor(props) {
-    super(props);
+  state: State;
+
+  constructor() {
+    super();
 
     this.state = {
-      inputEmail: null
+      inputEmail: ''
     };
   }
 
-  findAndClear = email => {
+  findAndClear = (email: string) => {
     this.props.search(email).then(() => {
-      this.setState({ inputEmail: null });
+      this.setState({ inputEmail: '' });
     });
   };
 
-  animateStateChange = modifiedState => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
-
-    this.setState(modifiedState);
-  };
-
-  updateInput = inputEmail => this.setState({ inputEmail });
+  updateInput = (inputEmail: string) => this.setState({ inputEmail });
 
   render() {
     const { recentlyAdded, recentlyFailed, delegateCount } = this.props;
@@ -52,32 +56,32 @@ export class Add extends Component {
             onSubmitEditing={event => this.findAndClear(event.nativeEvent.text)}
           />
         </View>
-        {recentlyAdded.map(this.renderRecentlyAdded)}
-        {recentlyFailed.map(this.renderRecentlyFailed)}
+        {recentlyAdded.map(renderRecentlyAdded)}
+        {recentlyFailed.map(renderRecentlyFailed)}
       </View>
     );
   }
-
-  renderRecentlyAdded = email => {
-    return (
-      <View key={email} style={styles.row}>
-        <Text style={{ color: 'green' }} key={email}>
-          Success! We found {email}
-        </Text>
-      </View>
-    );
-  };
-
-  renderRecentlyFailed = email => {
-    return (
-      <View key={email} style={styles.row}>
-        <Text style={{ color: 'darkorange' }} key={email}>
-          Sorry, we could not locate anyone with the registered email: {email}
-        </Text>
-      </View>
-    );
-  };
 }
+
+const renderRecentlyAdded = email => {
+  return (
+    <View key={email} style={styles.row}>
+      <Text style={{ color: 'green' }} key={email}>
+        Success! We found {email}
+      </Text>
+    </View>
+  );
+};
+
+const renderRecentlyFailed = email => {
+  return (
+    <View key={email} style={styles.row}>
+      <Text style={{ color: 'darkorange' }} key={email}>
+        Sorry, we could not locate anyone with the registered email: {email}
+      </Text>
+    </View>
+  );
+};
 
 Add.propTypes = {
   recentlyAdded: PropTypes.array.isRequired,
