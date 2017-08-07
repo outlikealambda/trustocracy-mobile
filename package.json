@@ -5,22 +5,21 @@
   "dependencies": {
     "d3-scale": "^1.0.6",
     "d3-shape": "^1.2.0",
-    "expo": "18.0.0",
+    "expo": "^19.0.0",
     "prop-types": "^15.5.10",
     "react": "16.0.0-alpha.12",
-    "react-native": "https://github.com/expo/react-native/archive/sdk-18.0.0.tar.gz",
+    "react-native": "^0.46.1",
     "react-native-simple-markdown": "^1.0.60-rc.3",
     "react-navigation": "^1.0.0-beta.11"
   },
-  "main": "main.js",
-  "semistandard": {
-    "parser": "babel-eslint",
-    "plugins": [
-      "flowtype"
-    ]
-  },
+  "main": "./node_modules/react-native-scripts/build/bin/crna-entry.js",
   "scripts": {
-    "flow": "flow"
+    "flow": "flow",
+    "start": "react-native-scripts start",
+    "eject": "react-native-scripts eject",
+    "android": "react-native-scripts android",
+    "ios": "react-native-scripts ios",
+    "test": "node node_modules/jest/bin/jest.js --watch"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
@@ -29,6 +28,8 @@
     "eslint": "^4.3.0",
     "eslint-plugin-react": "^7.1.0",
     "flow-bin": "0.45.0",
-    "prettier": "^1.5.3"
+    "jest-expo": "~19.0.0",
+    "prettier": "^1.5.3",
+    "react-native-scripts": "1.1.0"
   }
 }
