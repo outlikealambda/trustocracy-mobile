@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import PropTypes from 'prop-types';
 
 import * as Person from '../Person.js';
-import { RoundedButton } from '../Buttons.js';
+import { TextButton, Shapes, Sizes } from '../Buttons.js';
 
 import { Octicons } from '@expo/vector-icons';
 
@@ -40,9 +40,10 @@ const Chosen = ({ name, influence, clear }) =>
         { marginLeft: 0 }
       ]}
     >
-      <RoundedButton
+      <TextButton
         text="Remove"
-        size="small"
+        shape={Shapes.CIRCLE}
+        size={Sizes.SMALL}
         onPress={clear}
         buttonStyle={{ backgroundColor: '#aaa', marginRight: 6 }}
       />
@@ -92,7 +93,9 @@ const ChooseFriend = ({ name, influence, choose }) =>
         styles.drawerRowWrapper
       ]}
     >
-      <RoundedButton
+      <TextButton
+        shape={Shapes.CIRCLE}
+        size={Sizes.SMALL}
         text={'Delegate'}
         onPress={choose}
         buttonStyle={{ backgroundColor: 'lightgreen', marginRight: 4 }}
@@ -112,7 +115,9 @@ ChooseFriend.propTypes = {
 const ChooseAuthor = ({ name, choose }) =>
   <View style={styles.drawer}>
     <View style={[styles.drawerRow, styles.drawerRowWrapper, styles.drawerTop]}>
-      <RoundedButton
+      <TextButton
+        shape={Shapes.CIRCLE}
+        size={Sizes.SMALL}
         text={'Delegate Directly'}
         onPress={choose}
         buttonStyle={{ backgroundColor: 'lightgreen', marginRight: 4 }}

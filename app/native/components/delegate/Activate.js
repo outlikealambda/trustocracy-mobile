@@ -4,7 +4,7 @@
 import React, { Component } from 'react';
 import { Text, TouchableHighlight, View } from 'react-native';
 
-import { RoundedButton, IconButton, Sizes } from '../Buttons.js';
+import { TextButton, IconButton, Sizes, Shapes } from '../Buttons.js';
 
 import { styles } from './styles.js';
 import * as Person from '../Person.js';
@@ -138,9 +138,11 @@ export class Activate extends Component<void, Props, State> {
                 }
               ]}
             >
-              <RoundedButton
+              <TextButton
+                shape={Shapes.CIRCLE}
+                size={Sizes.SMALL}
                 buttonStyle={{
-                  backgroundColor: 'lightyellow',
+                  backgroundColor: Colors.destruction,
                   marginRight: 16
                 }}
                 text="Remove"

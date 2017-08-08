@@ -36,7 +36,8 @@ const iconStyles = {
   }
 };
 
-const button = {
+// As in: same angles/lengths
+const regular = {
   small: {
     width: 28,
     height: 28,
@@ -68,60 +69,73 @@ const buttonStyles = {
     return this[shape][size];
   },
   circle: StyleSheet.create({
-    small: Object.assign({}, { borderRadius: 14 }, button.small),
-    medium: Object.assign({}, { borderRadius: 22 }, button.medium),
-    large: Object.assign({}, { borderRadius: 30 }, button.large)
+    small: Object.assign({}, { borderRadius: 14 }, regular.small),
+    medium: Object.assign({}, { borderRadius: 22 }, regular.medium),
+    large: Object.assign({}, { borderRadius: 30 }, regular.large)
   }),
   square: StyleSheet.create({
-    small: Object.assign({}, { borderRadius: 2 }, button.small),
-    medium: Object.assign({}, { borderRadius: 2 }, button.medium),
-    large: Object.assign({}, { borderRadius: 2 }, button.large)
+    small: Object.assign({}, { borderRadius: 2 }, regular.small),
+    medium: Object.assign({}, { borderRadius: 2 }, regular.medium),
+    large: Object.assign({}, { borderRadius: 2 }, regular.large)
   })
 };
 
-const rectangularStyles = {
-  get: function(size: SizeType) {
-    return this[size];
+const rectangular = {
+  large: {
+    justifyContent: 'center',
+    height: 48
   },
-  large: StyleSheet.create({
-    container: {
-      justifyContent: 'center',
-      height: 48,
-      borderRadius: 24
+  medium: {
+    justifyContent: 'center',
+    height: 38
+  },
+  small: {
+    justifyContent: 'center',
+    height: 28
+  }
+};
+
+const rectangularStyle = {
+  container: {
+    get(shape: ShapeType, size: SizeType) {
+      return this[shape][size];
     },
-    text: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      marginVertical: 8,
-      marginHorizontal: 12
-    }
-  }),
-  medium: StyleSheet.create({
-    container: {
-      justifyContent: 'center',
-      height: 40,
-      borderRadius: 20
+    circle: StyleSheet.create({
+      small: Object.assign({}, { borderRadius: 14 }, rectangular.small),
+      medium: Object.assign({}, { borderRadius: 19 }, rectangular.medium),
+      large: Object.assign({}, { borderRadius: 24 }, rectangular.large)
+    }),
+    square: StyleSheet.create({
+      small: Object.assign({}, { borderRadius: 2 }, rectangular.small),
+      medium: Object.assign({}, { borderRadius: 2 }, rectangular.medium),
+      large: Object.assign({}, { borderRadius: 2 }, rectangular.large)
+    })
+  },
+  text: {
+    get(size: SizeType) {
+      return this.all[size];
     },
-    text: {
-      fontSize: 15,
-      fontWeight: 'bold',
-      marginVertical: 6,
-      marginHorizontal: 10
-    }
-  }),
-  small: StyleSheet.create({
-    container: {
-      justifyContent: 'center',
-      height: 32,
-      borderRadius: 16
-    },
-    text: {
-      fontSize: 14,
-      fontWeight: 'bold',
-      marginVertical: 4,
-      marginHorizontal: 8
-    }
-  })
+    all: StyleSheet.create({
+      small: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        marginVertical: 4,
+        marginHorizontal: 8
+      },
+      medium: {
+        fontSize: 15,
+        fontWeight: 'bold',
+        marginVertical: 6,
+        marginHorizontal: 10
+      },
+      large: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginVertical: 8,
+        marginHorizontal: 12
+      }
+    })
+  }
 };
 
 const wrapWithTouchable = (nativeComponent, onPress) =>
@@ -132,34 +146,37 @@ const wrapWithTouchable = (nativeComponent, onPress) =>
     {nativeComponent}
   </TouchableOpacity>;
 
-type RoundedProps = {
+type TextProps = {
   text: string,
+  shape: ShapeType,
   size: SizeType,
   buttonStyle: Object,
   onPress?: Function
 };
 
-type DefaultRoundedProps = {
+type DefaultTextProps = {
   buttonStyle: Object,
+  shape: ShapeType,
   size: SizeType
 };
 
-export class RoundedButton extends Component<
-  DefaultRoundedProps,
-  RoundedProps,
-  void
-> {
+export class TextButton extends Component<DefaultTextProps, TextProps, void> {
   static defaultProps = {
     buttonStyle: {},
+    shape: Shapes.CIRCLE,
     size: Sizes.LARGE
   };
 
   render() {
-    const style = rectangularStyles.get(this.props.size);
+    const containerStyle = rectangularStyle.container.get(
+      this.props.shape,
+      this.props.size
+    );
+    const textStyle = rectangularStyle.text.get(this.props.size);
 
     const button = (
-      <View style={[style.container, this.props.buttonStyle]}>
-        <Text style={style.text}>
+      <View style={[containerStyle, this.props.buttonStyle]}>
+        <Text style={textStyle}>
           {this.props.text}
         </Text>
       </View>

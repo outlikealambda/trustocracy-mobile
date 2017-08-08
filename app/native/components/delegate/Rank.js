@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import { Text, TouchableHighlight, View } from 'react-native';
 import PropTypes from 'prop-types';
 
-import { RoundedButton, IconButton, Sizes } from '../Buttons.js';
+import { TextButton, IconButton, Sizes } from '../Buttons.js';
 
 import { styles } from './styles.js';
 import * as Person from '../Person.js';
@@ -64,18 +64,18 @@ export class Rank extends Component<void, Props, State> {
         {!isDirty(activeState)
           ? []
           : <View style={styles.saveResetRow}>
-              <RoundedButton
+              <TextButton
                 text="Save"
                 buttonStyle={{
-                  backgroundColor: Colors.lightGreen,
+                  backgroundColor: Colors.creation,
                   marginHorizontal: 8
                 }}
                 onPress={save}
               />
-              <RoundedButton
+              <TextButton
                 text="Reset"
                 buttonStyle={{
-                  backgroundColor: Colors.lightRed,
+                  backgroundColor: Colors.destruction,
                   marginHorizontal: 8
                 }}
                 onPress={reset}
@@ -141,9 +141,13 @@ export class Rank extends Component<void, Props, State> {
                   }
                 ]}
               >
-                <RoundedButton
+                <TextButton
                   onPress={this.deactivate(idx)}
-                  buttonStyle={{ backgroundColor: 'red', marginRight: 16 }}
+                  size={Sizes.SMALL}
+                  buttonStyle={{
+                    backgroundColor: Colors.destruction,
+                    marginRight: 16
+                  }}
                   text="Deactivate"
                 />
                 <Text>
