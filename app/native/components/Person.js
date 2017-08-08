@@ -1,12 +1,26 @@
+/*
+ * @flow
+ */
 import React from 'react';
 import { View } from 'react-native';
-import PropTypes from 'prop-types';
 
-import { InitialsButton } from './Buttons.js';
+import { InitialsButton, type SizeType } from './Buttons.js';
 import Influence from './Influence.js';
 
 // Optional influence argument toggles influence badge
-export function Button({ person, pressAction, influence, size }) {
+type InitialsType = {
+  person: Object,
+  pressAction: Function,
+  influence?: number,
+  size?: SizeType
+};
+
+export function Initials({
+  person,
+  pressAction,
+  influence,
+  size
+}: InitialsType) {
   const {
     id: key,
     color,
@@ -51,13 +65,6 @@ export function Button({ person, pressAction, influence, size }) {
 
   return button;
 }
-
-Button.propTypes = {
-  person: PropTypes.object.isRequired,
-  pressAction: PropTypes.func,
-  influence: PropTypes.number,
-  size: PropTypes.string
-};
 
 function markAsInfluencer(content, key) {
   return (

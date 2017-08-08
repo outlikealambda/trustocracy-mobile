@@ -210,7 +210,7 @@ export class Connection extends Component {
             }}
           >
             {friend &&
-              <Person.Button person={friend} pressAction={toggleFriend} />}
+              <Person.Initials person={friend} pressAction={toggleFriend} />}
             {friend &&
               author &&
               Arrays.range(8, idx =>
@@ -220,7 +220,7 @@ export class Connection extends Component {
               author &&
               <Octicons name="chevron-right" size={20} color="#999" />}
             {author &&
-              <Person.Button
+              <Person.Initials
                 person={author}
                 pressAction={toggleAuthor}
                 influence={author.influence}

@@ -464,7 +464,7 @@ export class Topic extends Component<void, Props, State> {
     const renderTrusteeGroup = connection => {
       return connection.friends.map((friend, idx) =>
         <NavWrapper key={idx} isSelected={this.isSelectedFriend(friend)}>
-          <Person.Button
+          <Person.Initials
             person={friend}
             pressAction={this.showOpinion(
               friend,
@@ -524,7 +524,7 @@ export class Topic extends Component<void, Props, State> {
         } = found;
 
         delegate = (
-          <Person.Button
+          <Person.Initials
             person={Object.assign({ color: 'pink' }, activeInfluencer)}
             size="medium"
             pressAction={this.showOpinion(
@@ -554,7 +554,7 @@ export class Topic extends Component<void, Props, State> {
                     paddingVertical: 8
                   }}
                 >
-                  <Person.Button
+                  <Person.Initials
                     person={opinion.author}
                     pressAction={this.showBrowsedOpinion(opinion.id)}
                     influence={opinion.influence}

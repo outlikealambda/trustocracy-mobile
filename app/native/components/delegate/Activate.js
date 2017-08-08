@@ -112,7 +112,7 @@ export class Activate extends Component<void, Props, State> {
       >
         <View>
           <View style={styles.row}>
-            <Person.Button
+            <Person.Initials
               person={Object.assign({ color: '#efefef' }, friend)}
             />
             <Text style={{ flex: 1 }}>

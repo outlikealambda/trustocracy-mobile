@@ -118,7 +118,7 @@ export class Rank extends Component<void, Props, State> {
       <TouchableHighlight key={friend.id} onPress={this.toggle(friend.id)}>
         <View>
           <View style={styles.row}>
-            <Person.Button
+            <Person.Initials
               person={Object.assign({ color: '#efefef' }, friend)}
             />
             <Text style={{ flex: 1 }}>
