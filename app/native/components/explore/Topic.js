@@ -1,20 +1,14 @@
 import React, { Component } from 'react';
-import {
-  LayoutAnimation,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View
-} from 'react-native';
+import { LayoutAnimation, ScrollView, StyleSheet, View } from 'react-native';
 import PropTypes from 'prop-types';
 
 import Markdown from 'react-native-simple-markdown';
 import { DelegateIcon } from '../delegate/Delegate.js';
-import { IconButton, Sizes } from '../Buttons.js';
+import { IconButton } from '../Buttons.js';
 import { TopicInfo } from './TopicInfo.js';
 import { Connection } from './Connection.js';
+import Stance from './Stance.js';
 import * as Api from '../api';
-import * as Metric from '../Metric.js';
 import * as Person from '../Person.js';
 
 const trusteeColors = [
@@ -34,8 +28,6 @@ const NavWrapper = props => {
     marginHorizontal: 4,
     paddingBottom: 4
   };
-
-  // console.log(props);
 
   const selectedStyle = props.isSelected
     ? {
@@ -547,172 +539,36 @@ export class Topic extends Component<void, Props, State> {
       return <TopicInfo influence={influence} delegate={delegate} />;
     };
 
-    const answerTile = {
-      marginHorizontal: 8,
-      alignItems: 'center',
-      justifyContent: 'center'
-    };
-
-    const renderScalarAnswer = value => {
-      const height = 14;
-      const goesLeft = value < 0.5;
-      const width = Math.abs(value - 0.51) * 100 / 1;
-      const left = goesLeft ? value * 100 / 1 : 51;
-      const cornerRadius = 6;
-
-      const style = {
-        position: 'absolute',
-        left: left + '%',
-        width: width + '%',
-        height,
-        borderBottomLeftRadius: goesLeft ? cornerRadius : 0,
-        borderTopLeftRadius: goesLeft ? cornerRadius : 0,
-        borderBottomRightRadius: goesLeft ? 0 : cornerRadius,
-        borderTopRightRadius: goesLeft ? 0 : cornerRadius,
-        backgroundColor: goesLeft ? 'blue' : 'orange'
-      };
-
-      return (
-        <View
-          style={[
-            styles.scalarAnswer,
-            answerTile,
-            {
-              position: 'relative',
-              flex: 1
-            }
-          ]}
-        >
-          <View style={style} />
-          <View
-            style={{
-              position: 'absolute',
-              left: '49%',
-              width: '2%',
-              height: 28,
-              backgroundColor: '#ccc'
-            }}
-          />
-        </View>
-      );
-    };
-
-    const renderAnswers = (answer, prompt) => {
-      const { selected, value } = answer;
-
-      return Metric.isScalar(prompt)
-        ? renderScalarAnswer(value)
-        : <View style={[styles.multipleChoiceAnswer, answerTile]}>
-            <Text>
-              {prompt.options[selected].text}
-            </Text>
-          </View>;
-    };
-
-    const smallIcon = {
-      fontSize: 20,
-      height: 20,
-      width: 10
-    };
-
-    const renderChevron = (isDisabled, leftRight, updateFn) =>
-      isDisabled
-        ? renderDisabledChevron(leftRight)
-        : renderEnabledChevron(leftRight, updateFn);
-
-    const renderDisabledChevron = leftRight =>
-      <IconButton
-        size={Sizes.SMALL}
-        shape="circle"
-        name={'chevron-' + leftRight}
-        key={leftRight}
-        iconStyle={smallIcon}
-        color="#ccc"
-        backgroundColor="#efefef"
-        onPress={() => {}}
-      />;
-
-    const renderEnabledChevron = (leftRight, updateFn) =>
-      <IconButton
-        size={Sizes.SMALL}
-        shape="circle"
-        name={'chevron-' + leftRight}
-        key={leftRight}
-        iconStyle={smallIcon}
-        color="#444"
-        backgroundColor="#ddd"
-        onPress={updateFn}
-      />;
-
-    const renderPrompt = (prompts, promptIdx, updateFn) => {
-      const prompt = prompts[promptIdx];
-      const isFirst = promptIdx === 0;
-      const isLast = promptIdx === prompts.length - 1;
-
-      return (
-        // prompts row
-        <View
-          key="prompt"
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginRight: 40,
-            marginLeft: 40,
-            marginVertical: 16,
-            minHeight: 80,
-            flex: 1
-          }}
-        >
-          {renderChevron(isFirst, 'left', () => updateFn(promptIdx - 1))}
-          <Text
-            style={{
-              flex: 1,
-              fontSize: 18,
-              textAlign: 'center',
-              paddingHorizontal: 8
-            }}
-          >
-            {prompt.text}
-          </Text>
-          {renderChevron(isLast, 'right', () => updateFn(promptIdx + 1))}
-        </View>
-      );
-    };
-
-    const renderBrowseOpinions = (
-      opinions,
-      prompts,
-      promptIdx,
-      updatePromptFn
-    ) => {
+    const renderBrowseOpinions = (opinions, prompts) => {
       return (
         <ScrollView>
           <View style={{ paddingVertical: 12 }}>
-            {renderPrompt(prompts, promptIdx, updatePromptFn)}
-            {opinions.map(opinion =>
-              <View
-                key={opinion.id}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  flex: 1,
-                  paddingHorizontal: 8,
-                  paddingVertical: 8
-                }}
-              >
-                <Person.Button
-                  person={opinion.author}
-                  pressAction={this.showBrowsedOpinion(opinion.id)}
-                  influence={opinion.influence}
-                />
-                <View style={[styles.answers, { paddingRight: 48 }]}>
-                  {renderAnswers(
-                    opinion.answers[promptIdx],
-                    prompts[promptIdx]
+            {opinions.map(opinion => {
+              return (
+                <View
+                  key={opinion.id}
+                  style={{
+                    alignItems: 'center',
+                    flex: 1,
+                    paddingHorizontal: 8,
+                    paddingVertical: 8
+                  }}
+                >
+                  <Person.Button
+                    person={opinion.author}
+                    pressAction={this.showBrowsedOpinion(opinion.id)}
+                    influence={opinion.influence}
+                  />
+                  {prompts.map((prompt, idx) =>
+                    <Stance
+                      key={idx}
+                      prompt={prompt}
+                      answer={opinion.answers[idx]}
+                    />
                   )}
                 </View>
-              </View>
-            )}
+              );
+            })}
           </View>
         </ScrollView>
       );
@@ -820,9 +676,5 @@ const styles = StyleSheet.create({
   answers: {
     flexDirection: 'row',
     flex: 1
-  },
-  scalarAnswer: {
-    // width: 80
-  },
-  multipleChoiceAnswer: {}
+  }
 });
