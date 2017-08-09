@@ -251,7 +251,6 @@ type InitialsProps = {
   shape: ShapeType,
   size: SizeType,
   buttonStyle: Object,
-  backgroundColor?: string,
   onPress?: Function
 };
 
@@ -267,7 +266,6 @@ export class InitialsButton extends Component<
   };
 
   render() {
-    const backgroundColor = this.props.backgroundColor;
     const initials = this.props.initials;
     const size = this.props.size;
     const onPress = this.props.onPress;
@@ -276,7 +274,7 @@ export class InitialsButton extends Component<
     const fontSize = initialsFont[size];
 
     const button = (
-      <View style={[baseStyle, { backgroundColor }, buttonStyle]}>
+      <View style={[baseStyle, buttonStyle]}>
         <Text style={{ fontSize, color: '#444' }}>
           {initials}
         </Text>

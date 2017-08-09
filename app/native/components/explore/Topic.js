@@ -554,7 +554,7 @@ export class Topic extends Component<void, Props, State> {
                     paddingVertical: 8
                   }}
                 >
-                  <Person.Initials
+                  <Person.Full
                     person={opinion.author}
                     pressAction={this.showBrowsedOpinion(opinion.id)}
                     influence={opinion.influence}

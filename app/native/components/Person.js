@@ -4,23 +4,40 @@
 import React from 'react';
 import { View } from 'react-native';
 
-import { InitialsButton, type SizeType } from './Buttons.js';
+import { InitialsButton, TextButton, type SizeType } from './Buttons.js';
 import Influence from './Influence.js';
 
-// Optional influence argument toggles influence badge
-type InitialsType = {
+type NameStyleType = 'initials' | 'full';
+
+const NameStyle = {
+  INITIALS: 'initials',
+  FULL: 'full'
+};
+
+type ButtonProps = {
   person: Object,
   pressAction: Function,
   influence?: number,
-  size?: SizeType
+  size: SizeType
 };
 
-export function Initials({
+export function Full(props: ButtonProps) {
+  return <ButtonWrapper {...props} nameStyle={NameStyle.FULL} />;
+}
+
+export function Initials(props: ButtonProps) {
+  return <ButtonWrapper {...props} nameStyle={NameStyle.INITIALS} />;
+}
+
+type ButtonWrapperProps = ButtonProps & { nameStyle: NameStyleType };
+
+function ButtonWrapper({
   person,
   pressAction,
   influence,
-  size
-}: InitialsType) {
+  size,
+  nameStyle
+}: ButtonWrapperProps) {
   const {
     id: key,
     color,
@@ -36,24 +53,33 @@ export function Initials({
   const buttonStyle = isInfluencer
     ? {
         margin: 2,
-        opacity
+        opacity,
+        backgroundColor
       }
     : {
         margin: 6,
-        opacity
+        opacity,
+        backgroundColor
       };
 
-  let button = (
-    <InitialsButton
-      shape={isRanked ? 'circle' : 'square'}
-      onPress={pressAction}
-      key={key}
-      size={size}
-      backgroundColor={backgroundColor}
-      buttonStyle={buttonStyle}
-      initials={initials(person)}
-    />
-  );
+  let button =
+    nameStyle == NameStyle.INITIALS
+      ? <InitialsButton
+          shape={isRanked ? 'circle' : 'square'}
+          onPress={pressAction}
+          key={key}
+          size={size}
+          buttonStyle={buttonStyle}
+          initials={initials(person)}
+        />
+      : <TextButton
+          shape={isRanked ? 'circle' : 'square'}
+          onPress={pressAction}
+          key={key}
+          size={size}
+          buttonStyle={buttonStyle}
+          text={person.name}
+        />;
 
   if (isInfluencer) {
     button = markAsInfluencer(button, key);
@@ -65,6 +91,13 @@ export function Initials({
 
   return button;
 }
+// Optional influence argument toggles influence badge
+type InitialsType = {
+  person: Object,
+  pressAction: Function,
+  influence?: number,
+  size?: SizeType
+};
 
 function markAsInfluencer(content, key) {
   return (
