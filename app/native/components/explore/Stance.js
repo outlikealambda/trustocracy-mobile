@@ -6,19 +6,39 @@ import { StyleSheet, Text, View } from 'react-native';
 import * as Metric from '../Metric.js';
 import * as Colors from '../../colors.js';
 
-type Props = {
+type SingleProps = {
   prompt: Object,
-  answer: Object,
-  key: number
+  answer: AnswerType
 };
 
-export default class Stance extends Component<void, Props, void> {
+type AnswerType = { value: number } | { selected: number };
+
+export class Single extends Component<void, SingleProps, void> {
   render() {
     const { prompt, answer } = this.props;
     return (
-      <View style={styles.position}>
+      <View style={styles.stance}>
         <Prompt text={prompt.textShort} />
         <Answer prompt={prompt} answer={answer} />
+      </View>
+    );
+  }
+}
+
+type ListProps = {
+  prompts: Array<any>,
+  answers: Array<AnswerType>
+};
+
+export class List extends Component<void, ListProps, void> {
+  render() {
+    const { prompts, answers } = this.props;
+
+    return (
+      <View {...this.props}>
+        {prompts.map((prompt, idx) =>
+          <Single key={idx} prompt={prompt} answer={answers[idx]} />
+        )}
       </View>
     );
   }
@@ -102,19 +122,19 @@ const MultipleChoiceAnswer = ({ text }: { text: string }) => {
 };
 
 const styles = StyleSheet.create({
-  position: {
+  stance: {
     flexDirection: 'row',
-    flex: 1,
-    alignItems: 'center',
-    minHeight: 24
+    minHeight: 24,
+    alignItems: 'center'
   },
   prompt: {
     fontSize: 11,
     flex: 1,
     textAlign: 'right',
-    paddingRight: 8
+    marginRight: 8
   },
   answer: {
+    marginLeft: 8,
     flex: 1,
     alignItems: 'center'
   }

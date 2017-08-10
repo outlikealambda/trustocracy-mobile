@@ -7,7 +7,7 @@ import { DelegateIcon } from '../delegate/Delegate.js';
 import { IconButton } from '../Buttons.js';
 import { TopicInfo } from './TopicInfo.js';
 import { Connection } from './Connection.js';
-import Stance from './Stance.js';
+import * as Stance from './Stance.js';
 import * as Api from '../api';
 import * as Person from '../Person.js';
 
@@ -428,9 +428,13 @@ export class Topic extends Component<void, Props, State> {
     );
   };
 
-  showBrowsedOpinion = opinionId => () => {
-    this.fetchSelectedOpinion(opinionId).then(opinion =>
-      this.showOpinion(null, opinion.author, opinion)()
+  showBrowsedOpinion = (opinion: { id: number, answers: Array<any> }) => () => {
+    this.fetchSelectedOpinion(opinion.id).then(fetched =>
+      this.showOpinion(
+        null,
+        fetched.author,
+        Object.assign({}, opinion, fetched)
+      )()
     );
   };
 
@@ -476,7 +480,7 @@ export class Topic extends Component<void, Props, State> {
       );
     };
 
-    const renderBook = () =>
+    const BookIcon = () =>
       <IconButton
         shape="circle"
         name="book"
@@ -542,57 +546,62 @@ export class Topic extends Component<void, Props, State> {
     const renderBrowseOpinions = (opinions, prompts) => {
       return (
         <ScrollView>
-          <View style={{ paddingVertical: 12 }}>
-            {opinions.map(opinion => {
-              return (
-                <View
-                  key={opinion.id}
-                  style={{
-                    alignItems: 'center',
-                    flex: 1,
-                    paddingHorizontal: 8,
-                    paddingVertical: 8
-                  }}
-                >
-                  <Person.Full
-                    person={opinion.author}
-                    pressAction={this.showBrowsedOpinion(opinion.id)}
-                    influence={opinion.influence}
-                  />
-                  {prompts.map((prompt, idx) =>
-                    <Stance
-                      key={idx}
-                      prompt={prompt}
-                      answer={opinion.answers[idx]}
-                    />
-                  )}
-                </View>
-              );
-            })}
-          </View>
+          {opinions.map(opinion =>
+            <View
+              key={opinion.id}
+              style={{
+                paddingVertical: 16,
+                paddingHorizontal: 16,
+                borderBottomWidth: 2,
+                borderColor: '#efefef'
+              }}
+            >
+              <Person.Full
+                person={opinion.author}
+                pressAction={this.showBrowsedOpinion(opinion)}
+                influence={opinion.influence}
+              />
+              <Stance.List
+                style={{ marginTop: 8 }}
+                prompts={prompts}
+                answers={opinion.answers}
+              />
+            </View>
+          )}
         </ScrollView>
       );
     };
 
-    const renderOpinionText = opinionText =>
-      <ScrollView>
-        <View style={styles.bodyOfText}>
-          <Markdown>
-            {opinionText}
-          </Markdown>
-        </View>
+    const renderOpinion = (
+      { text, answers }: { text: string, answers: Array<any> },
+      prompts: Array<any>,
+      key?: number | string
+    ) =>
+      <ScrollView key={key}>
+        {answers &&
+          answers.length &&
+          <View style={styles.bodyItem}>
+            <Stance.List answers={answers} prompts={prompts} />
+          </View>}
+        {renderText(text)}
       </ScrollView>;
+
+    const renderText = (text: string) =>
+      <View style={styles.bodyItem}>
+        <Markdown>
+          {text}
+        </Markdown>
+      </View>;
 
     const renderBody = state => {
       if (state.isBrowse) {
         return state.visibleOpinion
-          ? renderOpinionText(state.visibleOpinion.text)
-          : renderBrowseOpinions(
-              state.opinions,
+          ? renderOpinion(
+              state.visibleOpinion,
               state.prompts,
-              state.promptIdx,
-              this.updatePrompt
-            );
+              state.visibleOpinion.id
+            )
+          : renderBrowseOpinions(state.opinions, state.prompts);
       }
 
       if (this.isTopicInfo()) {
@@ -600,13 +609,17 @@ export class Topic extends Component<void, Props, State> {
       }
 
       if (this.isNoConnectedOpinionToFriend()) {
-        const message = `${state.visibleFriend
-          .name} is not connected to any opinions`;
+        const message =
+          state.visibleFriend.name + 'is not connected to any opinions';
 
-        return renderOpinionText(message);
+        return renderText(message);
       }
 
-      return renderOpinionText(state.visibleOpinion.text);
+      return renderOpinion(
+        state.visibleOpinion,
+        state.prompts,
+        state.visibleOpinion.id
+      );
     };
 
     return (
@@ -618,7 +631,7 @@ export class Topic extends Component<void, Props, State> {
           <ScrollView horizontal contentContainerStyle={styles.scrollInterior}>
             {this.state.connections.map(renderTrusteeGroup)}
             <NavWrapper isSelected={this.state.isBrowse}>
-              {renderBook()}
+              <BookIcon />
             </NavWrapper>
           </ScrollView>
         </View>
@@ -666,15 +679,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 8
   },
-  bodyOfText: {
-    marginLeft: 20,
-    marginRight: 20,
-    marginBottom: 5
-  },
-
-  // prompts
-  answers: {
-    flexDirection: 'row',
-    flex: 1
+  bodyItem: {
+    marginLeft: 24,
+    marginRight: 24,
+    marginTop: 8
   }
 });
