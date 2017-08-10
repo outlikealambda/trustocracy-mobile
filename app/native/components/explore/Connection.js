@@ -209,8 +209,7 @@ export class Connection extends Component {
               padding: 8
             }}
           >
-            {friend &&
-              <Person.Initials person={friend} pressAction={toggleFriend} />}
+            {friend && PersonButton(friend, author, toggleFriend)}
             {friend &&
               author &&
               Arrays.range(8, idx =>
@@ -220,11 +219,7 @@ export class Connection extends Component {
               author &&
               <Octicons name="chevron-right" size={20} color="#999" />}
             {author &&
-              <Person.Initials
-                person={author}
-                pressAction={toggleAuthor}
-                influence={author.influence}
-              />}
+              PersonButton(author, friend, toggleAuthor, author.influence)}
           </View>
         </View>
         {isOpen(drawerState) &&
@@ -238,6 +233,28 @@ export class Connection extends Component {
     );
   }
 }
+
+const PersonButton = (focus, other, toggleFn, influence?: number) => {
+  if (focus && other) {
+    return (
+      <Person.Initials
+        person={focus}
+        pressAction={toggleFn}
+        influence={influence}
+      />
+    );
+  }
+
+  if (focus && !other) {
+    return (
+      <Person.Full
+        person={focus}
+        pressAction={toggleFn}
+        influence={influence}
+      />
+    );
+  }
+};
 
 Connection.propTypes = {
   state: PropTypes.string,
